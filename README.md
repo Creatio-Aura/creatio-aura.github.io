@@ -51,6 +51,42 @@ npx wrangler d1 execute creatio-aura-beta --remote --command \
   "SELECT name, email, platforms, confirmed_at FROM signups WHERE confirmed_at IS NOT NULL ORDER BY confirmed_at"
 ```
 
+## The tools: who's signed up, and sending builds
+
+You'll get an email at creatio.aura@gmail.com each time someone **confirms**: their name, email
+and where they play, and how many testers there are now.
+
+From `worker/` (they need the admin key, below):
+
+```
+npm run testers          # everyone confirmed, with where they play, and totals per platform
+
+# Email testers a new build: each gets only the links for the platforms they play on.
+# Without --send it only shows who'd get what, and the email.
+npm run announce -- --title "Ignis 0.6.0 is ready" \
+  --message "What's new: the digital board. Tell us what you think by replying." \
+  --android https://expo.dev/artifacts/eas/….apk --web
+npm run announce -- …the same… --send
+```
+
+`--web` on its own means https://creatio-aura.github.io/ignis-aura-web/. `--message-file note.txt`
+reads a longer note (blank lines make paragraphs). Every email has the tester's remove-me link,
+and the day's email allowance (400) still applies: anyone over it is listed to send tomorrow.
+
+**The admin key** is a long random string kept in two places only: the service's `ADMIN_TOKEN`
+secret, and `worker/.admin-token` on your computer (never in git). To change it, put a new one in
+both.
+
+## How testers get each build
+
+- **Web:** a link; it opens in any browser. Nothing to install.
+- **Android:** the install link from the Expo build page (`npx eas-cli build -p android --profile
+  preview` in the game repo makes one). On their phone they open it, download the app, allow
+  installing from their browser when asked, and press Install. Later builds install over it and
+  keep their games, since every build is signed with the same key.
+- **iPhone:** needs the Apple Developer Program (TestFlight). Until then, iPhone testers play the
+  web version.
+
 ## Working on it
 
 - **The website:** open `site/index.html` in a browser, or `python3 -m http.server -d site 8000`.

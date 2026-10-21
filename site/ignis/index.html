@@ -1,0 +1,130 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Ignis · Creatio Aura</title>
+  <meta name="description" content="Ignis (code name) is the companion app for a dark-fantasy tabletop game, built to be played around a campfire. Beta sign-ups are open with an invite code.">
+  <meta name="theme-color" content="#120f1f">
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght,SOFT,WONK@9..144,400..700,100,0&family=Nunito:wght@400;600;700&display=swap">
+  <link rel="stylesheet" href="/styles.css">
+  <script src="/stars.js" defer></script>
+  <script src="/beta.js" defer></script>
+  <script src="https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit" async defer></script>
+</head>
+<body>
+  <a class="skip" href="#main">Skip to the content</a>
+  <div class="sky" aria-hidden="true"></div>
+
+  <header class="wrap site-header">
+    <a class="brand" href="/">
+      <svg width="40" height="40" viewBox="0 0 40 40" fill="none" aria-hidden="true"><circle cx="20" cy="20" r="17" stroke="#ffb35c" stroke-opacity="0.35" stroke-width="2"/><circle cx="20" cy="20" r="11.5" stroke="#ffb35c" stroke-opacity="0.7" stroke-width="2"/><path d="M20 11c1.3 4.2 5.6 5.4 5.6 10.4a5.6 5.6 0 0 1-11.2 0c0-2.3 1.1-3.9 2.2-5 0 2.3 1.1 3.4 2.2 3.4 0-3.4-1.1-5.6 1.2-8.8z" fill="#ff8a3d"/></svg>
+      Creatio Aura
+    </a>
+    <nav class="site-nav" aria-label="Main">
+      <a href="/">All projects</a>
+      <a href="#beta">Join the beta</a>
+    </nav>
+  </header>
+
+  <main id="main">
+    <section class="wrap project-hero">
+      <div style="display: flex; flex-direction: column; gap: 22px">
+        <span class="eyebrow">Code name</span>
+        <h1>Ignis</h1>
+        <p>The companion app for a dark-fantasy tabletop game, built to be played around a campfire. The board, dice and cards stay on the table; the app tells the story.</p>
+        <span class="chips"><span>Beta sign-ups open</span><span>iPhone · Android · Web</span></span>
+      </div>
+      <div class="shots">
+        <img src="/images/02-tiles.png" alt="Choosing a tile in Ignis" width="360" height="780">
+        <img src="/images/04-encounter.png" alt="An encounter in Ignis" width="360" height="780">
+        <img src="/images/20-chest-of-fate.png" alt="The Chest of Fate in Ignis" width="360" height="780">
+      </div>
+    </section>
+
+    <section class="band">
+      <div class="wrap" style="display: block">
+        <h2 style="font-size: 36px; margin-bottom: 28px">What's in it</h2>
+        <div class="features">
+          <div><h3>Adventures and encounters</h3><p>Pick a tile and a place; the app draws the encounter, tells the story and settles the outcome.</p></div>
+          <div><h3>The digital board</h3><p>Every hero's square across four tiles, travelled through their gates. Forgot the board? Play on the phone.</p></div>
+          <div><h3>Your own phone, or one passed round</h3><p>Each friend on their own phone, online or by Bluetooth, or one phone passed around the fire.</p></div>
+          <div><h3>Dice, coins and locks</h3><p>Roll real dice or the app's 3D ones; pick tilt-maze locks, crack rune locks, race quicktime flares.</p></div>
+          <div><h3>The Chest of Fate</h3><p>Great deeds earn a draw: break the seal, enter the runes from a real Fate card, claim the reward.</p></div>
+          <div><h3>Heroes that grow</h3><p>Six classes, eight stats, gear, gold, renown and levels: feed embers into your stats as you rise.</p></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="wrap beta" id="beta">
+      <div class="beta-intro">
+        <h2>Join the beta</h2>
+        <p>Beta testers get early builds of Ignis and tell us what to change. Sign-ups are by invite: if someone gave you a code, enter it to begin.</p>
+        <p class="small">We only use your name and email for the Ignis beta, and you can leave any time. See the <a href="/privacy/">privacy policy</a>.</p>
+      </div>
+
+      <!-- Where the sign-up service is, and the public Turnstile key (not a secret). -->
+      <div id="beta-signup" data-service="https://creatio-aura-beta.creatio-aura.workers.dev" data-sitekey="0x4AAAAAAFf0XajRbISI5mg7">
+        <form class="panel" id="step-code" novalidate>
+          <h3>Your invite code</h3>
+          <div class="field">
+            <label for="code">Invite code</label>
+            <input id="code" name="code" autocomplete="off" autocapitalize="characters" spellcheck="false" placeholder="WORD-WORD-WORD-WORD-0000" required>
+            <span class="hint">Capitals and dashes don't matter.</span>
+          </div>
+          <div id="turnstile"></div>
+          <p class="error" id="code-error" role="alert" hidden></p>
+          <button class="button" type="submit">Continue</button>
+        </form>
+
+        <form class="panel" id="step-details" novalidate hidden>
+          <h3>Your details</h3>
+          <div class="field">
+            <label for="name">Name</label>
+            <input id="name" name="name" autocomplete="name" maxlength="60" required>
+          </div>
+          <div class="field">
+            <label for="email">Email</label>
+            <input id="email" name="email" type="email" autocomplete="email" maxlength="254" required>
+          </div>
+          <fieldset>
+            <legend>Where would you play?</legend>
+            <div class="options">
+              <label class="option"><input type="checkbox" name="platforms" value="iPhone"> iPhone</label>
+              <label class="option"><input type="checkbox" name="platforms" value="Android"> Android</label>
+              <label class="option"><input type="checkbox" name="platforms" value="Web"> Web</label>
+            </div>
+          </fieldset>
+          <!-- Hidden from people; bots fill it in. -->
+          <div class="decoy" aria-hidden="true">
+            <label for="website">Website</label>
+            <input id="website" name="website" tabindex="-1" autocomplete="off">
+          </div>
+          <label class="consent"><input type="checkbox" name="consent" id="consent"> <span>Email me about the Ignis beta. I've read the <a href="/privacy/">privacy policy</a>.</span></label>
+          <p class="error" id="details-error" role="alert" hidden></p>
+          <button class="button" type="submit">Join the beta</button>
+        </form>
+
+        <div class="panel done" id="step-done" role="status" hidden>
+          <h3>Check your email</h3>
+          <p>We've sent a link to <strong id="done-email"></strong>. Open it within 48 hours to confirm your place. If it doesn't arrive in a few minutes, look in your spam folder.</p>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="wrap">
+      <span>© 2026 Creatio Aura</span>
+      <nav aria-label="Footer">
+        <a href="/privacy/">Privacy</a>
+        <a href="mailto:creatio.aura@gmail.com">creatio.aura@gmail.com</a>
+        <a href="https://github.com/Creatio-Aura">GitHub</a>
+      </nav>
+    </div>
+  </footer>
+</body>
+</html>

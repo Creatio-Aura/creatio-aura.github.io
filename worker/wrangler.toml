@@ -1,0 +1,18 @@
+# The Ignis beta sign-up service. Secrets (the invite code, keys, the Gmail app password) are set
+# with `wrangler secret put …` and never kept in this repo: see README.md.
+name = "creatio-aura-beta"
+main = "src/index.ts"
+compatibility_date = "2026-10-01"
+
+[vars]
+SITE_URL = "https://creatio-aura.github.io"
+ALLOWED_ORIGINS = "https://creatio-aura.github.io"
+SERVICE_URL = "https://creatio-aura-beta.creatio-aura.workers.dev"
+GMAIL_USER = "creatio.aura@gmail.com"
+MAIL_MODE = "smtp"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "creatio-aura-beta"
+database_id = "25bd6917-afe2-4344-a6d1-9ebe21fc3ed2"
+migrations_dir = "migrations"

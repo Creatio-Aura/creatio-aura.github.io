@@ -93,7 +93,8 @@
           <fieldset>
             <legend>Where would you play?</legend>
             <div class="options">
-              <label class="option"><input type="checkbox" name="platforms" value="iPhone"> iPhone</label>
+              <!-- iPhone needs TestFlight (the Apple Developer Program): not yet. -->
+              <span class="option unavailable" tabindex="0" data-tip="Coming soon" aria-label="iPhone: coming soon"><input type="checkbox" value="iPhone" disabled aria-hidden="true"> iPhone</span>
               <label class="option"><input type="checkbox" name="platforms" value="Android"> Android</label>
               <label class="option"><input type="checkbox" name="platforms" value="Web"> Web</label>
             </div>

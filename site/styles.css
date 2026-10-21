@@ -102,7 +102,8 @@ a.card:hover { border-color: #5b4d78; color: var(--text); }
 .project-hero h1 { font-size: clamp(72px, 10vw, 120px); line-height: 0.9; color: var(--amber); }
 .project-hero p { font-size: 19px; color: var(--text-soft); }
 .shots { display: flex; gap: 14px; justify-content: center; }
-.shots img { width: 31%; max-width: 180px; border-radius: 18px; border: 2px solid var(--card-line); }
+/* height: auto keeps each screenshot its own shape as the width shrinks to fit. */
+.shots img { width: 31%; max-width: 180px; height: auto; border-radius: 18px; border: 2px solid var(--card-line); }
 .shots img:nth-child(odd) { transform: translateY(18px); }
 .features { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 24px; }
 .features h3 { font-size: 20px; margin-bottom: 6px; }

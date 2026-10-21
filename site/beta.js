@@ -22,6 +22,7 @@
     "pick-platform": "Pick at least one place you'd play.",
     "need-consent": "Tick the box so we can email you about the beta.",
     busy: "We're sending a lot of emails right now. Try again tomorrow.",
+    mail: "We couldn't send your confirmation email just now. Try again in a few minutes.",
   };
   const say = (element, error) => {
     element.textContent = MESSAGES[error] || "Something went wrong. Try again in a minute.";

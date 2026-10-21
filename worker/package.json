@@ -1,0 +1,17 @@
+{
+  "name": "creatio-aura-beta",
+  "private": true,
+  "description": "The Ignis beta sign-up service: invite code, human check, confirmation email, and the list in a private D1 database.",
+  "type": "module",
+  "scripts": {
+    "dev": "wrangler dev --port 8798",
+    "deploy": "wrangler d1 migrations apply creatio-aura-beta --remote && wrangler deploy",
+    "test": "node --test test/signup.test.mjs",
+    "typecheck": "tsc --noEmit -p ."
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "5.20261021.1",
+    "typescript": "5.9.3",
+    "wrangler": "4.151.3"
+  }
+}

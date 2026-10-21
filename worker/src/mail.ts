@@ -24,7 +24,8 @@ export async function sendEmail(env: Env, email: Email): Promise<void> {
       .run();
     return;
   }
-  await sendSmtp(env.GMAIL_USER, env.GMAIL_APP_PASSWORD, email);
+  // Google shows app passwords in groups of four; the spaces aren't part of it.
+  await sendSmtp(env.GMAIL_USER, env.GMAIL_APP_PASSWORD.replace(/\s+/g, ""), email);
 }
 
 /** Base64 of UTF-8 text, wrapped at 76 characters as MIME expects. */

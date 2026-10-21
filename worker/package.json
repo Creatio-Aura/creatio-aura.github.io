@@ -7,7 +7,9 @@
     "dev": "wrangler dev --port 8798",
     "deploy": "wrangler d1 migrations apply creatio-aura-beta --remote && wrangler deploy",
     "test": "node --test test/signup.test.mjs",
-    "typecheck": "tsc --noEmit -p ."
+    "typecheck": "tsc --noEmit -p .",
+    "testers": "node tools/testers.mjs",
+    "announce": "node tools/announce.mjs"
   },
   "devDependencies": {
     "@cloudflare/workers-types": "5.20261021.1",

@@ -2,7 +2,7 @@
 // throwaway local database) and walks people through it: npm test. Emails are kept in the
 // test outbox instead of sent. Turnstile uses Cloudflare's always-passes test key.
 
-import { execFileSync, spawn } from "node:child_process";
+import { execFileSync, spawn, spawnSync } from "node:child_process";
 import { mkdtempSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
@@ -25,6 +25,8 @@ const vars = {
   IP_SALT: "test-salt",
   GMAIL_APP_PASSWORD: "unused",
   SERVICE_URL: BASE,
+  ADMIN_TOKEN: "test-admin-key",
+  OWNER_EMAIL: "studio@example.com",
   // Every test comes from one machine: room for them all, while still testing the limit.
   CODE_LIMIT: "16",
   SIGNUP_LIMIT: "40",
@@ -168,6 +170,82 @@ test("signing up sends a confirmation email; the link confirms; the other remove
   assert.equal((await outbox()).filter((e) => e.to_addr === "kodi@example.com").length, 2);
 });
 
+
+const admin = (path, body, key = "test-admin-key") =>
+  fetch(`${BASE}${path}`, {
+    method: body ? "POST" : "GET",
+    headers: { Authorization: `Bearer ${key}`, "Content-Type": "application/json" },
+    body: body ? JSON.stringify(body) : undefined,
+  });
+
+/** Signs someone up and confirms them through the link in their email. */
+async function tester(name, email, platforms) {
+  await post("/signup", person((await passFor()).body.pass, { name, email, platforms }));
+  const mail = (await outbox()).find((e) => e.to_addr === email);
+  await fetch(mail.body.match(/(http\S+\/confirm\?t=\S+)/)[1], { redirect: "manual" });
+}
+
+test("confirming tells the studio, with their name, email and platforms", async () => {
+  await tester("Mira", "mira@example.com", ["Android", "Web"]);
+  const [note] = (await outbox()).filter((e) => e.to_addr === "studio@example.com");
+  assert.match(note.subject, /New Ignis beta tester: Mira \(Android, Web\)/);
+  assert.match(note.body, /Email: mira@example.com/);
+  assert.match(note.body, /Plays on: Android, Web/);
+});
+
+test("the admin tools need the admin key", async () => {
+  assert.equal((await admin("/admin/testers", undefined, "wrong")).status, 401);
+  assert.equal((await fetch(`${BASE}/admin/testers`)).status, 401);
+});
+
+test("the tester list has everyone confirmed, with where they play", async () => {
+  await tester("Rook", "rook@example.com", ["iPhone"]);
+  const { testers } = await (await admin("/admin/testers")).json();
+  const byEmail = Object.fromEntries(testers.map((t) => [t.email, t.platforms]));
+  assert.deepEqual(byEmail["mira@example.com"], ["Android", "Web"]);
+  assert.deepEqual(byEmail["rook@example.com"], ["iPhone"]);
+  // Kodi re-signed up earlier but hasn't confirmed: not on the list.
+  assert.equal(byEmail["kodi@example.com"], undefined);
+});
+
+test("an announcement goes only to people who play there, with only their links", async () => {
+  const links = { Android: "https://expo.dev/artifacts/eas/test.apk", Web: "https://creatio-aura.github.io/ignis-aura-web/" };
+  const dry = await (await admin("/admin/announce", { title: "Ignis 0.6.0 is ready", message: "The board is in.", links })).json();
+  assert.deepEqual(dry.recipients.map((r) => [r.email, r.platforms]), [["mira@example.com", ["Android", "Web"]]]);
+  assert.equal(dry.sent, 0);
+
+  const before = (await outbox()).length;
+  const sent = await (await admin("/admin/announce", { title: "Ignis 0.6.0 is ready", message: "The board is in.", links, send: true })).json();
+  assert.equal(sent.sent, 1);
+  const mails = (await outbox()).slice(0, (await outbox()).length - before);
+  assert.deepEqual(mails.map((m) => m.to_addr), ["mira@example.com"]);
+  assert.match(mails[0].body, /Android: https:\/\/expo.dev\/artifacts\/eas\/test.apk/);
+  assert.match(mails[0].body, /Web: https:\/\/creatio-aura.github.io\/ignis-aura-web\//);
+
+  // Its remove-me link works.
+  const leave = mails[0].body.match(/(http\S+\/leave\?t=\d+\.[0-9a-f]+)/)[1];
+  assert.equal((await fetch(leave, { redirect: "manual" })).headers.get("Location"), `${SITE}/beta/left/`);
+  const { testers } = await (await admin("/admin/testers")).json();
+  assert.equal(testers.find((t) => t.email === "mira@example.com"), undefined);
+});
+
+test("announcements need a title, a message and real https links", async () => {
+  const bad = async (body) => (await admin("/admin/announce", body)).status;
+  assert.equal(await bad({ message: "x", links: { Web: "https://a.b/" } }), 400);
+  assert.equal(await bad({ title: "x", links: { Web: "https://a.b/" } }), 400);
+  assert.equal(await bad({ title: "x", message: "y", links: { Web: "http://a.b/" } }), 400);
+});
+
+test("the announce and testers tools work from the command line", () => {
+  const env = { ...process.env, SERVICE_URL: BASE, ADMIN_TOKEN: "test-admin-key" };
+  const testers = spawnSync("node", ["tools/testers.mjs"], { cwd, env, encoding: "utf8" });
+  assert.match(testers.stdout, /Rook/);
+  const dry = spawnSync("node", ["tools/announce.mjs", "--title", "Hi", "--message", "Test", "--iphone", "https://testflight.apple.com/join/x"], { cwd, env, encoding: "utf8" });
+  assert.match(dry.stdout, /Would send to 1:/);
+  assert.match(dry.stdout, /Nothing was sent/);
+});
+
+// Last: it uses up this machine's code-check allowance.
 test("guessing the code is cut off after a few tries an hour", async () => {
   let last;
   for (let i = 0; i < 20; i++) last = await passFor("WRONG-CODE");

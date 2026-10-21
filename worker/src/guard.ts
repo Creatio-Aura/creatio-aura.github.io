@@ -116,3 +116,24 @@ export async function allowEmail(env: Env, limitPerDay: number): Promise<boolean
   if ((row?.sent ?? 0) >= limitPerDay) return false;
   return allow(env, "email", "all", Number.MAX_SAFE_INTEGER);
 }
+
+/**
+ * A remove-me link's token for one person: their id, signed. The service can make it again for
+ * every email it sends (only its signature proves it), so every email's link keeps working.
+ */
+export async function leaveToken(env: Env, id: number): Promise<string> {
+  return `${id}.${await sign(env, `leave:${id}`)}`;
+}
+
+/** The person a signed remove-me token is for, or null if it isn't one of ours. */
+export async function leaveTokenId(env: Env, token: string): Promise<number | null> {
+  const [id, signature] = token.split(".");
+  if (!id || !/^\d+$/.test(id) || !signature) return null;
+  return sameText(signature, await sign(env, `leave:${id}`)) ? Number(id) : null;
+}
+
+/** Whether a request carries the admin key (the announce and testers tools). */
+export function isAdmin(env: Env, request: Request): boolean {
+  const given = (request.headers.get("Authorization") ?? "").replace(/^Bearer\s+/i, "");
+  return !!env.ADMIN_TOKEN && given.length > 0 && sameText(given, env.ADMIN_TOKEN);
+}

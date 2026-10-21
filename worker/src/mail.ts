@@ -76,6 +76,7 @@ async function sendSmtp(user: string, password: string, email: Email): Promise<v
   const decoder = new TextDecoder();
   let buffer = "";
 
+  let lastLine = "";
   /** The server's next reply: its code, once the last line of it has arrived. */
   const reply = async (): Promise<number> => {
     for (;;) {
@@ -83,6 +84,7 @@ async function sendSmtp(user: string, password: string, email: Email): Promise<v
       for (let i = 0; i < lines.length - 1; i++) {
         const match = /^(\d{3}) /.exec(lines[i]!);
         if (match) {
+          lastLine = lines[i]!;
           buffer = lines.slice(i + 1).join("\r\n");
           return Number(match[1]);
         }
@@ -95,11 +97,12 @@ async function sendSmtp(user: string, password: string, email: Email): Promise<v
   const say = async (line: string, expect: number) => {
     await writer.write(encoder.encode(`${line}\r\n`));
     const code = await reply();
-    if (code !== expect) throw new Error(`The mail server said ${code} (expected ${expect})`);
+    // What the server said (never what we sent: that could be the password).
+    if (code !== expect) throw new Error(`Gmail said "${lastLine}" (expected ${expect})`);
   };
 
   try {
-    if ((await reply()) !== 220) throw new Error("The mail server didn't greet us");
+    if ((await reply()) !== 220) throw new Error(`Gmail didn't greet us: "${lastLine}"`);
     await say("EHLO creatio-aura.github.io", 250);
     await say("AUTH LOGIN", 334);
     await say(btoa(user), 334);

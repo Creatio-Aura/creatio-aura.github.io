@@ -199,7 +199,16 @@ async function signup(env: Env, request: Request, body: Record<string, unknown>,
   const service = env.SERVICE_URL.replace(/\/$/, "");
   const leaveUrl = `${service}/leave?t=${leaveToken.token}`;
   const content = confirmationEmail(name, `${service}/confirm?t=${confirmToken.token}`, leaveUrl);
-  await sendEmail(env, { to: email, ...content, leaveUrl });
+  try {
+    await sendEmail(env, { to: email, ...content, leaveUrl });
+  } catch (error) {
+    // Couldn't send: don't count it against them, and say so plainly.
+    console.error("Sending the confirmation email failed:", error);
+    await env.DB.prepare("UPDATE signups SET emails_sent = MAX(emails_sent - 1, 0) WHERE email = ?")
+      .bind(email)
+      .run();
+    return json({ ok: false, error: "mail" }, 502, origin);
+  }
   return json({ ok: true }, 200, origin);
 }
 

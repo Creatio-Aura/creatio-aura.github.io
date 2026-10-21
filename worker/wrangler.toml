@@ -4,6 +4,10 @@ name = "creatio-aura-beta"
 main = "src/index.ts"
 compatibility_date = "2026-10-01"
 
+# Keep the service's logs (Workers Logs), so problems can be looked into afterwards.
+[observability]
+enabled = true
+
 [vars]
 SITE_URL = "https://creatio-aura.github.io"
 ALLOWED_ORIGINS = "https://creatio-aura.github.io"

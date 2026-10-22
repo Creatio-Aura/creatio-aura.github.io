@@ -143,7 +143,7 @@ test("signing up sends a confirmation email; the link confirms; the other remove
   assert.equal(response.status, 200);
   const [email] = await outbox();
   assert.equal(email.to_addr, "kodi@example.com");
-  assert.match(email.subject, /Confirm your place in the Ignis beta/);
+  assert.match(email.subject, /Confirm your place in the Ignis Aura beta/);
   assert.match(email.body, /Hi Kodi,/);
   const confirmLink = email.body.match(/(http\S+\/confirm\?t=\S+)/)[1];
   const leaveLink = email.body.match(/(http\S+\/leave\?t=\S+)/)[1];
@@ -188,7 +188,7 @@ async function tester(name, email, platforms) {
 test("confirming tells the studio, with their name, email and platforms", async () => {
   await tester("Mira", "mira@example.com", ["Android", "Web"]);
   const [note] = (await outbox()).filter((e) => e.to_addr === "studio@example.com");
-  assert.match(note.subject, /New Ignis beta tester: Mira \(Android, Web\)/);
+  assert.match(note.subject, /New Ignis Aura beta tester: Mira \(Android, Web\)/);
   assert.match(note.body, /Email: mira@example.com/);
   assert.match(note.body, /Plays on: Android, Web/);
 });
@@ -210,12 +210,12 @@ test("the tester list has everyone confirmed, with where they play", async () =>
 
 test("an announcement goes only to people who play there, with only their links", async () => {
   const links = { Android: "https://expo.dev/artifacts/eas/test.apk", Web: "https://creatio-aura.github.io/ignis-aura-web/" };
-  const dry = await (await admin("/admin/announce", { title: "Ignis 0.6.0 is ready", message: "The board is in.", links })).json();
+  const dry = await (await admin("/admin/announce", { title: "Ignis Aura 0.6.0 is ready", message: "The board is in.", links })).json();
   assert.deepEqual(dry.recipients.map((r) => [r.email, r.platforms]), [["mira@example.com", ["Android", "Web"]]]);
   assert.equal(dry.sent, 0);
 
   const before = (await outbox()).length;
-  const sent = await (await admin("/admin/announce", { title: "Ignis 0.6.0 is ready", message: "The board is in.", links, send: true })).json();
+  const sent = await (await admin("/admin/announce", { title: "Ignis Aura 0.6.0 is ready", message: "The board is in.", links, send: true })).json();
   assert.equal(sent.sent, 1);
   const mails = (await outbox()).slice(0, (await outbox()).length - before);
   assert.deepEqual(mails.map((m) => m.to_addr), ["mira@example.com"]);

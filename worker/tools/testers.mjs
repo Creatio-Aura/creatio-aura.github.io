@@ -1,4 +1,4 @@
-// Everyone confirmed on the Ignis beta list, with where they play.
+// Everyone confirmed on the Ignis Aura beta list, with where they play.
 //
 //     npm run testers
 import { admin } from "./admin.mjs";

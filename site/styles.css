@@ -97,7 +97,7 @@ a.card:hover { border-color: #5b4d78; color: var(--text); }
 .closing h2 { font-size: 44px; }
 .closing p { color: var(--text-soft); max-width: 46ch; }
 
-/* The Ignis page */
+/* The Ignis Aura page */
 .project-hero { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 48px; align-items: center; padding-top: 32px; padding-bottom: 64px; }
 .project-hero h1 { font-size: clamp(72px, 10vw, 120px); line-height: 0.9; color: var(--amber); }
 .project-hero p { font-size: 19px; color: var(--text-soft); }

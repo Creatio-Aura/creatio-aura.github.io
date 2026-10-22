@@ -21,7 +21,7 @@
     "bad-email": "That email doesn't look right. Check it has an @ and ends like .com.",
     "pick-platform": "Pick at least one place you'd play.",
     "bad-notes": "Keep the notes to 500 characters or fewer.",
-    "need-consent": "Tick the box so we can email you about the beta.",
+    "need-consent": "Tick the box to agree to the Beta Tester Terms, so we can email you about the beta.",
     busy: "We're sending a lot of emails right now. Try again tomorrow.",
     mail: "We couldn't send your confirmation email just now. Try again in a few minutes.",
   };

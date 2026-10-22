@@ -69,7 +69,9 @@ export interface Env {
 }
 
 /** What people agree to by ticking the box; kept with each sign-up. */
-const CONSENT_TEXT = "Email me about the Ignis Aura beta. I've read the privacy policy.";
+// Exactly what testers agree to, kept with each sign-up: the terms' date says which version.
+const CONSENT_TEXT =
+  "Email me about the Ignis Aura beta. I agree to the Beta Tester Terms (22 October 2026) and I've read the privacy policy.";
 const PLATFORMS = ["iPhone", "Android", "Web"];
 /** Per connection per hour (code checks, sign-ups); emails per day; emails to one address. */
 const limits = (env: Env) => ({

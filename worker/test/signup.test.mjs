@@ -7,6 +7,7 @@ import { mkdtempSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { after, before, test } from "node:test";
+import { emailProblem } from "../../site/email-check.js";
 import assert from "node:assert/strict";
 
 const PORT = 8797;
@@ -119,6 +120,8 @@ test("bad details are turned away, each with its reason", async () => {
     [{ name: "" }, "bad-name"],
     [{ name: "x".repeat(61) }, "bad-name"],
     [{ email: "not-an-email" }, "bad-email"],
+    [{ email: "kodi@example" }, "bad-email"],
+    [{ email: "kodi@gmail.con" }, "email-typo"],
     [{ platforms: ["Toaster"] }, "pick-platform"],
     [{ consent: false }, "need-consent"],
   ];
@@ -126,6 +129,33 @@ test("bad details are turned away, each with its reason", async () => {
     const response = await post("/signup", person(body.pass, change));
     assert.equal(response.status, 400, error);
     assert.equal((await response.json()).error, error);
+  }
+});
+
+test("a typo'd email is turned away with the likely right address", async () => {
+  const { body } = await passFor();
+  const response = await post("/signup", person(body.pass, { email: "kodi@gmail.con" }));
+  assert.deepEqual(await response.json(), { ok: false, error: "email-typo", suggestion: "kodi@gmail.com" });
+});
+
+test("the email check (shared by the form and the service) catches typos, and passes real addresses", () => {
+  const cases = [
+    ["kodi@gmail.con", "kodi@gmail.com"],
+    ["kodi@gmial.com", "kodi@gmail.com"],
+    ["kodi@gmial.con", "kodi@gmail.com"],
+    ["Kodi@Hotmial.com", "Kodi@hotmail.com"],
+    ["kodi@icloud.co", "kodi@icloud.com"],
+    ["kodi@studio.cmo", "kodi@studio.com"],
+    ["kodi@school.ogr", "kodi@school.org"],
+  ];
+  for (const [email, suggestion] of cases) {
+    assert.deepEqual(emailProblem(email), { error: "email-typo", suggestion }, email);
+  }
+  for (const email of ["kodi", "kodi@", "@gmail.com", "kodi@gmail", "kodi@gmail.c", "ko di@gmail.com", "kodi@@gmail.com"]) {
+    assert.deepEqual(emailProblem(email), { error: "bad-email" }, email);
+  }
+  for (const email of ["kodi@gmail.com", "k.o+di@sub.example.co.uk", "kodi@example.co", "kodi@studio.games", "KODI@ICLOUD.COM"]) {
+    assert.equal(emailProblem(email), null, email);
   }
 });
 

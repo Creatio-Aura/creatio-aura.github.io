@@ -18,7 +18,7 @@
     "too-many": "Too many tries for now. Wait a while, then try again.",
     "expired-pass": "That took a while, so the form closed. Enter your invite code again.",
     "bad-name": "Add your name (up to 60 characters).",
-    "bad-email": "That email doesn't look right.",
+    "bad-email": "That email doesn't look right. Check it has an @ and ends like .com.",
     "pick-platform": "Pick at least one place you'd play.",
     "need-consent": "Tick the box so we can email you about the beta.",
     busy: "We're sending a lot of emails right now. Try again tomorrow.",
@@ -28,6 +28,31 @@
     element.textContent = MESSAGES[error] || "Something went wrong. Try again in a minute.";
     element.hidden = false;
   };
+
+  // An email that looks like a typo ("gmail.con"): offer the likely address, one tap to use it.
+  const emailField = () => stepDetails.email;
+  const offerFix = (suggestion) => {
+    const use = document.createElement("button");
+    use.type = "button";
+    use.className = "link-button";
+    use.textContent = `Use ${suggestion}`;
+    use.addEventListener("click", () => {
+      emailField().value = suggestion;
+      detailsError.hidden = true;
+      emailField().focus();
+    });
+    detailsError.replaceChildren(`Did you mean ${suggestion}? `, use);
+    detailsError.hidden = false;
+  };
+  // site/email-check.js; if it didn't load, the service still checks.
+  const emailProblem = (email) =>
+    window.IgnisEmail
+      ? window.IgnisEmail.emailProblem(email)
+      : /^[^@\s]+@[^@\s]+\.[^@\s]{2,}$/.test(email)
+        ? null
+        : { error: "bad-email" };
+  const showEmailProblem = (problem) =>
+    problem.error === "email-typo" ? offerFix(problem.suggestion) : say(detailsError, problem.error);
 
   // The human check, drawn once its script has loaded.
   const drawCheck = () => {
@@ -75,6 +100,14 @@
     }
   });
 
+  // Leaving the email box: a gentle check straight away, before they reach the button.
+  emailField().addEventListener("blur", () => {
+    const value = emailField().value.trim();
+    const issue = value ? emailProblem(value) : null;
+    if (issue) showEmailProblem(issue);
+    else if (!detailsError.hidden && detailsError.querySelector(".link-button")) detailsError.hidden = true;
+  });
+
   stepDetails.addEventListener("submit", async (event) => {
     event.preventDefault();
     detailsError.hidden = true;
@@ -88,7 +121,8 @@
       website: stepDetails.website.value,
     };
     if (!details.name) return say(detailsError, "bad-name");
-    if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(details.email)) return say(detailsError, "bad-email");
+    const emailIssue = emailProblem(details.email);
+    if (emailIssue) return showEmailProblem(emailIssue);
     if (platforms.length === 0) return say(detailsError, "pick-platform");
     if (!details.consent) return say(detailsError, "need-consent");
     busy(stepDetails, true);
@@ -100,6 +134,7 @@
           stepCode.hidden = false;
           return say(codeError, "expired-pass");
         }
+        if (result.error === "email-typo" || result.error === "bad-email") return showEmailProblem(result);
         return say(detailsError, result.error);
       }
       document.getElementById("done-email").textContent = details.email;

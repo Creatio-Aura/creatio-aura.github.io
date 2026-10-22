@@ -9,6 +9,7 @@
 // And for Creatio Aura only, with the admin key (worker/tools/):
 //   GET  /admin/testers                                    → everyone confirmed, with platforms
 //   POST /admin/announce { title, message, links, send }   → emails testers their builds
+//   POST /admin/report { send }                            → the daily report (also sent every morning)
 //
 // Only people with the invite code get as far as the form; only those who confirm by email
 // join the list. Nothing is kept but what they typed: no IP addresses. The list lives in the
@@ -30,6 +31,7 @@ import {
 } from "./guard";
 import {
   announcementEmail,
+  dailyReportEmail,
   confirmationEmail,
   newTesterEmail,
   sendEmail,
@@ -48,6 +50,8 @@ export interface Env {
   GMAIL_USER: string;
   /** Where "new beta tester" notifications go. */
   OWNER_EMAIL: string;
+  /** Where the daily report goes; the owner's email if not set. */
+  REPORT_EMAIL?: string;
   /** "smtp" to send through Gmail, "test" to keep emails in the outbox table. */
   MAIL_MODE: string;
   /** Tries per connection per hour; defaults 8 and 6 (the tests raise them). */
@@ -98,6 +102,11 @@ const redirect = (env: Env, path: string) =>
   Response.redirect(`${env.SITE_URL.replace(/\/$/, "")}${path}`, 303);
 
 export default {
+  // Every morning (wrangler.toml's cron), the studio's report on the beta list.
+  async scheduled(_controller: ScheduledController, env: Env, ctx: ExecutionContext) {
+    ctx.waitUntil(dailyReport(env, true).then(() => undefined));
+  },
+
   async fetch(request: Request, env: Env): Promise<Response> {
     const url = new URL(request.url);
     const allowed = env.ALLOWED_ORIGINS.split(",").map((o) => o.trim());
@@ -117,6 +126,10 @@ export default {
         if (url.pathname === "/admin/testers" && request.method === "GET") return await testers(env);
         if (url.pathname === "/admin/announce" && request.method === "POST") {
           return await announce(env, (await request.json()) as Record<string, unknown>);
+        }
+        if (url.pathname === "/admin/report" && request.method === "POST") {
+          const { send } = (await request.json()) as { send?: boolean };
+          return json({ ok: true, ...(await dailyReport(env, send === true)) }, 200, null);
         }
       } catch (error) {
         console.error(error);
@@ -311,6 +324,30 @@ const confirmedTesters = async (env: Env) =>
       "SELECT id, name, email, platforms, confirmed_at FROM signups WHERE confirmed_at IS NOT NULL ORDER BY confirmed_at",
     ).all<Tester>()
   ).results;
+
+/**
+ * The daily report: everyone confirmed (newest first), who confirmed in the last 24 hours, and how
+ * many are still waiting to confirm. Sent when asked; otherwise just shown.
+ */
+async function dailyReport(env: Env, send: boolean) {
+  const since = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
+  const list = [...(await confirmedTesters(env))].reverse().map((t) => ({
+    name: t.name,
+    email: t.email,
+    platforms: t.platforms.split(","),
+    confirmedAt: t.confirmed_at,
+    isNew: t.confirmed_at >= since,
+  }));
+  const waiting = await env.DB.prepare(
+    "SELECT COUNT(*) AS n FROM signups WHERE confirmed_at IS NULL AND confirm_expires > ?",
+  )
+    .bind(new Date().toISOString())
+    .first<{ n: number }>();
+  const report = dailyReportEmail(list, waiting?.n ?? 0);
+  const to = env.REPORT_EMAIL || env.OWNER_EMAIL;
+  if (send) await sendEmail(env, { to, ...report });
+  return { sent: send, to, subject: report.subject, preview: report.text };
+}
 
 async function testers(env: Env) {
   const list = await confirmedTesters(env);

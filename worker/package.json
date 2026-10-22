@@ -9,7 +9,8 @@
     "test": "node --test test/signup.test.mjs",
     "typecheck": "tsc --noEmit -p .",
     "testers": "node tools/testers.mjs",
-    "announce": "node tools/announce.mjs"
+    "announce": "node tools/announce.mjs",
+    "report": "node tools/report.mjs"
   },
   "devDependencies": {
     "@cloudflare/workers-types": "5.20261021.1",

@@ -221,6 +221,11 @@ test("an announcement goes only to people who play there, with only their links"
   assert.deepEqual(mails.map((m) => m.to_addr), ["mira@example.com"]);
   assert.match(mails[0].body, /Android: https:\/\/expo.dev\/artifacts\/eas\/test.apk/);
   assert.match(mails[0].body, /Web: https:\/\/creatio-aura.github.io\/ignis-aura-web\//);
+  // Every download email carries the Beta Tester Terms: at your own risk, and confidential.
+  assert.match(mails[0].body, /you agree to the Beta Tester Terms/);
+  assert.match(mails[0].body, /at your own risk/);
+  assert.match(mails[0].body, /confidential/);
+  assert.match(mails[0].body, new RegExp(`${SITE}/beta/terms/`));
 
   // Its remove-me link works.
   const leave = mails[0].body.match(/(http\S+\/leave\?t=\d+\.[0-9a-f]+)/)[1];

@@ -204,18 +204,30 @@ export function newTesterEmail(name: string, email: string, platforms: string[],
   return { subject: `New Ignis Aura beta tester: ${name} (${platforms.join(", ")})`, text, html };
 }
 
-/** An announcement to a tester: a message, and the links for the platforms they play on. */
+/** What every download email says about the Beta Tester Terms, above the links. */
+const TERMS_IN_SHORT = [
+  "By downloading, installing or using this beta build, you agree to the Beta Tester Terms. In short:",
+  "it's unfinished test software that you use at your own risk, and Creatio Aura Ltd isn't responsible",
+  "for problems it causes on your devices; and the game is confidential: please don't post or talk about",
+  "it publicly, social media included, without written permission from its creator and Creatio Aura Ltd.",
+];
+
+/** An announcement to a tester: a message, the Beta Tester Terms, and the links for the platforms they play on. */
 export function announcementEmail(
   name: string,
   title: string,
   body: string,
   links: { platform: string; url: string; how: string }[],
   leaveUrl: string,
+  termsUrl: string,
 ) {
   const text = [
     `Hi ${name},`,
     "",
     body,
+    "",
+    ...TERMS_IN_SHORT,
+    `The full terms: ${termsUrl}`,
     "",
     ...links.flatMap((link) => [`${link.platform}: ${link.url}`, `  ${link.how}`, ""]),
     "Thanks for testing Ignis Aura.",
@@ -240,6 +252,13 @@ export function announcementEmail(
 <h1 style="margin:0 0 18px;font-family:Georgia,serif;font-weight:600;font-size:26px;color:#ffb35c">${escape(title)}</h1>
 <p style="margin:0 0 14px;font-size:16px;line-height:1.6">Hi ${escape(name)},</p>
 ${paragraphs}
+<div style="margin:6px 0 22px;padding:14px 16px;border:1px solid #4a3f66;border-radius:12px;background:#171327">
+<p style="margin:0 0 6px;font-size:13px;letter-spacing:1px;text-transform:uppercase;color:#b9a8d6">Before you download</p>
+<p style="margin:0 0 8px;font-size:14px;line-height:1.55;color:#d8cbb6">By downloading, installing or using this beta build, you agree to the <a href="${termsUrl}" style="color:#ffb35c">Beta Tester Terms</a>. In short:</p>
+<ul style="margin:0;padding-left:20px;font-size:14px;line-height:1.55;color:#d8cbb6">
+<li>It's unfinished test software that you use at your own risk; Creatio Aura Ltd isn't responsible for problems it causes on your devices.</li>
+<li>The game is confidential: please don't post or talk about it publicly, social media included, without written permission from its creator and Creatio Aura Ltd.</li>
+</ul></div>
 ${buttons}
 <p style="margin:8px 0 0;font-size:15px;color:#d8cbb6">Thanks for testing Ignis Aura.</p>
 </div>

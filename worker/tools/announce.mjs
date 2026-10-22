@@ -2,7 +2,7 @@
 // they play on (people who play none of them get nothing). Shows who'd get what first; nothing
 // is sent without --send.
 //
-//     npm run announce -- --title "Ignis 0.6.0 is ready" --message "What's new: the digital board…" \
+//     npm run announce -- --title "Ignis Aura 0.6.0 is ready" --message "What's new: the digital board…" \
 //       --android https://expo.dev/artifacts/eas/….apk --web
 //     …then the same again with --send
 //

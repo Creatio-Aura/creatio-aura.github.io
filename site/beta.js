@@ -1,4 +1,4 @@
-// The Ignis beta sign-up, in three steps: the invite code (with Cloudflare's human check), then
+// The Ignis Aura beta sign-up, in three steps: the invite code (with Cloudflare's human check), then
 // name, email and where they'd play, then "check your email". The sign-up service checks
 // everything again itself; this only keeps the form friendly.
 (() => {

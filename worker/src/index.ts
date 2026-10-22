@@ -1,4 +1,4 @@
-// The Ignis beta sign-up service (a Cloudflare Worker, with a D1 database).
+// The Ignis Aura beta sign-up service (a Cloudflare Worker, with a D1 database).
 //
 //   POST /check-code  { code, turnstile }                 → { pass } unlocks the form for 30 min
 //   POST /signup      { pass, name, email, platforms, consent, website }
@@ -64,7 +64,7 @@ export interface Env {
 }
 
 /** What people agree to by ticking the box; kept with each sign-up. */
-const CONSENT_TEXT = "Email me about the Ignis beta. I've read the privacy policy.";
+const CONSENT_TEXT = "Email me about the Ignis Aura beta. I've read the privacy policy.";
 const PLATFORMS = ["iPhone", "Android", "Web"];
 /** Per connection per hour (code checks, sign-ups); emails per day; emails to one address. */
 const limits = (env: Env) => ({

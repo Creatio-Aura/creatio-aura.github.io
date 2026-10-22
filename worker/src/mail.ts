@@ -150,7 +150,7 @@ export function confirmationEmail(name: string, confirmUrl: string, leaveUrl: st
   const text = [
     `Hi ${name},`,
     "",
-    "Thanks for signing up for the Ignis beta. To confirm it was you, open this link:",
+    "Thanks for signing up for the Ignis Aura beta. To confirm it was you, open this link:",
     "",
     confirmUrl,
     "",
@@ -165,7 +165,7 @@ export function confirmationEmail(name: string, confirmUrl: string, leaveUrl: st
   const html = `<!doctype html><html><body style="margin:0;background:#120f1f;padding:32px 16px;font-family:Helvetica,Arial,sans-serif;color:#f4eadb">
 <div style="max-width:520px;margin:0 auto;background:#1d1830;border-radius:20px;padding:32px">
 <p style="margin:0 0 6px;font-size:13px;letter-spacing:2px;text-transform:uppercase;color:#b9a8d6">Creatio Aura</p>
-<h1 style="margin:0 0 18px;font-family:Georgia,serif;font-weight:600;font-size:26px;color:#ffb35c">Confirm your place in the Ignis beta</h1>
+<h1 style="margin:0 0 18px;font-family:Georgia,serif;font-weight:600;font-size:26px;color:#ffb35c">Confirm your place in the Ignis Aura beta</h1>
 <p style="margin:0 0 14px;font-size:16px;line-height:1.6">Hi ${safeName},</p>
 <p style="margin:0 0 24px;font-size:16px;line-height:1.6">Thanks for signing up. Press the button to confirm it was you.</p>
 <p style="margin:0 0 24px"><a href="${confirmUrl}" style="display:inline-block;background:#ff8a3d;color:#1d0f05;font-weight:bold;text-decoration:none;padding:14px 26px;border-radius:99px">Confirm my place</a></p>
@@ -173,7 +173,7 @@ export function confirmationEmail(name: string, confirmUrl: string, leaveUrl: st
 </div>
 <p style="max-width:520px;margin:16px auto 0;font-size:12px;color:#b9a8d6;text-align:center">Don't want these emails? <a href="${leaveUrl}" style="color:#ffb35c">Remove yourself</a>.</p>
 </body></html>`;
-  return { subject: "Confirm your place in the Ignis beta", text, html };
+  return { subject: "Confirm your place in the Ignis Aura beta", text, html };
 }
 
 const escape = (text: string) => text.replace(/[&<>"']/g, (c) => `&#${c.charCodeAt(0)};`);
@@ -182,7 +182,7 @@ const escape = (text: string) => text.replace(/[&<>"']/g, (c) => `&#${c.charCode
 export function newTesterEmail(name: string, email: string, platforms: string[], testers: number) {
   const when = new Date().toUTCString();
   const text = [
-    "A new Ignis beta tester has confirmed.",
+    "A new Ignis Aura beta tester has confirmed.",
     "",
     `Name: ${name}`,
     `Email: ${email}`,
@@ -192,7 +192,7 @@ export function newTesterEmail(name: string, email: string, platforms: string[],
     `Confirmed testers now: ${testers}.`,
   ].join("\n");
   const html = `<!doctype html><html><body style="font-family:Helvetica,Arial,sans-serif;color:#1d1a16">
-<h2 style="margin:0 0 12px">New Ignis beta tester</h2>
+<h2 style="margin:0 0 12px">New Ignis Aura beta tester</h2>
 <table cellpadding="4" style="font-size:15px">
 <tr><td><b>Name</b></td><td>${escape(name)}</td></tr>
 <tr><td><b>Email</b></td><td>${escape(email)}</td></tr>
@@ -201,7 +201,7 @@ export function newTesterEmail(name: string, email: string, platforms: string[],
 </table>
 <p style="font-size:15px">Confirmed testers now: <b>${testers}</b>.</p>
 </body></html>`;
-  return { subject: `New Ignis beta tester: ${name} (${platforms.join(", ")})`, text, html };
+  return { subject: `New Ignis Aura beta tester: ${name} (${platforms.join(", ")})`, text, html };
 }
 
 /** An announcement to a tester: a message, and the links for the platforms they play on. */
@@ -218,7 +218,7 @@ export function announcementEmail(
     body,
     "",
     ...links.flatMap((link) => [`${link.platform}: ${link.url}`, `  ${link.how}`, ""]),
-    "Thanks for testing Ignis.",
+    "Thanks for testing Ignis Aura.",
     "— Creatio Aura",
     "",
     `Don't want these emails? Remove yourself: ${leaveUrl}`,
@@ -236,12 +236,12 @@ export function announcementEmail(
     .join("");
   const html = `<!doctype html><html><body style="margin:0;background:#120f1f;padding:32px 16px;font-family:Helvetica,Arial,sans-serif;color:#f4eadb">
 <div style="max-width:520px;margin:0 auto;background:#1d1830;border-radius:20px;padding:32px">
-<p style="margin:0 0 6px;font-size:13px;letter-spacing:2px;text-transform:uppercase;color:#b9a8d6">Creatio Aura · Ignis beta</p>
+<p style="margin:0 0 6px;font-size:13px;letter-spacing:2px;text-transform:uppercase;color:#b9a8d6">Creatio Aura · Ignis Aura beta</p>
 <h1 style="margin:0 0 18px;font-family:Georgia,serif;font-weight:600;font-size:26px;color:#ffb35c">${escape(title)}</h1>
 <p style="margin:0 0 14px;font-size:16px;line-height:1.6">Hi ${escape(name)},</p>
 ${paragraphs}
 ${buttons}
-<p style="margin:8px 0 0;font-size:15px;color:#d8cbb6">Thanks for testing Ignis.</p>
+<p style="margin:8px 0 0;font-size:15px;color:#d8cbb6">Thanks for testing Ignis Aura.</p>
 </div>
 <p style="max-width:520px;margin:16px auto 0;font-size:12px;color:#b9a8d6;text-align:center">Don't want these emails? <a href="${leaveUrl}" style="color:#ffb35c">Remove yourself</a>.</p>
 </body></html>`;

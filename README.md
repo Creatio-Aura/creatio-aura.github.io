@@ -1,7 +1,7 @@
 # Creatio Aura's website
 
-**https://creatio-aura.github.io**: our projects, and beta sign-ups. The first project, code name
-**Ignis**, takes beta sign-ups by invite code.
+**https://creatio-aura.github.io**: our projects, and beta sign-ups. The first project,
+**Ignis Aura**, takes beta sign-ups by invite code.
 
 ## What's here
 
@@ -63,7 +63,7 @@ npm run testers          # everyone confirmed, with where they play, and totals 
 
 # Email testers a new build: each gets only the links for the platforms they play on.
 # Without --send it only shows who'd get what, and the email.
-npm run announce -- --title "Ignis 0.6.0 is ready" \
+npm run announce -- --title "Ignis Aura 0.6.0 is ready" \
   --message "What's new: the digital board. Tell us what you think by replying." \
   --android https://expo.dev/artifacts/eas/….apk --web
 npm run announce -- …the same… --send

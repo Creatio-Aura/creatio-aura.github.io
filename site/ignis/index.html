@@ -125,7 +125,12 @@
               <label class="option"><input type="checkbox" name="platforms" value="Android"> Android</label>
               <label class="option"><input type="checkbox" name="platforms" value="Web"> Web</label>
             </div>
+            <span class="hint">On iPhone? It's coming soon: pick Web for now, and say so in the notes.</span>
           </fieldset>
+          <div class="field">
+            <label for="notes">Notes <span class="optional">(optional)</span></label>
+            <textarea id="notes" name="notes" rows="3" maxlength="500" placeholder="Anything we should know, e.g. &quot;I'd play on iPhone when it's out.&quot;"></textarea>
+          </div>
           <!-- Hidden from people; bots fill it in. -->
           <div class="decoy" aria-hidden="true">
             <label for="website">Website</label>

@@ -179,7 +179,13 @@ export function confirmationEmail(name: string, confirmUrl: string, leaveUrl: st
 const escape = (text: string) => text.replace(/[&<>"']/g, (c) => `&#${c.charCodeAt(0)};`);
 
 /** To the studio: someone has just confirmed their place in the beta. */
-export function newTesterEmail(name: string, email: string, platforms: string[], testers: number) {
+export function newTesterEmail(
+  name: string,
+  email: string,
+  platforms: string[],
+  notes: string,
+  testers: number,
+) {
   const when = new Date().toUTCString();
   const text = [
     "A new Ignis Aura beta tester has confirmed.",
@@ -187,6 +193,7 @@ export function newTesterEmail(name: string, email: string, platforms: string[],
     `Name: ${name}`,
     `Email: ${email}`,
     `Plays on: ${platforms.join(", ")}`,
+    `Notes: ${notes || "(none)"}`,
     `Confirmed: ${when}`,
     "",
     `Confirmed testers now: ${testers}.`,
@@ -197,6 +204,7 @@ export function newTesterEmail(name: string, email: string, platforms: string[],
 <tr><td><b>Name</b></td><td>${escape(name)}</td></tr>
 <tr><td><b>Email</b></td><td>${escape(email)}</td></tr>
 <tr><td><b>Plays on</b></td><td>${escape(platforms.join(", "))}</td></tr>
+<tr><td valign="top"><b>Notes</b></td><td>${notes ? escape(notes).replace(/\n/g, "<br>") : "<i>none</i>"}</td></tr>
 <tr><td><b>Confirmed</b></td><td>${escape(when)}</td></tr>
 </table>
 <p style="font-size:15px">Confirmed testers now: <b>${testers}</b>.</p>
@@ -269,7 +277,14 @@ ${buttons}
 
 /** The studio's daily report: who joined the beta in the last day, and everyone on it. */
 export function dailyReportEmail(
-  testers: { name: string; email: string; platforms: string[]; confirmedAt: string; isNew: boolean }[],
+  testers: {
+    name: string;
+    email: string;
+    platforms: string[];
+    notes: string;
+    confirmedAt: string;
+    isNew: boolean;
+  }[],
   waiting: number,
 ) {
   const day = new Date().toLocaleDateString("en-US", {
@@ -283,7 +298,8 @@ export function dailyReportEmail(
   const count = (platform: string) => testers.filter((t) => t.platforms.includes(platform)).length;
   const totals = `iPhone ${count("iPhone")} · Android ${count("Android")} · Web ${count("Web")}`;
   const row = (t: (typeof testers)[number]) =>
-    `${t.name} <${t.email}>: ${t.platforms.join(", ")} (confirmed ${t.confirmedAt.slice(0, 10)})`;
+    `${t.name} <${t.email}>: ${t.platforms.join(", ")} (confirmed ${t.confirmedAt.slice(0, 10)})` +
+    (t.notes ? `\n      Notes: ${t.notes.replace(/\n/g, " / ")}` : "");
   const text = [
     `Ignis Aura beta: ${day}`,
     "",
@@ -297,7 +313,7 @@ export function dailyReportEmail(
     ...testers.map((t) => `  ${row(t)}`),
   ].join("\n");
   const cells = (t: (typeof testers)[number]) =>
-    `<tr${t.isNew ? ' style="background:#fff3e2"' : ""}><td>${escape(t.name)}${t.isNew ? " <b>(new)</b>" : ""}</td><td>${escape(t.email)}</td><td>${escape(t.platforms.join(", "))}</td><td>${escape(t.confirmedAt.slice(0, 10))}</td></tr>`;
+    `<tr${t.isNew ? ' style="background:#fff3e2"' : ""}><td>${escape(t.name)}${t.isNew ? " <b>(new)</b>" : ""}</td><td>${escape(t.email)}</td><td>${escape(t.platforms.join(", "))}</td><td>${escape(t.confirmedAt.slice(0, 10))}</td><td>${escape(t.notes).replace(/\n/g, "<br>")}</td></tr>`;
   const html = `<!doctype html><html><body style="font-family:Helvetica,Arial,sans-serif;color:#1d1a16">
 <h2 style="margin:0 0 4px">Ignis Aura beta</h2>
 <p style="margin:0 0 16px;color:#6b6157">${escape(day)}</p>
@@ -309,7 +325,7 @@ export function dailyReportEmail(
 ${
   testers.length
     ? `<table cellpadding="6" style="font-size:14px;border-collapse:collapse" border="1" bordercolor="#e4ddd2">
-<tr style="background:#f4efe6"><th align="left">Name</th><th align="left">Email</th><th align="left">Plays on</th><th align="left">Confirmed</th></tr>
+<tr style="background:#f4efe6"><th align="left">Name</th><th align="left">Email</th><th align="left">Plays on</th><th align="left">Confirmed</th><th align="left">Notes</th></tr>
 ${testers.map(cells).join("\n")}
 </table>`
     : "<p>No confirmed testers yet.</p>"

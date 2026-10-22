@@ -124,6 +124,7 @@ test("bad details are turned away, each with its reason", async () => {
     [{ email: "kodi@gmail.con" }, "email-typo"],
     [{ platforms: ["Toaster"] }, "pick-platform"],
     [{ consent: false }, "need-consent"],
+    [{ notes: "x".repeat(501) }, "bad-notes"],
   ];
   for (const [change, error] of cases) {
     const response = await post("/signup", person(body.pass, change));
@@ -262,6 +263,21 @@ test("an announcement goes only to people who play there, with only their links"
   assert.equal((await fetch(leave, { redirect: "manual" })).headers.get("Location"), `${SITE}/beta/left/`);
   const { testers } = await (await admin("/admin/testers")).json();
   assert.equal(testers.find((t) => t.email === "mira@example.com"), undefined);
+});
+
+test("notes written at sign-up reach the studio's email, the testers list and the report", async () => {
+  const { body } = await passFor();
+  const notes = "I'd play on iPhone when it's out.\nHappy to test the web version now.";
+  assert.equal((await post("/signup", person(body.pass, { email: "noor@example.com", name: "Noor", platforms: ["Web"], notes }))).status, 200);
+  const confirmLink = (await outbox())[0].body.match(/(http\S+\/confirm\?t=\S+)/)[1];
+  await fetch(confirmLink, { redirect: "manual" });
+  const [studio] = await outbox();
+  assert.match(studio.subject, /New Ignis Aura beta tester: Noor/);
+  assert.match(studio.body, /Notes: I'd play on iPhone when it's out\./);
+  const { testers } = await (await admin("/admin/testers")).json();
+  assert.equal(testers.find((t) => t.email === "noor@example.com").notes, notes);
+  const report = await (await admin("/admin/report", {})).json();
+  assert.match(report.preview, /Notes: I'd play on iPhone when it's out\. \/ Happy to test/);
 });
 
 test("the daily report lists everyone confirmed, marks the day's new testers, and emails the studio", async () => {

@@ -20,6 +20,7 @@
     "bad-name": "Add your name (up to 60 characters).",
     "bad-email": "That email doesn't look right. Check it has an @ and ends like .com.",
     "pick-platform": "Pick at least one place you'd play.",
+    "bad-notes": "Keep the notes to 500 characters or fewer.",
     "need-consent": "Tick the box so we can email you about the beta.",
     busy: "We're sending a lot of emails right now. Try again tomorrow.",
     mail: "We couldn't send your confirmation email just now. Try again in a few minutes.",
@@ -117,6 +118,7 @@
       name: document.getElementById("name").value.trim(),
       email: stepDetails.email.value.trim(),
       platforms,
+      notes: document.getElementById("notes").value.trim(),
       consent: stepDetails.consent.checked,
       website: stepDetails.website.value,
     };
@@ -124,6 +126,7 @@
     const emailIssue = emailProblem(details.email);
     if (emailIssue) return showEmailProblem(emailIssue);
     if (platforms.length === 0) return say(detailsError, "pick-platform");
+    if (details.notes.length > 500) return say(detailsError, "bad-notes");
     if (!details.consent) return say(detailsError, "need-consent");
     busy(stepDetails, true);
     try {

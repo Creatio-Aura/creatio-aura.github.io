@@ -12,7 +12,10 @@ if (testers.length === 0) {
   const line = (cells) => cells.map((c, i) => c.padEnd(widths[i])).join("   ");
   console.log(line(["Name", "Email", "Plays on", "Confirmed"]));
   console.log(widths.map((w) => "-".repeat(w)).join("   "));
-  for (const row of rows) console.log(line(row));
+  testers.forEach((t, i) => {
+    console.log(line(rows[i]));
+    if (t.notes) console.log(`    Notes: ${t.notes.replace(/\n/g, " / ")}`);
+  });
   const count = (p) => testers.filter((t) => t.platforms.includes(p)).length;
   console.log(`\n${testers.length} confirmed · iPhone ${count("iPhone")} · Android ${count("Android")} · Web ${count("Web")}`);
 }

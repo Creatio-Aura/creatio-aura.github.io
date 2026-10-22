@@ -80,6 +80,8 @@ const limits = (env: Env) => ({
 });
 const CONFIRM_HOURS = 48;
 const UNCONFIRMED_DAYS = 7;
+/** The most a tester can write in the sign-up notes. */
+const NOTES_MAX = 500;
 
 const json = (body: unknown, status: number, origin: string | null) =>
   new Response(JSON.stringify(body), {
@@ -194,6 +196,12 @@ async function signup(env: Env, request: Request, body: Record<string, unknown>,
   const emailIssue = emailProblem(email);
   if (emailIssue) return json({ ok: false, ...emailIssue }, 400, origin);
   if (platforms.length === 0) return json({ ok: false, error: "pick-platform" }, 400, origin);
+  // Optional notes, kept as plain text: line breaks allowed, other control characters dropped.
+  const notes =
+    typeof body.notes === "string"
+      ? body.notes.replace(/\r\n?/g, "\n").replace(/[\u0000-\u0009\u000b-\u001f\u007f]/g, "").trim()
+      : "";
+  if (notes.length > NOTES_MAX) return json({ ok: false, error: "bad-notes" }, 400, origin);
   if (body.consent !== true) return json({ ok: false, error: "need-consent" }, 400, origin);
 
   const now = new Date();
@@ -219,10 +227,11 @@ async function signup(env: Env, request: Request, body: Record<string, unknown>,
   const legacyLeave = await newToken();
   const expires = new Date(now.getTime() + CONFIRM_HOURS * 3_600_000).toISOString();
   const row = await env.DB.prepare(
-    `INSERT INTO signups (email, name, platforms, consent_text, consent_at, created_at,
+    `INSERT INTO signups (email, name, platforms, notes, consent_text, consent_at, created_at,
        confirm_hash, confirm_expires, leave_hash, emails_sent, last_email_at)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 1, ?)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 1, ?)
      ON CONFLICT (email) DO UPDATE SET name = excluded.name, platforms = excluded.platforms,
+       notes = excluded.notes,
        consent_text = excluded.consent_text, consent_at = excluded.consent_at,
        confirm_hash = excluded.confirm_hash, confirm_expires = excluded.confirm_expires,
        leave_hash = excluded.leave_hash, emails_sent = signups.emails_sent + 1,
@@ -233,6 +242,7 @@ async function signup(env: Env, request: Request, body: Record<string, unknown>,
       email,
       name,
       platforms.join(","),
+      notes,
       CONSENT_TEXT,
       now.toISOString(),
       now.toISOString(),
@@ -263,7 +273,7 @@ async function confirm(env: Env, url: URL) {
   const token = url.searchParams.get("t") ?? "";
   if (!token) return redirect(env, "/beta/link-expired/");
   const row = await env.DB.prepare(
-    "SELECT id, name, email, platforms, confirm_expires, confirmed_at FROM signups WHERE confirm_hash = ?",
+    "SELECT id, name, email, platforms, notes, confirm_expires, confirmed_at FROM signups WHERE confirm_hash = ?",
   )
     .bind(await sha256(token))
     .first<{
@@ -271,6 +281,7 @@ async function confirm(env: Env, url: URL) {
       name: string;
       email: string;
       platforms: string;
+      notes: string;
       confirm_expires: string;
       confirmed_at: string | null;
     }>();
@@ -284,7 +295,7 @@ async function confirm(env: Env, url: URL) {
   try {
     const count = await env.DB.prepare("SELECT COUNT(*) AS n FROM signups WHERE confirmed_at IS NOT NULL")
       .first<{ n: number }>();
-    const note = newTesterEmail(row.name, row.email, row.platforms.split(","), count?.n ?? 0);
+    const note = newTesterEmail(row.name, row.email, row.platforms.split(","), row.notes, count?.n ?? 0);
     await sendEmail(env, { to: env.OWNER_EMAIL, ...note });
   } catch (error) {
     console.error("Telling the studio about a new tester failed:", error);
@@ -316,13 +327,14 @@ interface Tester {
   name: string;
   email: string;
   platforms: string;
+  notes: string;
   confirmed_at: string;
 }
 
 const confirmedTesters = async (env: Env) =>
   (
     await env.DB.prepare(
-      "SELECT id, name, email, platforms, confirmed_at FROM signups WHERE confirmed_at IS NOT NULL ORDER BY confirmed_at",
+      "SELECT id, name, email, platforms, notes, confirmed_at FROM signups WHERE confirmed_at IS NOT NULL ORDER BY confirmed_at",
     ).all<Tester>()
   ).results;
 
@@ -336,6 +348,7 @@ async function dailyReport(env: Env, send: boolean) {
     name: t.name,
     email: t.email,
     platforms: t.platforms.split(","),
+    notes: t.notes,
     confirmedAt: t.confirmed_at,
     isNew: t.confirmed_at >= since,
   }));
@@ -353,7 +366,7 @@ async function dailyReport(env: Env, send: boolean) {
 async function testers(env: Env) {
   const list = await confirmedTesters(env);
   return json(
-    { ok: true, testers: list.map(({ name, email, platforms, confirmed_at }) => ({ name, email, platforms: platforms.split(","), confirmed_at })) },
+    { ok: true, testers: list.map(({ name, email, platforms, notes, confirmed_at }) => ({ name, email, platforms: platforms.split(","), notes, confirmed_at })) },
     200,
     null,
   );

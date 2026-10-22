@@ -234,6 +234,20 @@ test("an announcement goes only to people who play there, with only their links"
   assert.equal(testers.find((t) => t.email === "mira@example.com"), undefined);
 });
 
+test("the daily report lists everyone confirmed, marks the day's new testers, and emails the studio", async () => {
+  const shown = await (await admin("/admin/report", {})).json();
+  assert.equal(shown.sent, false);
+  assert.match(shown.preview, /New in the last day: \d+/);
+  assert.match(shown.preview, /Confirmed testers: \d+ \(iPhone \d+ · Android \d+ · Web \d+\)/);
+  assert.match(shown.preview, /Signed up, waiting to confirm: \d+/);
+
+  const sent = await (await admin("/admin/report", { send: true })).json();
+  assert.equal(sent.sent, true);
+  const [latest] = await outbox();
+  assert.equal(latest.to_addr, "studio@example.com");
+  assert.match(latest.subject, /^Ignis Aura beta: \d+ new today, \d+ in all$/);
+});
+
 test("announcements need a title, a message and real https links", async () => {
   const bad = async (body) => (await admin("/admin/announce", body)).status;
   assert.equal(await bad({ message: "x", links: { Web: "https://a.b/" } }), 400);

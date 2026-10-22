@@ -16,6 +16,10 @@ GMAIL_USER = "creatio.aura@gmail.com"
 OWNER_EMAIL = "creatio.aura@gmail.com"
 MAIL_MODE = "smtp"
 
+# The daily beta report, every morning: 14:00 UTC is 8 am in Colorado in summer, 7 am in winter.
+[triggers]
+crons = ["0 14 * * *"]
+
 [[d1_databases]]
 binding = "DB"
 database_name = "creatio-aura-beta"

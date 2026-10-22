@@ -266,3 +266,55 @@ ${buttons}
 </body></html>`;
   return { subject: title, text, html };
 }
+
+/** The studio's daily report: who joined the beta in the last day, and everyone on it. */
+export function dailyReportEmail(
+  testers: { name: string; email: string; platforms: string[]; confirmedAt: string; isNew: boolean }[],
+  waiting: number,
+) {
+  const day = new Date().toLocaleDateString("en-US", {
+    weekday: "long",
+    month: "long",
+    day: "numeric",
+    year: "numeric",
+    timeZone: "America/Denver",
+  });
+  const fresh = testers.filter((t) => t.isNew);
+  const count = (platform: string) => testers.filter((t) => t.platforms.includes(platform)).length;
+  const totals = `iPhone ${count("iPhone")} · Android ${count("Android")} · Web ${count("Web")}`;
+  const row = (t: (typeof testers)[number]) =>
+    `${t.name} <${t.email}>: ${t.platforms.join(", ")} (confirmed ${t.confirmedAt.slice(0, 10)})`;
+  const text = [
+    `Ignis Aura beta: ${day}`,
+    "",
+    `New in the last day: ${fresh.length}`,
+    ...fresh.map((t) => `  + ${row(t)}`),
+    "",
+    `Confirmed testers: ${testers.length} (${totals})`,
+    `Signed up, waiting to confirm: ${waiting}`,
+    "",
+    "Everyone on the beta, newest first:",
+    ...testers.map((t) => `  ${row(t)}`),
+  ].join("\n");
+  const cells = (t: (typeof testers)[number]) =>
+    `<tr${t.isNew ? ' style="background:#fff3e2"' : ""}><td>${escape(t.name)}${t.isNew ? " <b>(new)</b>" : ""}</td><td>${escape(t.email)}</td><td>${escape(t.platforms.join(", "))}</td><td>${escape(t.confirmedAt.slice(0, 10))}</td></tr>`;
+  const html = `<!doctype html><html><body style="font-family:Helvetica,Arial,sans-serif;color:#1d1a16">
+<h2 style="margin:0 0 4px">Ignis Aura beta</h2>
+<p style="margin:0 0 16px;color:#6b6157">${escape(day)}</p>
+<table cellpadding="6" style="font-size:15px;border-collapse:collapse;margin-bottom:16px">
+<tr><td><b>New in the last day</b></td><td style="font-size:20px"><b>${fresh.length}</b></td></tr>
+<tr><td><b>Confirmed testers</b></td><td>${testers.length} &nbsp;(${escape(totals)})</td></tr>
+<tr><td><b>Waiting to confirm</b></td><td>${waiting}</td></tr>
+</table>
+${
+  testers.length
+    ? `<table cellpadding="6" style="font-size:14px;border-collapse:collapse" border="1" bordercolor="#e4ddd2">
+<tr style="background:#f4efe6"><th align="left">Name</th><th align="left">Email</th><th align="left">Plays on</th><th align="left">Confirmed</th></tr>
+${testers.map(cells).join("\n")}
+</table>`
+    : "<p>No confirmed testers yet.</p>"
+}
+</body></html>`;
+  const subject = `Ignis Aura beta: ${fresh.length} new today, ${testers.length} in all`;
+  return { subject, text, html };
+}

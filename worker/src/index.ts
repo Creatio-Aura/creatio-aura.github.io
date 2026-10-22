@@ -29,6 +29,7 @@ import {
   sha256,
   visitorKey,
 } from "./guard";
+import { emailProblem } from "../../site/email-check.js";
 import {
   announcementEmail,
   dailyReportEmail,
@@ -189,9 +190,9 @@ async function signup(env: Env, request: Request, body: Record<string, unknown>,
   if (name.length < 1 || name.length > 60 || /[\r\n<>]/.test(name)) {
     return json({ ok: false, error: "bad-name" }, 400, origin);
   }
-  if (email.length > 254 || !/^[^@\s<>"]+@[^@\s<>"]+\.[^@\s<>"]+$/.test(email)) {
-    return json({ ok: false, error: "bad-email" }, 400, origin);
-  }
+  // The same check as the form's (site/email-check.js): a real address, and no typo like ".con".
+  const emailIssue = emailProblem(email);
+  if (emailIssue) return json({ ok: false, ...emailIssue }, 400, origin);
   if (platforms.length === 0) return json({ ok: false, error: "pick-platform" }, 400, origin);
   if (body.consent !== true) return json({ ok: false, error: "need-consent" }, 400, origin);
 

@@ -355,6 +355,7 @@ async function announce(env: Env, body: Record<string, unknown>) {
       message,
       theirs.map((platform) => ({ platform, url: links[platform]!, how: HOW[platform]! })),
       leaveUrl,
+      `${env.SITE_URL.replace(/\/$/, "")}/beta/terms/`,
     );
     plan.push({ tester, email: { to: tester.email, ...content, leaveUrl } });
   }

@@ -108,6 +108,12 @@ a.card:hover { border-color: #5b4d78; color: var(--text); }
 .features { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 24px; }
 .features h3 { font-size: 20px; margin-bottom: 6px; }
 .features p { color: var(--text-soft); font-size: 16px; }
+.coming-soon { margin-top: 40px; gap: 12px; }
+.coming-soon h3 { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; font-size: 22px; }
+.coming-soon .wip { font-family: inherit; font-size: 12px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; padding: 3px 10px; border-radius: 999px; border: 1px solid currentColor; color: var(--text-soft); }
+.coming-soon ul { display: grid; gap: 10px; padding-left: 20px; }
+.coming-soon li { color: var(--text-soft); }
+.coming-soon strong { color: var(--text); }
 .idea { display: block; padding-top: 72px; padding-bottom: 72px; }
 .idea .lede { font-size: 20px; color: var(--text-soft); max-width: 760px; margin-bottom: 32px; }
 .idea .beta-note { margin-top: 40px; gap: 8px; }

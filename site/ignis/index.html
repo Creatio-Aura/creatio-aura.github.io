@@ -137,13 +137,15 @@
             <input id="website" name="website" tabindex="-1" autocomplete="off">
           </div>
           <label class="consent"><input type="checkbox" name="consent" id="consent"> <span>Email me about the Ignis Aura beta. I agree to the <a href="/beta/terms/" target="_blank" rel="noopener">Beta Tester Terms</a> and I've read the <a href="/privacy/" target="_blank" rel="noopener">privacy policy</a>.</span></label>
+          <p class="small">We'll email you a link to confirm your place. It can land in your spam or junk folder, so check there too. If you don't confirm within 48 hours, you won't be added to the beta list.</p>
           <p class="error" id="details-error" role="alert" hidden></p>
           <button class="button" type="submit">Join the beta</button>
         </form>
 
         <div class="panel done" id="step-done" role="status" hidden>
           <h3>Check your email</h3>
-          <p>We've sent a link to <strong id="done-email"></strong>. Open it within 48 hours to confirm your place. If it doesn't arrive in a few minutes, look in your spam folder.</p>
+          <p>We've sent a link to <strong id="done-email"></strong>. Open it within 48 hours to confirm your place: until you do, you're not on the beta list.</p>
+          <p>Can't find it? Check your <strong>spam or junk folder</strong>; it often lands there. Marking it "not spam" helps our next emails reach you.</p>
         </div>
       </div>
     </section>

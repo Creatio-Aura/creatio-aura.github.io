@@ -286,6 +286,8 @@ export function dailyReportEmail(
     isNew: boolean;
   }[],
   waiting: number,
+  /** When the last report was sent; null before the first, when "new" means the last day. */
+  lastReport: string | null,
 ) {
   const day = new Date().toLocaleDateString("en-US", {
     weekday: "long",
@@ -295,6 +297,16 @@ export function dailyReportEmail(
     timeZone: "America/Denver",
   });
   const fresh = testers.filter((t) => t.isNew);
+  const sinceWhen = lastReport
+    ? `since the last report (${new Date(lastReport).toLocaleString("en-US", {
+        weekday: "short",
+        month: "short",
+        day: "numeric",
+        hour: "numeric",
+        minute: "2-digit",
+        timeZone: "America/Denver",
+      })})`
+    : "in the last day";
   const count = (platform: string) => testers.filter((t) => t.platforms.includes(platform)).length;
   const totals = `iPhone ${count("iPhone")} · Android ${count("Android")} · Web ${count("Web")}`;
   const row = (t: (typeof testers)[number]) =>
@@ -303,7 +315,7 @@ export function dailyReportEmail(
   const text = [
     `Ignis Aura beta: ${day}`,
     "",
-    `New in the last day: ${fresh.length}`,
+    `New ${sinceWhen}: ${fresh.length}`,
     ...fresh.map((t) => `  + ${row(t)}`),
     "",
     `Confirmed testers: ${testers.length} (${totals})`,
@@ -318,7 +330,7 @@ export function dailyReportEmail(
 <h2 style="margin:0 0 4px">Ignis Aura beta</h2>
 <p style="margin:0 0 16px;color:#6b6157">${escape(day)}</p>
 <table cellpadding="6" style="font-size:15px;border-collapse:collapse;margin-bottom:16px">
-<tr><td><b>New in the last day</b></td><td style="font-size:20px"><b>${fresh.length}</b></td></tr>
+<tr><td><b>New ${escape(sinceWhen)}</b></td><td style="font-size:20px"><b>${fresh.length}</b></td></tr>
 <tr><td><b>Confirmed testers</b></td><td>${testers.length} &nbsp;(${escape(totals)})</td></tr>
 <tr><td><b>Waiting to confirm</b></td><td>${waiting}</td></tr>
 </table>
@@ -331,6 +343,6 @@ ${testers.map(cells).join("\n")}
     : "<p>No confirmed testers yet.</p>"
 }
 </body></html>`;
-  const subject = `Ignis Aura beta: ${fresh.length} new today, ${testers.length} in all`;
+  const subject = `Ignis Aura beta: ${fresh.length} new, ${testers.length} in all`;
   return { subject, text, html };
 }

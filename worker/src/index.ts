@@ -341,27 +341,34 @@ const confirmedTesters = async (env: Env) =>
   ).results;
 
 /**
- * The daily report: everyone confirmed (newest first), who confirmed in the last 24 hours, and how
- * many are still waiting to confirm. Sent when asked; otherwise just shown.
+ * The daily report: everyone confirmed (newest first), who's confirmed since the last report was
+ * sent (or in the last day, before the first), and how many are still waiting to confirm. Sent
+ * when asked, and then remembered; otherwise just shown.
  */
 async function dailyReport(env: Env, send: boolean) {
-  const since = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
+  const last = await env.DB.prepare("SELECT sent_at FROM reports ORDER BY sent_at DESC LIMIT 1").first<{
+    sent_at: string;
+  }>();
+  const since = last?.sent_at ?? new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
   const list = [...(await confirmedTesters(env))].reverse().map((t) => ({
     name: t.name,
     email: t.email,
     platforms: t.platforms.split(","),
     notes: t.notes,
     confirmedAt: t.confirmed_at,
-    isNew: t.confirmed_at >= since,
+    isNew: t.confirmed_at > since,
   }));
   const waiting = await env.DB.prepare(
     "SELECT COUNT(*) AS n FROM signups WHERE confirmed_at IS NULL AND confirm_expires > ?",
   )
     .bind(new Date().toISOString())
     .first<{ n: number }>();
-  const report = dailyReportEmail(list, waiting?.n ?? 0);
+  const report = dailyReportEmail(list, waiting?.n ?? 0, last ? since : null);
   const to = env.REPORT_EMAIL || env.OWNER_EMAIL;
-  if (send) await sendEmail(env, { to, ...report });
+  if (send) {
+    await sendEmail(env, { to, ...report });
+    await env.DB.prepare("INSERT INTO reports (sent_at) VALUES (?)").bind(new Date().toISOString()).run();
+  }
   return { sent: send, to, subject: report.subject, preview: report.text };
 }
 

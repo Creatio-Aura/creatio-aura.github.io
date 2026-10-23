@@ -55,7 +55,7 @@ npx wrangler d1 execute creatio-aura-beta --remote --command \
 
 You'll get an email at creatio.aura@gmail.com each time someone **confirms**: their name, email
 and where they play, and how many testers there are now. And **every morning** (14:00 UTC: 8 am in
-Colorado in summer, 7 am in winter) a report: how many confirmed in the last day, everyone on the
+Colorado in summer, 7 am in winter) a report: how many confirmed since the last report was sent, everyone on the
 beta with where they play, totals per platform, and how many are still waiting to confirm. It goes
 to `REPORT_EMAIL` if that's set (`wrangler.toml`), otherwise to `OWNER_EMAIL`.
 

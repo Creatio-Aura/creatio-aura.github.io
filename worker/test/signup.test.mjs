@@ -283,7 +283,7 @@ test("notes written at sign-up reach the studio's email, the testers list and th
 test("the daily report lists everyone confirmed, marks the day's new testers, and emails the studio", async () => {
   const shown = await (await admin("/admin/report", {})).json();
   assert.equal(shown.sent, false);
-  assert.match(shown.preview, /New in the last day: \d+/);
+  assert.match(shown.preview, /New (in the last day|since the last report \(.+\)): \d+/);
   assert.match(shown.preview, /Confirmed testers: \d+ \(iPhone \d+ · Android \d+ · Web \d+\)/);
   assert.match(shown.preview, /Signed up, waiting to confirm: \d+/);
 
@@ -291,7 +291,11 @@ test("the daily report lists everyone confirmed, marks the day's new testers, an
   assert.equal(sent.sent, true);
   const [latest] = await outbox();
   assert.equal(latest.to_addr, "studio@example.com");
-  assert.match(latest.subject, /^Ignis Aura beta: \d+ new today, \d+ in all$/);
+  assert.match(latest.subject, /^Ignis Aura beta: \d+ new, \d+ in all$/);
+
+  // The next report counts only who's new since that one: nobody, here.
+  const after = await (await admin("/admin/report", {})).json();
+  assert.match(after.preview, /New since the last report \(.+\): 0/);
 });
 
 test("announcements need a title, a message and real https links", async () => {

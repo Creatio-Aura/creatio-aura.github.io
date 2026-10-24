@@ -30,6 +30,7 @@ import {
   visitorKey,
 } from "./guard";
 import { emailProblem } from "../../site/email-check.js";
+import { guests } from "./guests";
 import {
   announcementEmail,
   dailyReportEmail,
@@ -157,6 +158,13 @@ export default {
     try {
       if (url.pathname === "/check-code") return await checkCode(env, request, body, okOrigin);
       if (url.pathname === "/signup") return await signup(env, request, body, okOrigin);
+      // Guest creators, from the online creator (on the same site).
+      if (url.pathname.startsWith("/guests/")) {
+        // Plenty for a guest at work; slow for anyone guessing codes.
+        if (!(await allow(env, "guests", await visitorKey(env, request), 600)))
+          return json({ ok: false, error: "slow-down" }, 429, okOrigin);
+        return await guests(env, request, url.pathname, body, cors(okOrigin));
+      }
     } catch (error) {
       console.error(error);
       return json({ ok: false, error: "server" }, 500, okOrigin);

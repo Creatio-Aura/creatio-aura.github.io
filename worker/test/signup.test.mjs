@@ -321,3 +321,56 @@ test("guessing the code is cut off after a few tries an hour", async () => {
   assert.equal(last.status, 429);
   assert.equal(last.body.error, "too-many");
 });
+
+// Guest creators: Andrew (here with the admin key) makes a code; the guest submits, he reviews.
+const asAdmin = (path, body) =>
+  fetch(`${BASE}${path}`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json", Origin: SITE, Authorization: "Bearer test-admin-key" },
+    body: JSON.stringify(body),
+  }).then(async (response) => ({ status: response.status, body: await response.json() }));
+const asGuest = (path, body) =>
+  post(path, body).then(async (response) => ({ status: response.status, body: await response.json() }));
+
+test("guest creators: a code, a submission, changes asked, resubmitted, approved", async () => {
+  assert.equal((await asGuest("/guests/admin/list", {})).status, 401);
+  assert.equal((await asGuest("/guests/admin/list", { github: "not-a-real-token-at-all" })).status, 401);
+  assert.equal((await asGuest("/guests/login", { code: "ASH-OAK-0000" })).status, 401);
+
+  const made = await asAdmin("/guests/admin/guest", { name: "Wren" });
+  assert.match(made.body.code, /^[A-Z]+-[A-Z]+-\d{4}$/);
+  const code = made.body.code;
+  assert.equal((await asGuest("/guests/login", { code: code.toLowerCase() })).body.name, "Wren");
+
+  const encounter = { id: "civilization.tavern.a-quiet-corner", title: "A Quiet Corner" };
+  const where = { tile: "civilization", location: "tavern" };
+  const sent = await asGuest("/guests/submit", { code, encounter, where });
+  assert.equal(sent.status, 200);
+  const id = sent.body.id;
+
+  await asAdmin("/guests/admin/review", { id, status: "changes", note: "More smoke" });
+  const mine = (await asGuest("/guests/mine", { code })).body.submissions;
+  assert.equal(mine.length, 1);
+  assert.equal(mine[0].status, "changes");
+  assert.equal(mine[0].note, "More smoke");
+  assert.deepEqual(mine[0].where, where);
+
+  // Sent again, it's the same submission, waiting again.
+  const again = await asGuest("/guests/submit", { code, id, encounter: { ...encounter, title: "A Smoky Corner" }, where });
+  assert.equal(again.body.id, id);
+  const listed = (await asAdmin("/guests/admin/list", {})).body;
+  assert.equal(listed.submissions.length, 1);
+  assert.equal(listed.submissions[0].status, "submitted");
+  assert.equal(listed.submissions[0].title, "A Smoky Corner");
+  assert.equal(listed.submissions[0].guest, "Wren");
+
+  await asAdmin("/guests/admin/review", { id, status: "approved" });
+  // Approved, it's done: sending it again makes a new one.
+  const after = await asGuest("/guests/submit", { code, id, encounter, where });
+  assert.notEqual(after.body.id, id);
+
+  // Switched off, the code stops working.
+  await asAdmin("/guests/admin/guest-active", { code, active: false });
+  assert.equal((await asGuest("/guests/login", { code })).status, 401);
+  assert.equal((await asGuest("/guests/submit", { code, encounter, where })).status, 401);
+});

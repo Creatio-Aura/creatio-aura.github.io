@@ -84,6 +84,11 @@ a.card:hover { border-color: #5b4d78; color: var(--text); }
 .card-top { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; }
 .eyebrow { font-size: 13px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; color: var(--text-muted); }
 .badge { padding: 6px 14px; border-radius: 99px; background: #3a2618; border: 1px solid var(--ember); color: var(--amber); font-weight: 700; font-size: 13px; }
+/* The Ignis Aura flame beside its name, as in the app. */
+.with-flame { display: inline-flex; align-items: center; gap: 0.12em; }
+.with-flame .flame { width: 0.95em; height: 0.95em; flex: none; margin-left: -0.12em; }
+.project-hero h1.with-flame { flex-direction: column; align-items: flex-start; gap: 0.08em; }
+.project-hero h1.with-flame .flame { width: 0.7em; height: 0.7em; margin-left: -0.1em; }
 .project-name { font-family: var(--serif); font-variation-settings: "SOFT" 100; font-weight: 700; font-size: 54px; line-height: 1; color: var(--amber); }
 .chips { display: flex; gap: 8px; flex-wrap: wrap; font-size: 14px; font-weight: 600; }
 .chips span { padding: 6px 12px; border-radius: 99px; background: #2a2240; color: #e8dcc8; }

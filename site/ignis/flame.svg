@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+  <!-- The Ignis Aura flame: the same shapes as the app's header flame and icon. -->
+  <defs>
+    <filter id="glow" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="4"/></filter>
+  </defs>
+  <g transform="translate(14 8) scale(0.86)">
+    <path d="M50 16 C56 31 72 41 70 61 C69 74 60 83 50 83 C40 83 31 74 30 61 C29 50 36 43 40 35 C42 44 45 49 50 51 C53 42 54 31 50 16 Z" fill="none" stroke="#ff8a2a" stroke-width="14" stroke-linejoin="round" opacity="0.5" filter="url(#glow)"/>
+    <path d="M50 16 C56 31 72 41 70 61 C69 74 60 83 50 83 C40 83 31 74 30 61 C29 50 36 43 40 35 C42 44 45 49 50 51 C53 42 54 31 50 16 Z" fill="none" stroke="#ff8a2a" stroke-width="6" stroke-linejoin="round" opacity="0.55"/>
+    <path d="M50 16 C56 31 72 41 70 61 C69 74 60 83 50 83 C40 83 31 74 30 61 C29 50 36 43 40 35 C42 44 45 49 50 51 C53 42 54 31 50 16 Z" fill="none" stroke="#ffe2b0" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>
+    <path d="M50 47 C56 56 62 62 60 70 C59 76 55 78 50 78 C45 78 41 76 40 70 C39 63 46 56 50 47 Z" fill="#ff8a2a"/>
+    <path d="M50 60 C53 65 56 68 55 72 C54.5 75 52.5 76 50 76 C47.5 76 45.5 75 45 72 C44 68 47 65 50 60 Z" fill="#ffe2b0"/>
+    <circle cx="47" cy="9" r="1.6" fill="#ffe2b0" opacity="0.9"/>
+    <circle cx="55" cy="4" r="1.2" fill="#ffe2b0" opacity="0.7"/>
+  </g>
+</svg>

@@ -1,0 +1,14 @@
+[
+  {
+    "relation": [
+      "delegate_permission/common.handle_all_urls"
+    ],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "com.creatioaura.ignisaura",
+      "sha256_cert_fingerprints": [
+        "F9:79:CF:08:60:11:09:AE:2A:AC:41:E2:1F:5B:C2:B1:49:4B:33:38:02:51:BB:C1:25:D3:04:D8:D7:5F:FB:5B"
+      ]
+    }
+  }
+]

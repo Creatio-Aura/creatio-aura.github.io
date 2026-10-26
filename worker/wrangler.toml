@@ -10,7 +10,7 @@ enabled = true
 
 [vars]
 SITE_URL = "https://creatio-aura.github.io"
-ALLOWED_ORIGINS = "https://creatio-aura.github.io"
+ALLOWED_ORIGINS = "https://creatio-aura.github.io,https://ignis-aura-play.creatio-aura.workers.dev"
 SERVICE_URL = "https://creatio-aura-beta.creatio-aura.workers.dev"
 GMAIL_USER = "creatio.aura@gmail.com"
 OWNER_EMAIL = "creatio.aura@gmail.com"

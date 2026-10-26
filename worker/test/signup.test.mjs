@@ -27,6 +27,8 @@ const vars = {
   GMAIL_APP_PASSWORD: "unused",
   SERVICE_URL: BASE,
   ADMIN_TOKEN: "test-admin-key",
+  INTERNAL_TOKEN: "test-internal-key",
+  PLAY_ALLOW: "friend@example.com",
   OWNER_EMAIL: "studio@example.com",
   // Every test comes from one machine: room for them all, while still testing the limit.
   CODE_LIMIT: "16",
@@ -373,4 +375,28 @@ test("guest creators: a code, a submission, changes asked, resubmitted, approved
   await asAdmin("/guests/admin/guest-active", { code, active: false });
   assert.equal((await asGuest("/guests/login", { code })).status, 401);
   assert.equal((await asGuest("/guests/submit", { code, encounter, where })).status, 401);
+});
+
+test("the web build's sign-in: a link only for those who may play, and only with the shared key", async () => {
+  const internal = (path, body, key = "test-internal-key") =>
+    fetch(`${BASE}${path}`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", Authorization: `Bearer ${key}` },
+      body: JSON.stringify(body),
+    });
+  const link = "https://play.example.com/ignis-aura-web/__login/link?t=abc";
+  const mailsTo = async (to) =>
+    (await outbox()).filter((mail) => mail.to_addr === to);
+
+  // Without the key: nothing.
+  assert.equal((await internal("/internal/play-link", { email: "friend@example.com", link }, "wrong")).status, 401);
+  // Someone on the allow list gets their link; a stranger gets the same answer, and no email.
+  assert.deepEqual(await (await internal("/internal/play-link", { email: "Friend@Example.com", link })).json(), { ok: true });
+  assert.deepEqual(await (await internal("/internal/play-link", { email: "stranger@example.com", link })).json(), { ok: true });
+  const friend = await mailsTo("friend@example.com");
+  assert.equal(friend.length, 1);
+  assert.match(friend[0].body, /play\.example\.com/);
+  assert.equal((await mailsTo("stranger@example.com")).length, 0);
+  // A guest creator's code that isn't one: no.
+  assert.equal((await (await internal("/internal/guest-check", { code: "NOT-A-CODE" })).json()).ok, false);
 });

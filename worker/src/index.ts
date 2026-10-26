@@ -31,6 +31,7 @@ import {
 } from "./guard";
 import { emailProblem } from "../../site/email-check.js";
 import { guests } from "./guests";
+import { internal } from "./play";
 import {
   announcementEmail,
   dailyReportEmail,
@@ -67,6 +68,10 @@ export interface Env {
   GMAIL_APP_PASSWORD: string;
   /** The key the announce and testers tools use. */
   ADMIN_TOKEN: string;
+  /** The key the web build's Worker uses for /internal/… (sign-in links, guest codes). */
+  INTERNAL_TOKEN?: string;
+  /** Addresses that may open the web build without signing up (comma-separated). */
+  PLAY_ALLOW?: string;
 }
 
 /** What people agree to by ticking the box; kept with each sign-up. */
@@ -125,6 +130,15 @@ export default {
       return leave(env, url, request.method);
     }
     if (url.pathname === "/__outbox" && env.MAIL_MODE === "test") return outbox(env);
+    // The web build's Worker, over a service binding: sign-in links and guest codes.
+    if (url.pathname.startsWith("/internal/")) {
+      try {
+        return await internal(env, request, url.pathname);
+      } catch (error) {
+        console.error(error);
+        return json({ ok: false, error: "server" }, 500, null);
+      }
+    }
     // Creatio Aura's own tools, from a computer rather than the site: the admin key instead.
     if (url.pathname.startsWith("/admin/")) {
       if (!isAdmin(env, request)) return json({ ok: false, error: "admin" }, 401, null);

@@ -132,6 +132,12 @@ export async function leaveTokenId(env: Env, token: string): Promise<number | nu
   return sameText(signature, await sign(env, `leave:${id}`)) ? Number(id) : null;
 }
 
+/** Whether a request comes from the web build's Worker: its shared key (INTERNAL_TOKEN). */
+export function isInternal(env: Env, request: Request): boolean {
+  const given = (request.headers.get("Authorization") ?? "").replace(/^Bearer\s+/i, "");
+  return !!env.INTERNAL_TOKEN && given.length > 0 && sameText(given, env.INTERNAL_TOKEN);
+}
+
 /** Whether a request carries the admin key (the announce and testers tools). */
 export function isAdmin(env: Env, request: Request): boolean {
   const given = (request.headers.get("Authorization") ?? "").replace(/^Bearer\s+/i, "");

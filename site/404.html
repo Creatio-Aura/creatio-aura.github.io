@@ -5,6 +5,12 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Not found · Creatio Aura</title>
   <meta name="robots" content="noindex">
+  <!-- Anything under the beta's old web address (the creator, a page reloaded) forwards to it. -->
+  <script>
+    if (location.pathname.startsWith("/ignis-aura-web/")) {
+      location.replace("https://ignis-aura-play.creatio-aura.workers.dev" + location.pathname + location.search + location.hash);
+    }
+  </script>
   <meta name="theme-color" content="#120f1f">
   <link rel="icon" href="/favicon.svg" type="image/svg+xml">
   <!-- Link previews (Messages, WhatsApp, Slack, social) and the home-screen icon. -->

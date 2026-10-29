@@ -14,6 +14,7 @@
   --amber: #ffb35c;
   --effugium: #7fd4c6;
   --secessio: #c9b3ff;
+  --familia: #b3d98c;
   --ink-on-ember: #1d0f05;
   --error: #ff9b8a;
   --serif: "Fraunces", Georgia, serif;
@@ -82,7 +83,8 @@ p { margin: 0; }
 }
 .section { padding-top: 32px; padding-bottom: 88px; }
 .section h2 { font-size: 40px; margin-bottom: 26px; }
-.cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 24px; align-items: start; }
+/* At most two across, so four projects sit as a 2×2. */
+.cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 360px), 1fr)); gap: 24px; align-items: start; }
 .card { display: flex; flex-direction: column; gap: 14px; padding: 32px; border-radius: 28px; background: var(--card); border: 2px solid var(--card-line); color: var(--text); text-decoration: none; }
 a.card:hover { border-color: #5b4d78; color: var(--text); }
 .card-top { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; }
@@ -99,6 +101,7 @@ a.card:hover { border-color: #5b4d78; color: var(--text); }
 /* Each project's own colour for its name. */
 .project-name.effugium { color: var(--effugium); }
 .project-name.secessio { color: var(--secessio); }
+.project-name.familia { color: var(--familia); }
 .chips { display: flex; gap: 8px; flex-wrap: wrap; font-size: 14px; font-weight: 600; }
 .chips span { padding: 6px 12px; border-radius: 99px; background: #2a2240; color: #e8dcc8; }
 .band { background: var(--sky-raised); border-top: 2px solid var(--line); border-bottom: 2px solid var(--line); position: relative; }

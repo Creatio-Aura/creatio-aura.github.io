@@ -54,7 +54,7 @@ function message(from: string, email: Email): string {
     `To: <${email.to}>`,
     `Subject: =?UTF-8?B?${btoa(String.fromCharCode(...new TextEncoder().encode(email.subject)))}?=`,
     `Date: ${new Date().toUTCString()}`,
-    `Message-ID: <${crypto.randomUUID()}@creatio-aura.github.io>`,
+    `Message-ID: <${crypto.randomUUID()}@creatio-aura.com>`,
     ...(email.leaveUrl
       ? [`List-Unsubscribe: <${email.leaveUrl}>`, "List-Unsubscribe-Post: List-Unsubscribe=One-Click"]
       : []),
@@ -116,7 +116,7 @@ async function sendSmtp(user: string, password: string, emails: Email[]): Promis
   const results: (true | Error)[] = [];
   try {
     if ((await reply()) !== 220) throw new Error(`Gmail didn't greet us: "${lastLine}"`);
-    await say("EHLO creatio-aura.github.io", 250);
+    await say("EHLO creatio-aura.com", 250);
     await say("AUTH LOGIN", 334);
     await say(btoa(user), 334);
     await say(btoa(password), 235);

@@ -1,6 +1,6 @@
 name: Publish the website
 
-# Publishes site/ to GitHub Pages (https://creatio-aura.github.io) whenever main changes.
+# Publishes site/ to GitHub Pages (https://creatio-aura.com) whenever main changes.
 on:
   push:
     branches: [main]

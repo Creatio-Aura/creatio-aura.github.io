@@ -17,7 +17,7 @@ import { parseArgs } from "node:util";
 
 import { admin } from "./admin.mjs";
 
-const WEB = "https://creatio-aura.github.io/ignis-aura-web/";
+const WEB = "https://creatio-aura.com/ignis-aura-web/";
 const { values } = parseArgs({
   options: {
     title: { type: "string" },

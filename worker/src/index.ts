@@ -50,12 +50,14 @@ export interface Env {
   ALLOWED_ORIGINS: string;
   /** This service's own address, for the links in emails. */
   SERVICE_URL: string;
-  GMAIL_USER: string;
+  /** The mail server emails go out through, and the mailbox (and From address) it signs in as. */
+  SMTP_HOST: string;
+  SMTP_USER: string;
   /** Where "new beta tester" notifications go. */
   OWNER_EMAIL: string;
   /** Where the daily report goes; the owner's email if not set. */
   REPORT_EMAIL?: string;
-  /** "smtp" to send through Gmail, "test" to keep emails in the outbox table. */
+  /** "smtp" to send through the mail server, "test" to keep emails in the outbox table. */
   MAIL_MODE: string;
   /** Tries per connection per hour; defaults 8 and 6 (the tests raise them). */
   CODE_LIMIT?: string;
@@ -65,7 +67,8 @@ export interface Env {
   TURNSTILE_SECRET: string;
   PASS_SECRET: string;
   IP_SALT: string;
-  GMAIL_APP_PASSWORD: string;
+  /** The SMTP_USER mailbox's password. */
+  SMTP_PASSWORD: string;
   /** The key the announce and testers tools use. */
   ADMIN_TOKEN: string;
   /** The key the web build's Worker uses for /internal/… (sign-in links, guest codes). */

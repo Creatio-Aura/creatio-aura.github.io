@@ -105,7 +105,10 @@ export async function allow(env: Env, kind: string, key: string, limit: number):
   return (row?.count ?? 0) <= limit;
 }
 
-/** How many emails have gone out in the last 24 hours (Gmail allows about 500 a day). */
+/**
+ * How many emails have gone out in the last 24 hours. IONOS lets a new mailbox send 50 an hour,
+ * rising to 500 an hour after its first month; over that, sends fail and are tried again later.
+ */
 export async function allowEmail(env: Env, limitPerDay: number): Promise<boolean> {
   const hour = hourNow();
   const row = await env.DB.prepare(

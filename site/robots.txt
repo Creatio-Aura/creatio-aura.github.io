@@ -1,0 +1,6 @@
+# Every page may be crawled; the ones that shouldn't be in search results say so themselves
+# (noindex). The sitemap lists the pages that should.
+User-agent: *
+Allow: /
+
+Sitemap: https://creatio-aura.com/sitemap.xml

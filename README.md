@@ -13,6 +13,13 @@
 | `.github/workflows/pages.yml` | Publishes `site/` on every change to `main`.                                                              |
 | `.github/workflows/security-txt.yml` | Monthly: fails once `site/.well-known/security.txt` is under 60 days from expiring.          |
 
+**Search engines.** `site/robots.txt` points them at `site/sitemap.xml`, which lists the pages to
+index: **add new pages there**. Pages that shouldn't appear in results (the beta's confirmed/left/
+expired pages, 404, `ignis-aura-web/`) say `noindex` themselves. Indexed pages name their canonical
+creatio-aura.com address, and the home page carries the company's details for search engines
+(name, legal name "Creatio Aura Ltd.", logo, contact email and the business phone; no postal
+address, on purpose). `/support/` is the Support URL for App Store and Google Play listings.
+
 ## How a beta sign-up works
 
 1. **The invite code.** Someone enters the code you gave them, and passes Cloudflare **Turnstile**

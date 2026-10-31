@@ -247,7 +247,7 @@ export function newTesterEmail(
 /** What every download email says about the Beta Tester Terms, above the links. */
 const TERMS_IN_SHORT = [
   "By downloading, installing or using this beta build, you agree to the Beta Tester Terms. In short:",
-  "it's unfinished test software that you use at your own risk, and Creatio Aura Ltd isn't responsible",
+  "it's unfinished test software that you use at your own risk, and Creatio Aura Ltd. isn't responsible",
   "for problems it causes on your devices; and the game is confidential: please don't post or talk about",
   "it publicly, social media included, without written permission from its creator and Creatio Aura Ltd.",
 ];
@@ -296,7 +296,7 @@ ${paragraphs}
 <p style="margin:0 0 6px;font-size:13px;letter-spacing:1px;text-transform:uppercase;color:#b9a8d6">Before you download</p>
 <p style="margin:0 0 8px;font-size:14px;line-height:1.55;color:#d8cbb6">By downloading, installing or using this beta build, you agree to the <a href="${termsUrl}" style="color:#ffb35c">Beta Tester Terms</a>. In short:</p>
 <ul style="margin:0;padding-left:20px;font-size:14px;line-height:1.55;color:#d8cbb6">
-<li>It's unfinished test software that you use at your own risk; Creatio Aura Ltd isn't responsible for problems it causes on your devices.</li>
+<li>It's unfinished test software that you use at your own risk; Creatio Aura Ltd. isn't responsible for problems it causes on your devices.</li>
 <li>The game is confidential: please don't post or talk about it publicly, social media included, without written permission from its creator and Creatio Aura Ltd.</li>
 </ul></div>
 ${buttons}

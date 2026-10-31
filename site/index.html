@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Creatio Aura · For the night, and the people in it</title>
   <meta name="description" content="Creatio Aura is an independent studio making games for friends around the table, and quiet apps for the hours around them. Our first, Ignis Aura, is in beta.">
+  <link rel="canonical" href="https://creatio-aura.com/">
   <meta name="theme-color" content="#120f1f">
   <link rel="icon" href="/favicon.svg" type="image/svg+xml">
   <!-- Link previews (Messages, WhatsApp, Slack, social) and the home-screen icon. -->
@@ -24,6 +25,40 @@
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght,SOFT,WONK@9..144,400..700,100,0&family=Nunito:wght@400;600;700&display=swap">
   <link rel="stylesheet" href="/styles.css">
   <script src="/stars.js" defer></script>
+  <!-- Company details for search engines (not shown on the page): the site's name in results, and
+       the contact details Google may show. No postal address, on purpose. -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "WebSite",
+        "@id": "https://creatio-aura.com/#website",
+        "name": "Creatio Aura",
+        "url": "https://creatio-aura.com/",
+        "publisher": { "@id": "https://creatio-aura.com/#organization" }
+      },
+      {
+        "@type": "Organization",
+        "@id": "https://creatio-aura.com/#organization",
+        "name": "Creatio Aura",
+        "legalName": "Creatio Aura Ltd.",
+        "url": "https://creatio-aura.com/",
+        "logo": "https://creatio-aura.com/apple-touch-icon.png",
+        "email": "contact@creatio-aura.com",
+        "telephone": "+1-720-504-4780",
+        "foundingDate": "2026-10-21",
+        "contactPoint": {
+          "@type": "ContactPoint",
+          "contactType": "customer support",
+          "email": "support@creatio-aura.com",
+          "telephone": "+1-720-504-4780",
+          "availableLanguage": "English"
+        }
+      }
+    ]
+  }
+  </script>
 </head>
 <body>
   <a class="skip" href="#main">Skip to the content</a>
@@ -137,8 +172,9 @@
 
   <footer class="site-footer" id="contact">
     <div class="wrap">
-      <span>© 2026 Creatio Aura Ltd</span>
+      <span>© 2026 Creatio Aura Ltd.</span>
       <nav aria-label="Footer">
+        <a href="/support/">Support</a>
         <a href="/privacy/">Privacy</a>
         <a href="/beta/terms/">Beta terms</a>
         <a href="mailto:contact@creatio-aura.com">contact@creatio-aura.com</a>

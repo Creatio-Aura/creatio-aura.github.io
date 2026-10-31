@@ -182,6 +182,34 @@ export function confirmationEmail(name: string, confirmUrl: string, leaveUrl: st
 
 const escape = (text: string) => text.replace(/[&<>"']/g, (c) => `&#${c.charCodeAt(0)};`);
 
+/** Once they've confirmed: they're on the list, and here's how to leave it. */
+export function welcomeEmail(name: string, leaveUrl: string) {
+  const text = [
+    `Hi ${name},`,
+    "",
+    "You're confirmed: you're on the Ignis Aura beta list. We'll email you when there's a build for",
+    "you to play. Questions? Just reply to this email.",
+    "",
+    "Changed your mind? Remove yourself from the beta list (this deletes your details straight away):",
+    "",
+    leaveUrl,
+    "",
+    "— Creatio Aura",
+  ].join("\n");
+  const html = `<!doctype html><html><body style="margin:0;background:#120f1f;padding:32px 16px;font-family:Helvetica,Arial,sans-serif;color:#f4eadb">
+<div style="max-width:520px;margin:0 auto;background:#1d1830;border-radius:20px;padding:32px">
+<p style="margin:0 0 6px;font-size:13px;letter-spacing:2px;text-transform:uppercase;color:#b9a8d6">Creatio Aura</p>
+<h1 style="margin:0 0 18px;font-family:Georgia,serif;font-weight:600;font-size:26px;color:#ffb35c">You're on the Ignis Aura beta list</h1>
+<p style="margin:0 0 14px;font-size:16px;line-height:1.6">Hi ${escape(name)},</p>
+<p style="margin:0 0 14px;font-size:16px;line-height:1.6">You're confirmed. We'll email you when there's a build for you to play.</p>
+<p style="margin:0 0 28px;font-size:16px;line-height:1.6">Questions? Just reply to this email.</p>
+<p style="margin:0 0 12px;font-size:14px;line-height:1.6;color:#d8cbb6">Changed your mind? Leaving the list deletes your details straight away.</p>
+<p style="margin:0"><a href="${leaveUrl}" style="display:inline-block;border:2px solid #5b4d78;color:#f4eadb;font-weight:bold;text-decoration:none;padding:12px 24px;border-radius:99px">Remove me from the beta</a></p>
+</div>
+</body></html>`;
+  return { subject: "You're on the Ignis Aura beta list", text, html };
+}
+
 /** To the studio: someone has just confirmed their place in the beta. */
 export function newTesterEmail(
   name: string,

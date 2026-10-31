@@ -170,7 +170,7 @@ test("bots that fill in the hidden field are quietly ignored", async () => {
   assert.equal((await outbox()).length, before);
 });
 
-test("signing up sends a confirmation email; the link confirms; the other removes them", async () => {
+test("signing up sends a confirmation email; the link confirms and says so by email; leaving removes them", async () => {
   const { body } = await passFor();
   const response = await post("/signup", person(body.pass));
   assert.equal(response.status, 200);
@@ -179,11 +179,15 @@ test("signing up sends a confirmation email; the link confirms; the other remove
   assert.match(email.subject, /Confirm your place in the Ignis Aura beta/);
   assert.match(email.body, /Hi Kodi,/);
   const confirmLink = email.body.match(/(http\S+\/confirm\?t=\S+)/)[1];
-  const leaveLink = email.body.match(/(http\S+\/leave\?t=\S+)/)[1];
 
   const confirmed = await fetch(confirmLink, { redirect: "manual" });
   assert.equal(confirmed.status, 303);
   assert.equal(confirmed.headers.get("Location"), `${SITE}/beta/confirmed/`);
+  // They're told they're on the list, with the way off it.
+  const welcome = (await outbox()).find((e) => e.to_addr === "kodi@example.com");
+  assert.match(welcome.subject, /You're on the Ignis Aura beta list/);
+  assert.match(welcome.body, /Hi Kodi,/);
+  const leaveLink = welcome.body.match(/(http\S+\/leave\?t=\S+)/)[1];
   // A used link still says confirmed; a made-up one, expired.
   assert.equal((await fetch(confirmLink, { redirect: "manual" })).headers.get("Location"), `${SITE}/beta/confirmed/`);
   assert.equal(
@@ -191,16 +195,17 @@ test("signing up sends a confirmation email; the link confirms; the other remove
     `${SITE}/beta/link-expired/`,
   );
 
-  // Signing up again once confirmed says the same as always, and sends nothing.
+  // Signing up again once confirmed says the same as always, and sends nothing; nor does
+  // confirming again.
   const again = await post("/signup", person((await passFor()).body.pass));
   assert.equal(again.status, 200);
-  assert.equal((await outbox()).filter((e) => e.to_addr === "kodi@example.com").length, 1);
+  assert.equal((await outbox()).filter((e) => e.to_addr === "kodi@example.com").length, 2);
 
   const left = await fetch(leaveLink, { redirect: "manual" });
   assert.equal(left.headers.get("Location"), `${SITE}/beta/left/`);
   // Gone: signing up again starts over with a new email.
   await post("/signup", person((await passFor()).body.pass));
-  assert.equal((await outbox()).filter((e) => e.to_addr === "kodi@example.com").length, 2);
+  assert.equal((await outbox()).filter((e) => e.to_addr === "kodi@example.com").length, 3);
 });
 
 

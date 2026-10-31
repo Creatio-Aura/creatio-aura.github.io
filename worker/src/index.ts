@@ -39,6 +39,7 @@ import {
   newTesterEmail,
   sendEmail,
   sendEmails,
+  welcomeEmail,
   type Email,
 } from "./mail";
 
@@ -318,14 +319,24 @@ async function confirm(env: Env, url: URL) {
   await env.DB.prepare("UPDATE signups SET confirmed_at = ? WHERE id = ?")
     .bind(new Date().toISOString(), row.id)
     .run();
-  // Tell the studio. If that email fails, they're confirmed all the same.
+  // Tell them they're on the list (with the way off it), and tell the studio. If either email
+  // fails, they're confirmed all the same.
   try {
     const count = await env.DB.prepare("SELECT COUNT(*) AS n FROM signups WHERE confirmed_at IS NOT NULL")
       .first<{ n: number }>();
+    const emails: Email[] = [];
+    if (await allowEmail(env, limits(env).emailsPerDay)) {
+      const leaveUrl = `${env.SERVICE_URL.replace(/\/$/, "")}/leave?t=${await leaveToken(env, row.id)}`;
+      emails.push({ to: row.email, ...welcomeEmail(row.name, leaveUrl), leaveUrl });
+    }
     const note = newTesterEmail(row.name, row.email, row.platforms.split(","), row.notes, count?.n ?? 0);
-    await sendEmail(env, { to: env.OWNER_EMAIL, ...note });
+    emails.push({ to: env.OWNER_EMAIL, ...note });
+    const results = await sendEmails(env, emails);
+    results.forEach((result, i) => {
+      if (result instanceof Error) console.error(`Emailing ${emails[i]!.to === env.OWNER_EMAIL ? "the studio" : "the new tester"} failed:`, result);
+    });
   } catch (error) {
-    console.error("Telling the studio about a new tester failed:", error);
+    console.error("Emailing about a new tester failed:", error);
   }
   return redirect(env, "/beta/confirmed/");
 }

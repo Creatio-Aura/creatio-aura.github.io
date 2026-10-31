@@ -1,6 +1,6 @@
 # Creatio Aura's website
 
-**https://creatio-aura.github.io**: our projects, and beta sign-ups. The first project,
+**https://creatio-aura.com**: our projects, and beta sign-ups. The first project,
 **Ignis Aura**, takes beta sign-ups by invite code.
 
 ## What's here
@@ -73,7 +73,7 @@ npm run announce -- --title "Ignis Aura 0.6.0 is ready" \
 npm run announce -- …the same… --send
 ```
 
-`--web` on its own means https://creatio-aura.github.io/ignis-aura-web/. `--message-file note.txt`
+`--web` on its own means https://creatio-aura.com/ignis-aura-web/. `--message-file note.txt`
 reads a longer note (blank lines make paragraphs). Every email has the tester's remove-me link,
 and the day's email allowance (400) still applies: anyone over it is listed to send tomorrow.
 
@@ -98,3 +98,16 @@ both.
   throwaway database and Cloudflare's test keys; emails go to a test outbox instead of being sent.
 - **Publishing the service:** `cd worker && npm run deploy` (applies database changes, then deploys).
 - Pull requests into `main`; only Andrew can publish (`main` is protected).
+
+## The domain
+
+**creatio-aura.com** is registered at IONOS, which also runs its DNS and the company email. The site
+itself is still GitHub Pages: the domain points there, and the repo's Pages settings name it as the
+custom domain (creatio-aura.github.io forwards to it). In IONOS (Domains & SSL → creatio-aura.com →
+DNS):
+
+- `@` A: 185.199.108.153, 185.199.109.153, 185.199.110.153, 185.199.111.153
+- `@` AAAA: 2606:50c0:8000::153, 2606:50c0:8001::153, 2606:50c0:8002::153, 2606:50c0:8003::153
+- `www` CNAME: creatio-aura.github.io
+- `_github-pages-challenge-Creatio-Aura` TXT: verifies the domain for the Creatio-Aura organisation
+- The MX, SPF (`v=spf1`) and other email records belong to IONOS Mail: leave them alone.

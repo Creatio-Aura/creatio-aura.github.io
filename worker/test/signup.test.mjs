@@ -12,7 +12,7 @@ import assert from "node:assert/strict";
 
 const PORT = 8797;
 const BASE = `http://127.0.0.1:${PORT}`;
-const SITE = "https://creatio-aura.github.io";
+const SITE = "https://creatio-aura.com";
 const CODE = "EMBER-RAVEN-LANTERN-THORN-4821";
 const cwd = new URL("..", import.meta.url);
 const state = mkdtempSync(join(tmpdir(), "beta-test-"));
@@ -242,7 +242,7 @@ test("the tester list has everyone confirmed, with where they play", async () =>
 });
 
 test("an announcement goes only to people who play there, with only their links", async () => {
-  const links = { Android: "https://expo.dev/artifacts/eas/test.apk", Web: "https://creatio-aura.github.io/ignis-aura-web/" };
+  const links = { Android: "https://expo.dev/artifacts/eas/test.apk", Web: "https://creatio-aura.com/ignis-aura-web/" };
   const dry = await (await admin("/admin/announce", { title: "Ignis Aura 0.6.0 is ready", message: "The board is in.", links })).json();
   assert.deepEqual(dry.recipients.map((r) => [r.email, r.platforms]), [["mira@example.com", ["Android", "Web"]]]);
   assert.equal(dry.sent, 0);
@@ -253,7 +253,7 @@ test("an announcement goes only to people who play there, with only their links"
   const mails = (await outbox()).slice(0, (await outbox()).length - before);
   assert.deepEqual(mails.map((m) => m.to_addr), ["mira@example.com"]);
   assert.match(mails[0].body, /Android: https:\/\/expo.dev\/artifacts\/eas\/test.apk/);
-  assert.match(mails[0].body, /Web: https:\/\/creatio-aura.github.io\/ignis-aura-web\//);
+  assert.match(mails[0].body, /Web: https:\/\/creatio-aura.com\/ignis-aura-web\//);
   // Every download email carries the Beta Tester Terms: at your own risk, and confidential.
   assert.match(mails[0].body, /you agree to the Beta Tester Terms/);
   assert.match(mails[0].body, /at your own risk/);

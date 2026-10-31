@@ -9,8 +9,9 @@ compatibility_date = "2026-10-01"
 enabled = true
 
 [vars]
-SITE_URL = "https://creatio-aura.github.io"
-ALLOWED_ORIGINS = "https://creatio-aura.github.io,https://ignis-aura-play.creatio-aura.workers.dev"
+SITE_URL = "https://creatio-aura.com"
+# creatio-aura.github.io forwards to creatio-aura.com now; it stays allowed for pages opened before the move.
+ALLOWED_ORIGINS = "https://creatio-aura.com,https://creatio-aura.github.io,https://ignis-aura-play.creatio-aura.workers.dev"
 SERVICE_URL = "https://creatio-aura-beta.creatio-aura.workers.dev"
 GMAIL_USER = "creatio.aura@gmail.com"
 OWNER_EMAIL = "creatio.aura@gmail.com"

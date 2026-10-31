@@ -11,6 +11,7 @@
 | `worker/`                   | The beta sign-up service, a Cloudflare Worker with a D1 database (the list).                                |
 | `.github/workflows/ci.yml`  | Every pull request: the sign-up service's type check and tests.                                            |
 | `.github/workflows/pages.yml` | Publishes `site/` on every change to `main`.                                                              |
+| `.github/workflows/security-txt.yml` | Monthly: fails once `site/.well-known/security.txt` is under 60 days from expiring.          |
 
 ## How a beta sign-up works
 
@@ -122,4 +123,7 @@ land there), billing@, owner@, and the standard postmaster@ and abuse@. The serv
 notifications go straight to creatio.aura@gmail.com (`OWNER_EMAIL`).
 
 **`security.txt` expires on 31 October 2027.** Move its `Expires` date on before then (at most a year
-ahead), or security researchers may treat it as out of date.
+ahead), or security researchers may treat it as out of date. The **security.txt date** workflow checks
+it on the 1st of every month and fails, which emails Andrew, once it's under 60 days away. GitHub pauses
+scheduled runs in a public repo after 60 days without commits: if that happens, turn it back on from
+the Actions tab.

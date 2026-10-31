@@ -19,7 +19,7 @@
    form for 30 minutes. Wrong codes are limited to a few tries an hour per connection.
 2. **Their details:** name, email, where they'd play, and consent. A hidden decoy field catches
    bots. Sign-ups are limited per connection too.
-3. **A confirmation email** from creatio.aura@gmail.com, sent through Gmail. Only people who click
+3. **A confirmation email** from support@creatio-aura.com, sent through IONOS. Only people who click
    its link (within 48 hours) join the list; unconfirmed sign-ups are deleted after 7 days. Every
    email has a remove-me link, which deletes them at once.
 
@@ -36,7 +36,7 @@ Set once with `npx wrangler secret put <NAME>` in `worker/`:
 | -------------------- | --------------------------------------------------------------------------------- |
 | `INVITE_CODE`        | The code you share, e.g. `WORD-WORD-WORD-WORD-0000`. Change it any time to retire the old one. |
 | `TURNSTILE_SECRET`   | Turnstile's secret key (its public site key is in `site/ignis/index.html`).      |
-| `GMAIL_APP_PASSWORD` | A Gmail app password for creatio.aura@gmail.com, so the service can send email.  |
+| `SMTP_PASSWORD`      | The support@creatio-aura.com mailbox's password (IONOS), so the service can send email. |
 | `PASS_SECRET`        | A long random string that signs the 30-minute passes.                            |
 | `IP_SALT`            | A long random string for the anonymous rate-limit fingerprints.                  |
 
@@ -116,9 +116,9 @@ DNS):
 **Email addresses** (IONOS Mail Basic; each forwards to creatio.aura@gmail.com with its own `+label`,
 e.g. `creatio.aura+support@gmail.com`): contact@ (the site's footer and invite requests), privacy@
 (the privacy policy), legal@ (the beta terms), security@ (`site/.well-known/security.txt`),
-support@, billing@, owner@, and the standard postmaster@ and abuse@. The sign-up service still sends
-from Gmail, and its notifications still go straight to Gmail: a Gmail message sent to an address that
-forwards back to the same Gmail account can be hidden from the inbox.
+support@ (the sign-up service sends as it, through IONOS's `smtp.ionos.com`, so testers' replies
+land there), billing@, owner@, and the standard postmaster@ and abuse@. The service's own
+notifications go straight to creatio.aura@gmail.com (`OWNER_EMAIL`).
 
 **`security.txt` expires on 31 October 2027.** Move its `Expires` date on before then (at most a year
 ahead), or security researchers may treat it as out of date.

@@ -24,7 +24,7 @@ const vars = {
   TURNSTILE_SECRET: "1x0000000000000000000000000000000AA",
   PASS_SECRET: "test-pass-secret",
   IP_SALT: "test-salt",
-  GMAIL_APP_PASSWORD: "unused",
+  SMTP_PASSWORD: "unused",
   SERVICE_URL: BASE,
   ADMIN_TOKEN: "test-admin-key",
   INTERNAL_TOKEN: "test-internal-key",

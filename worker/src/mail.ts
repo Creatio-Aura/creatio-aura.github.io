@@ -1,5 +1,5 @@
-// Sending email through Gmail itself: the Worker signs in to smtp.gmail.com as the studio's
-// address with a Gmail app password, so the emails really come from Gmail and land in inboxes.
+// Sending email through the studio's own mail server (IONOS): the Worker signs in as the support
+// mailbox, so emails come from support@creatio-aura.com, signed for the domain, and land in inboxes.
 // In test mode (MAIL_MODE=test) nothing is sent: emails are kept in the outbox table instead.
 
 import { connect } from "cloudflare:sockets";
@@ -21,7 +21,7 @@ export async function sendEmail(env: Env, email: Email): Promise<void> {
 }
 
 /**
- * Sends several emails in one go (one sign-in to Gmail), and says how each went: true, or the
+ * Sends several emails in one go (one sign-in to the mail server), and says how each went: true, or the
  * error. A failure partway doesn't stop the rest from being tried.
  */
 export async function sendEmails(env: Env, emails: Email[]): Promise<(true | Error)[]> {
@@ -35,8 +35,7 @@ export async function sendEmails(env: Env, emails: Email[]): Promise<(true | Err
     }
     return emails.map(() => true);
   }
-  // Google shows app passwords in groups of four; the spaces aren't part of it.
-  return sendSmtp(env.GMAIL_USER, env.GMAIL_APP_PASSWORD.replace(/\s+/g, ""), emails);
+  return sendSmtp(env.SMTP_HOST, env.SMTP_USER, env.SMTP_PASSWORD, emails);
 }
 
 /** Base64 of UTF-8 text, wrapped at 76 characters as MIME expects. */
@@ -77,9 +76,14 @@ function message(from: string, email: Email): string {
 }
 
 /** Emails over SMTP (implicit TLS on port 465), signing in once with AUTH LOGIN. */
-async function sendSmtp(user: string, password: string, emails: Email[]): Promise<(true | Error)[]> {
+async function sendSmtp(
+  hostname: string,
+  user: string,
+  password: string,
+  emails: Email[],
+): Promise<(true | Error)[]> {
   const socket = connect(
-    { hostname: "smtp.gmail.com", port: 465 },
+    { hostname, port: 465 },
     { secureTransport: "on", allowHalfOpen: false },
   );
   const writer = socket.writable.getWriter();
@@ -110,12 +114,12 @@ async function sendSmtp(user: string, password: string, emails: Email[]): Promis
     await writer.write(encoder.encode(`${line}\r\n`));
     const code = await reply();
     // What the server said (never what we sent: that could be the password).
-    if (code !== expect) throw new Error(`Gmail said "${lastLine}" (expected ${expect})`);
+    if (code !== expect) throw new Error(`The mail server said "${lastLine}" (expected ${expect})`);
   };
 
   const results: (true | Error)[] = [];
   try {
-    if ((await reply()) !== 220) throw new Error(`Gmail didn't greet us: "${lastLine}"`);
+    if ((await reply()) !== 220) throw new Error(`The mail server didn't greet us: "${lastLine}"`);
     await say("EHLO creatio-aura.com", 250);
     await say("AUTH LOGIN", 334);
     await say(btoa(user), 334);

@@ -1,4 +1,4 @@
-# The Ignis beta sign-up service. Secrets (the invite code, keys, the Gmail app password) are set
+# The Ignis beta sign-up service. Secrets (the invite code, keys, the mailbox password) are set
 # with `wrangler secret put …` and never kept in this repo: see README.md.
 name = "creatio-aura-beta"
 main = "src/index.ts"
@@ -13,7 +13,10 @@ SITE_URL = "https://creatio-aura.com"
 # creatio-aura.github.io forwards to creatio-aura.com now; it stays allowed for pages opened before the move.
 ALLOWED_ORIGINS = "https://creatio-aura.com,https://creatio-aura.github.io,https://ignis-aura-play.creatio-aura.workers.dev"
 SERVICE_URL = "https://creatio-aura-beta.creatio-aura.workers.dev"
-GMAIL_USER = "creatio.aura@gmail.com"
+# Emails go out through IONOS, signed in as the support mailbox (its password: the SMTP_PASSWORD
+# secret), so they come from support@creatio-aura.com and replies land there.
+SMTP_HOST = "smtp.ionos.com"
+SMTP_USER = "support@creatio-aura.com"
 OWNER_EMAIL = "creatio.aura@gmail.com"
 MAIL_MODE = "smtp"
 

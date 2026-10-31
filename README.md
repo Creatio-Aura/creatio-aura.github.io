@@ -20,8 +20,9 @@
 2. **Their details:** name, email, where they'd play, and consent. A hidden decoy field catches
    bots. Sign-ups are limited per connection too.
 3. **A confirmation email** from support@creatio-aura.com, sent through IONOS. Only people who click
-   its link (within 48 hours) join the list; unconfirmed sign-ups are deleted after 7 days. Every
-   email has a remove-me link, which deletes them at once.
+   its link (within 48 hours) join the list; unconfirmed sign-ups are deleted after 7 days.
+4. **A "you're on the list" email** once they've confirmed, with a button to leave. Every email has
+   a remove-me link, which deletes them at once.
 
 **What's kept:** name, email, platforms, what they agreed to and when. **No IP addresses**: rate
 limits use a salted, anonymous fingerprint, cleared within two days. The list lives in the D1

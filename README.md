@@ -109,5 +109,6 @@ DNS):
 - `@` A: 185.199.108.153, 185.199.109.153, 185.199.110.153, 185.199.111.153
 - `@` AAAA: 2606:50c0:8000::153, 2606:50c0:8001::153, 2606:50c0:8002::153, 2606:50c0:8003::153
 - `www` CNAME: creatio-aura.github.io
-- `_github-pages-challenge-Creatio-Aura` TXT: verifies the domain for the Creatio-Aura organisation
-- The MX, SPF (`v=spf1`) and other email records belong to IONOS Mail: leave them alone.
+- `_github-pages-challenge-creatio-aura` TXT: verifies the domain for the Creatio-Aura organisation
+- The MX, SPF (`v=spf1`), `_dmarc`, `_domainkey` and `autodiscover` records are IONOS's "Mail" service:
+  leave them alone. (IONOS's "Default Site" service, its parking page, was turned off for the move.)

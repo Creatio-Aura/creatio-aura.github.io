@@ -112,3 +112,13 @@ DNS):
 - `_github-pages-challenge-creatio-aura` TXT: verifies the domain for the Creatio-Aura organisation
 - The MX, SPF (`v=spf1`), `_dmarc`, `_domainkey` and `autodiscover` records are IONOS's "Mail" service:
   leave them alone. (IONOS's "Default Site" service, its parking page, was turned off for the move.)
+
+**Email addresses** (IONOS Mail Basic; each forwards to creatio.aura@gmail.com with its own `+label`,
+e.g. `creatio.aura+support@gmail.com`): contact@ (the site's footer and invite requests), privacy@
+(the privacy policy), legal@ (the beta terms), security@ (`site/.well-known/security.txt`),
+support@, billing@, owner@, and the standard postmaster@ and abuse@. The sign-up service still sends
+from Gmail, and its notifications still go straight to Gmail: a Gmail message sent to an address that
+forwards back to the same Gmail account can be hidden from the inbox.
+
+**`security.txt` expires on 31 October 2027.** Move its `Expires` date on before then (at most a year
+ahead), or security researchers may treat it as out of date.

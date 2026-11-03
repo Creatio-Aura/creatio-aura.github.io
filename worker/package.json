@@ -9,6 +9,7 @@
     "test": "node --test test/signup.test.mjs",
     "typecheck": "tsc --noEmit -p .",
     "testers": "node tools/testers.mjs",
+    "waitlist": "node tools/waitlist.mjs",
     "announce": "node tools/announce.mjs",
     "report": "node tools/report.mjs"
   },

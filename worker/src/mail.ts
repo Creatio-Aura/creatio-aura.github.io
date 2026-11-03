@@ -244,6 +244,61 @@ export function newTesterEmail(
   return { subject: `New Ignis Aura beta tester: ${name} (${platforms.join(", ")})`, text, html };
 }
 
+/** A waiting list's confirmation email: one link to confirm, one to remove them. */
+export function waitlistConfirmationEmail(project: string, confirmUrl: string, leaveUrl: string) {
+  const text = [
+    "Hi,",
+    "",
+    `Thanks for asking to hear when ${project} is out. To confirm it was you, open this link:`,
+    "",
+    confirmUrl,
+    "",
+    "It works for 48 hours. If you didn't ask, ignore this email: without confirming, your email is",
+    "deleted within 7 days.",
+    "",
+    "— Creatio Aura",
+    "",
+    `Don't want these emails? Remove yourself: ${leaveUrl}`,
+  ].join("\n");
+  const html = `<!doctype html><html><body style="margin:0;background:#120f1f;padding:32px 16px;font-family:Helvetica,Arial,sans-serif;color:#f4eadb">
+<div style="max-width:520px;margin:0 auto;background:#1d1830;border-radius:20px;padding:32px">
+<p style="margin:0 0 6px;font-size:13px;letter-spacing:2px;text-transform:uppercase;color:#b9a8d6">Creatio Aura</p>
+<h1 style="margin:0 0 18px;font-family:Georgia,serif;font-weight:600;font-size:26px;color:#ffb35c">Confirm: tell me when ${escape(project)} is out</h1>
+<p style="margin:0 0 24px;font-size:16px;line-height:1.6">Thanks for asking to hear when ${escape(project)} is out. Press the button to confirm it was you.</p>
+<p style="margin:0 0 24px"><a href="${confirmUrl}" style="display:inline-block;background:#ff8a3d;color:#1d0f05;font-weight:bold;text-decoration:none;padding:14px 26px;border-radius:99px">Confirm</a></p>
+<p style="margin:0 0 8px;font-size:14px;line-height:1.6;color:#d8cbb6">The link works for 48 hours. If you didn't ask, ignore this email: without confirming, your email is deleted within 7 days.</p>
+</div>
+<p style="max-width:520px;margin:16px auto 0;font-size:12px;color:#b9a8d6;text-align:center">Don't want these emails? <a href="${leaveUrl}" style="color:#ffb35c">Remove yourself</a>.</p>
+</body></html>`;
+  return { subject: `Confirm: tell me when ${project} is out`, text, html };
+}
+
+/** Once they've confirmed a waiting list: they're on it, and here's how to leave it. */
+export function waitlistWelcomeEmail(project: string, leaveUrl: string) {
+  const text = [
+    "Hi,",
+    "",
+    `You're confirmed: we'll email you when ${project} is out. Questions? Just reply to this email.`,
+    "",
+    "Changed your mind? Remove yourself from the list (this deletes your email straight away):",
+    "",
+    leaveUrl,
+    "",
+    "— Creatio Aura",
+  ].join("\n");
+  const html = `<!doctype html><html><body style="margin:0;background:#120f1f;padding:32px 16px;font-family:Helvetica,Arial,sans-serif;color:#f4eadb">
+<div style="max-width:520px;margin:0 auto;background:#1d1830;border-radius:20px;padding:32px">
+<p style="margin:0 0 6px;font-size:13px;letter-spacing:2px;text-transform:uppercase;color:#b9a8d6">Creatio Aura</p>
+<h1 style="margin:0 0 18px;font-family:Georgia,serif;font-weight:600;font-size:26px;color:#ffb35c">You're on the ${escape(project)} list</h1>
+<p style="margin:0 0 14px;font-size:16px;line-height:1.6">You're confirmed. We'll email you when ${escape(project)} is out.</p>
+<p style="margin:0 0 28px;font-size:16px;line-height:1.6">Questions? Just reply to this email.</p>
+<p style="margin:0 0 12px;font-size:14px;line-height:1.6;color:#d8cbb6">Changed your mind? Leaving the list deletes your email straight away.</p>
+<p style="margin:0"><a href="${leaveUrl}" style="display:inline-block;border:2px solid #5b4d78;color:#f4eadb;font-weight:bold;text-decoration:none;padding:12px 24px;border-radius:99px">Remove me from the list</a></p>
+</div>
+</body></html>`;
+  return { subject: `You're on the ${project} list`, text, html };
+}
+
 /** What every download email says about the Beta Tester Terms, above the links. */
 const TERMS_IN_SHORT = [
   "By downloading, installing or using this beta build, you agree to the Beta Tester Terms. In short:",
@@ -320,6 +375,8 @@ export function dailyReportEmail(
   waiting: number,
   /** When the last report was sent; null before the first, when "new" means the last day. */
   lastReport: string | null,
+  /** The waiting lists for the projects in the works: how many are on each, and how many are new. */
+  lists: { name: string; total: number; fresh: number }[] = [],
 ) {
   const day = new Date().toLocaleDateString("en-US", {
     weekday: "long",
@@ -355,6 +412,9 @@ export function dailyReportEmail(
     "",
     "Everyone on the beta, newest first:",
     ...testers.map((t) => `  ${row(t)}`),
+    ...(lists.length
+      ? ["", "Waiting lists (\"tell me when it's out\"):", ...lists.map((l) => `  ${l.name}: ${l.total} (${l.fresh} new)`)]
+      : []),
   ].join("\n");
   const cells = (t: (typeof testers)[number]) =>
     `<tr${t.isNew ? ' style="background:#fff3e2"' : ""}><td>${escape(t.name)}${t.isNew ? " <b>(new)</b>" : ""}</td><td>${escape(t.email)}</td><td>${escape(t.platforms.join(", "))}</td><td>${escape(t.confirmedAt.slice(0, 10))}</td><td>${escape(t.notes).replace(/\n/g, "<br>")}</td></tr>`;
@@ -373,6 +433,14 @@ ${
 ${testers.map(cells).join("\n")}
 </table>`
     : "<p>No confirmed testers yet.</p>"
+}
+${
+  lists.length
+    ? `<h3 style="margin:24px 0 8px">Waiting lists</h3>
+<table cellpadding="6" style="font-size:15px;border-collapse:collapse">
+${lists.map((l) => `<tr><td><b>${escape(l.name)}</b></td><td>${l.total}${l.fresh ? ` &nbsp;(${l.fresh} new)` : ""}</td></tr>`).join("\n")}
+</table>`
+    : ""
 }
 </body></html>`;
   const subject = `Ignis Aura beta: ${fresh.length} new, ${testers.length} in all`;

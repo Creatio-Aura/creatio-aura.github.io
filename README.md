@@ -20,6 +20,18 @@ creatio-aura.com address, and the home page carries the company's details for se
 (name, legal name "Creatio Aura Ltd.", logo, contact email and the business phone; no postal
 address, on purpose). `/support/` is the Support URL for App Store and Google Play listings.
 
+## Waiting lists ("tell me when it's out")
+
+Each project in the works has its own page (`site/effugium/`, `site/secessio/`, `site/familia-arbor/`)
+with a sign-up for its waiting list: an email, consent and the Turnstile check. **No invite code**,
+so the human check, the decoy field and the rate limits do the guarding. The same service sends a
+confirmation link (48 hours); confirming sends a "You're on the list" email with a button to leave,
+and lands on `/waitlist/confirmed/`. Only the email, the project and the consent are kept (table
+`waitlist`, `worker/migrations/0005_waitlist.sql`); unconfirmed rows go after 7 days. The daily
+report shows each list's size, and `npm run waitlist` lists them. The projects are named in
+`worker/src/waitlist.ts` (`PROJECTS`); a new one needs its page, an entry there, and one in the
+confirmed page's script. Nothing sends the launch email yet: that's for when a project ships.
+
 ## How a beta sign-up works
 
 1. **The invite code.** Someone enters the code you gave them, and passes Cloudflare **Turnstile**
@@ -72,6 +84,7 @@ From `worker/` (they need the admin key, below):
 
 ```
 npm run testers          # everyone confirmed, with where they play, and totals per platform
+npm run waitlist         # everyone confirmed on each project's waiting list
 npm run report           # the daily report, shown here; add -- --send to email it now
 
 # Email testers a new build: each gets only the links for the platforms they play on.

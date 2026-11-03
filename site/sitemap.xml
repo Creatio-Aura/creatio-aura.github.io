@@ -1,8 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- The pages search engines should index. Add a page here when it's added to the site. -->
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-  <url><loc>https://creatio-aura.com/</loc><lastmod>2026-10-31</lastmod></url>
+  <url><loc>https://creatio-aura.com/</loc><lastmod>2026-11-03</lastmod></url>
   <url><loc>https://creatio-aura.com/ignis/</loc><lastmod>2026-10-31</lastmod></url>
+  <url><loc>https://creatio-aura.com/effugium/</loc><lastmod>2026-11-03</lastmod></url>
+  <url><loc>https://creatio-aura.com/secessio/</loc><lastmod>2026-11-03</lastmod></url>
+  <url><loc>https://creatio-aura.com/familia-arbor/</loc><lastmod>2026-11-03</lastmod></url>
   <url><loc>https://creatio-aura.com/support/</loc><lastmod>2026-10-31</lastmod></url>
   <url><loc>https://creatio-aura.com/privacy/</loc><lastmod>2026-10-31</lastmod></url>
   <url><loc>https://creatio-aura.com/beta/terms/</loc><lastmod>2026-10-31</lastmod></url>

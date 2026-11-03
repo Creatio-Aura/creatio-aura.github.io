@@ -104,6 +104,10 @@ a.card:hover { border-color: #5b4d78; color: var(--text); }
 .project-name.effugium { color: var(--effugium); }
 .project-name.secessio { color: var(--secessio); }
 .project-name.familia { color: var(--familia); }
+/* A project page's title, in the project's own colour. */
+.project-hero h1.effugium { color: var(--effugium); }
+.project-hero h1.secessio { color: var(--secessio); }
+.project-hero h1.familia-arbor { color: var(--familia); }
 .chips { display: flex; gap: 8px; flex-wrap: wrap; font-size: 14px; font-weight: 600; }
 .chips span { padding: 6px 12px; border-radius: 99px; background: #2a2240; color: #e8dcc8; }
 .band { background: var(--sky-raised); border-top: 2px solid var(--line); border-bottom: 2px solid var(--line); position: relative; }

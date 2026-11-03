@@ -123,16 +123,17 @@ export async function allowEmail(env: Env, limitPerDay: number): Promise<boolean
 /**
  * A remove-me link's token for one person: their id, signed. The service can make it again for
  * every email it sends (only its signature proves it), so every email's link keeps working.
+ * `list` keeps the beta's and the waiting lists' tokens apart.
  */
-export async function leaveToken(env: Env, id: number): Promise<string> {
-  return `${id}.${await sign(env, `leave:${id}`)}`;
+export async function leaveToken(env: Env, id: number, list = "leave"): Promise<string> {
+  return `${id}.${await sign(env, `${list}:${id}`)}`;
 }
 
 /** The person a signed remove-me token is for, or null if it isn't one of ours. */
-export async function leaveTokenId(env: Env, token: string): Promise<number | null> {
+export async function leaveTokenId(env: Env, token: string, list = "leave"): Promise<number | null> {
   const [id, signature] = token.split(".");
   if (!id || !/^\d+$/.test(id) || !signature) return null;
-  return sameText(signature, await sign(env, `leave:${id}`)) ? Number(id) : null;
+  return sameText(signature, await sign(env, `${list}:${id}`)) ? Number(id) : null;
 }
 
 /** Whether a request comes from the web build's Worker: its shared key (INTERNAL_TOKEN). */

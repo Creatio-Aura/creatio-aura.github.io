@@ -405,3 +405,67 @@ test("the web build's sign-in: a link only for those who may play, and only with
   // A guest creator's code that isn't one: no.
   assert.equal((await (await internal("/internal/guest-check", { code: "NOT-A-CODE" })).json()).ok, false);
 });
+
+const joinList = (extra = {}) =>
+  post("/waitlist", {
+    project: "effugium",
+    email: "wren@example.com",
+    consent: true,
+    turnstile: "XXXX.DUMMY.TOKEN.XXXX",
+    website: "",
+    ...extra,
+  });
+
+test("a waiting list: a confirmation email, the link confirms and says so by email, leaving removes them", async () => {
+  assert.equal((await joinList()).status, 200);
+  const [first] = (await outbox()).filter((e) => e.to_addr === "wren@example.com");
+  assert.match(first.subject, /Confirm: tell me when Effugium Aura is out/);
+  const confirmLink = first.body.match(/(http\S+\/waitlist\/confirm\?t=\S+)/)[1];
+
+  const confirmed = await fetch(confirmLink, { redirect: "manual" });
+  assert.equal(confirmed.status, 303);
+  assert.equal(confirmed.headers.get("Location"), `${SITE}/waitlist/confirmed/?p=effugium`);
+  const welcome = (await outbox()).find((e) => e.to_addr === "wren@example.com");
+  assert.match(welcome.subject, /You're on the Effugium Aura list/);
+  const leaveLink = welcome.body.match(/(http\S+\/waitlist\/leave\?t=\S+)/)[1];
+  // Confirming again, or joining again, sends nothing more.
+  await fetch(confirmLink, { redirect: "manual" });
+  assert.equal((await joinList()).status, 200);
+  assert.equal((await outbox()).filter((e) => e.to_addr === "wren@example.com").length, 2);
+
+  const { lists } = await (await admin("/admin/waitlist")).json();
+  assert.deepEqual(lists.find((l) => l.project === "effugium").people.map((p) => p.email), ["wren@example.com"]);
+  assert.equal(lists.find((l) => l.project === "secessio").people.length, 0);
+  const report = await (await admin("/admin/report", {})).json();
+  assert.match(report.preview, /Effugium Aura: 1 \(1 new\)/);
+
+  const left = await fetch(leaveLink, { redirect: "manual" });
+  assert.equal(left.headers.get("Location"), `${SITE}/waitlist/left/`);
+  const after = await (await admin("/admin/waitlist")).json();
+  assert.equal(after.lists.find((l) => l.project === "effugium").people.length, 0);
+  // A beta remove-me link can't be forged from a waiting list's, or the other way round.
+  const [id, signature] = new URL(leaveLink).searchParams.get("t").split(".");
+  const crossed = await fetch(`${BASE}/leave?t=${id}.${signature}`, { redirect: "manual" });
+  assert.equal(crossed.headers.get("Location"), `${SITE}/beta/left/`);
+});
+
+test("a waiting list checks the project, the email, the consent, and catches bots", async () => {
+  assert.deepEqual(await (await joinList({ project: "toaster" })).json(), { ok: false, error: "bad-project" });
+  assert.deepEqual(await (await joinList({ project: "__proto__" })).json(), { ok: false, error: "bad-project" });
+  assert.equal((await (await joinList({ email: "wren@gmail.con" })).json()).error, "email-typo");
+  assert.deepEqual(await (await joinList({ consent: false })).json(), { ok: false, error: "need-consent" });
+  const before = (await outbox()).length;
+  assert.equal((await joinList({ email: "bot@example.com", website: "spam" })).status, 200);
+  assert.equal((await outbox()).length, before);
+  // Only from our own site.
+  assert.equal((await post("/waitlist", { project: "effugium" }, "https://evil.example")).status, 403);
+});
+
+test("one email can wait for several projects", async () => {
+  for (const project of ["secessio", "familia-arbor"]) {
+    assert.equal((await joinList({ project, email: "ash@example.com" })).status, 200);
+  }
+  const subjects = (await outbox()).filter((e) => e.to_addr === "ash@example.com").map((e) => e.subject);
+  assert.ok(subjects.some((s) => /Secessio Aura/.test(s)));
+  assert.ok(subjects.some((s) => /Familia Arbor Aura/.test(s)));
+});

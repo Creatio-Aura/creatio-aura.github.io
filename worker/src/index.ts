@@ -5,11 +5,13 @@
 //                                                          → sends a confirmation email
 //   GET  /confirm?t=…                                      → confirms, then back to the site
 //   GET|POST /leave?t=…                                    → removes them, then back to the site
+//   POST /waitlist, GET /waitlist/confirm, /waitlist/leave → "tell me when it's out" (waitlist.ts)
 //
 // And for Creatio Aura only, with the admin key (worker/tools/):
 //   GET  /admin/testers                                    → everyone confirmed, with platforms
 //   POST /admin/announce { title, message, links, send }   → emails testers their builds
 //   POST /admin/report { send }                            → the daily report (also sent every morning)
+//   GET  /admin/waitlist                                   → everyone confirmed on each waiting list
 //
 // Only people with the invite code get as far as the form; only those who confirm by email
 // join the list. Nothing is kept but what they typed: no IP addresses. The list lives in the
@@ -32,6 +34,7 @@ import {
 import { emailProblem } from "../../site/email-check.js";
 import { guests } from "./guests";
 import { internal } from "./play";
+import { waitlistConfirm, waitlistLeave, waitlists, waitlistSignup } from "./waitlist";
 import {
   announcementEmail,
   dailyReportEmail,
@@ -133,6 +136,10 @@ export default {
     if (url.pathname === "/leave" && (request.method === "GET" || request.method === "POST")) {
       return leave(env, url, request.method);
     }
+    if (url.pathname === "/waitlist/confirm" && request.method === "GET") return waitlistConfirm(env, url);
+    if (url.pathname === "/waitlist/leave" && (request.method === "GET" || request.method === "POST")) {
+      return waitlistLeave(env, url, request.method);
+    }
     if (url.pathname === "/__outbox" && env.MAIL_MODE === "test") return outbox(env);
     // The web build's Worker, over a service binding: sign-in links and guest codes.
     if (url.pathname.startsWith("/internal/")) {
@@ -148,6 +155,9 @@ export default {
       if (!isAdmin(env, request)) return json({ ok: false, error: "admin" }, 401, null);
       try {
         if (url.pathname === "/admin/testers" && request.method === "GET") return await testers(env);
+        if (url.pathname === "/admin/waitlist" && request.method === "GET") {
+          return json({ ok: true, lists: await waitlists(env) }, 200, null);
+        }
         if (url.pathname === "/admin/announce" && request.method === "POST") {
           return await announce(env, (await request.json()) as Record<string, unknown>);
         }
@@ -176,6 +186,7 @@ export default {
     try {
       if (url.pathname === "/check-code") return await checkCode(env, request, body, okOrigin);
       if (url.pathname === "/signup") return await signup(env, request, body, okOrigin);
+      if (url.pathname === "/waitlist") return await waitlistSignup(env, request, body, cors(okOrigin), limits(env).signups);
       // Guest creators, from the online creator (on the same site).
       if (url.pathname.startsWith("/guests/")) {
         // Plenty for a guest at work; slow for anyone guessing codes.
@@ -399,7 +410,12 @@ async function dailyReport(env: Env, send: boolean) {
   )
     .bind(new Date().toISOString())
     .first<{ n: number }>();
-  const report = dailyReportEmail(list, waiting?.n ?? 0, last ? since : null);
+  const lists = (await waitlists(env)).map((l) => ({
+    name: l.name,
+    total: l.people.length,
+    fresh: l.people.filter((p) => p.confirmed_at > since).length,
+  }));
+  const report = dailyReportEmail(list, waiting?.n ?? 0, last ? since : null, lists);
   const to = env.REPORT_EMAIL || env.OWNER_EMAIL;
   if (send) {
     await sendEmail(env, { to, ...report });

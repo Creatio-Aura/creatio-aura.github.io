@@ -13,6 +13,8 @@ export interface Email {
   html: string;
   /** The remove-me link, for mail apps' own "unsubscribe" button (not on emails to us). */
   leaveUrl?: string;
+  /** Where a reply goes instead of support@ (a tester's feedback: to them). */
+  replyTo?: string;
 }
 
 export async function sendEmail(env: Env, email: Email): Promise<void> {
@@ -28,9 +30,9 @@ export async function sendEmails(env: Env, emails: Email[]): Promise<(true | Err
   if (env.MAIL_MODE === "test") {
     for (const email of emails) {
       await env.DB.prepare(
-        "INSERT INTO outbox (to_addr, subject, body, created_at) VALUES (?, ?, ?, ?)",
+        "INSERT INTO outbox (to_addr, subject, body, created_at, reply_to) VALUES (?, ?, ?, ?, ?)",
       )
-        .bind(email.to, email.subject, email.text, new Date().toISOString())
+        .bind(email.to, email.subject, email.text, new Date().toISOString(), email.replyTo ?? null)
         .run();
     }
     return emails.map(() => true);
@@ -51,6 +53,8 @@ function message(from: string, email: Email): string {
   return [
     `From: Creatio Aura <${from}>`,
     `To: <${email.to}>`,
+    // Only ever an address the email check has passed (no line breaks, no brackets).
+    ...(email.replyTo ? [`Reply-To: <${email.replyTo}>`] : []),
     `Subject: =?UTF-8?B?${btoa(String.fromCharCode(...new TextEncoder().encode(email.subject)))}?=`,
     `Date: ${new Date().toUTCString()}`,
     `Message-ID: <${crypto.randomUUID()}@creatio-aura.com>`,
@@ -244,6 +248,63 @@ export function newTesterEmail(
   return { subject: `New Ignis Aura beta tester: ${name} (${platforms.join(", ")})`, text, html };
 }
 
+/** What the app sends with a note, as the feedback email names it. */
+const DETAIL_LABELS: Record<string, string> = {
+  version: "App version",
+  build: "Build",
+  platform: "Plays on",
+  device: "Device",
+  screen: "Screen",
+  game: "Game",
+};
+
+/** To the studio: a tester's note from the app, with what the app sent along. */
+export function feedbackEmail(
+  message: string,
+  email: string | null,
+  /** Their name on the beta list, if they're on it. */
+  tester: string | null,
+  details: Record<string, string>,
+  sentAt: string,
+) {
+  const when = new Date(sentAt).toLocaleString("en-US", {
+    weekday: "short",
+    month: "short",
+    day: "numeric",
+    hour: "numeric",
+    minute: "2-digit",
+    timeZone: "America/Denver",
+  });
+  const from = email
+    ? `${email} (${tester ? `${tester}, on the beta list` : "not on the beta list"}). Reply to this email to answer them.`
+    : "No address left, so there's no one to reply to.";
+  const rows = Object.entries(DETAIL_LABELS).flatMap(([key, label]) =>
+    details[key] ? [[label, details[key]] as const] : [],
+  );
+  const text = [
+    "Feedback from the Ignis Aura app.",
+    "",
+    message,
+    "",
+    `From: ${from}`,
+    ...rows.map(([label, value]) => `${label}: ${value}`),
+    `Sent: ${when}`,
+  ].join("\n");
+  const html = `<!doctype html><html><body style="font-family:Helvetica,Arial,sans-serif;color:#1d1a16">
+<h2 style="margin:0 0 12px">Ignis Aura feedback</h2>
+<p style="font-size:16px;line-height:1.5;white-space:pre-wrap;border-left:3px solid #e8792b;padding-left:12px">${escape(message)}</p>
+<table cellpadding="4" style="font-size:14px;color:#4a433b">
+<tr><td valign="top"><b>From</b></td><td>${escape(from)}</td></tr>
+${rows.map(([label, value]) => `<tr><td><b>${escape(label)}</b></td><td>${escape(value)}</td></tr>`).join("\n")}
+<tr><td><b>Sent</b></td><td>${escape(when)}</td></tr>
+</table>
+</body></html>`;
+  // Its first line, short, so the inbox shows what it's about.
+  const gist = message.split("\n")[0]!.trim();
+  const subject = `Ignis Aura feedback: ${gist.length > 60 ? `${gist.slice(0, 57).trimEnd()}…` : gist}`;
+  return { subject, text, html };
+}
+
 /** A waiting list's confirmation email: one link to confirm, one to remove them. */
 export function waitlistConfirmationEmail(project: string, confirmUrl: string, leaveUrl: string) {
   const text = [
@@ -377,6 +438,8 @@ export function dailyReportEmail(
   lastReport: string | null,
   /** The waiting lists for the projects in the works: how many are on each, and how many are new. */
   lists: { name: string; total: number; fresh: number }[] = [],
+  /** Notes sent from the app in the same time (each one is emailed on its own as it comes). */
+  feedback = 0,
 ) {
   const day = new Date().toLocaleDateString("en-US", {
     weekday: "long",
@@ -409,6 +472,7 @@ export function dailyReportEmail(
     "",
     `Confirmed testers: ${testers.length} (${totals})`,
     `Signed up, waiting to confirm: ${waiting}`,
+    `Feedback from the app ${sinceWhen}: ${feedback}`,
     "",
     "Everyone on the beta, newest first:",
     ...testers.map((t) => `  ${row(t)}`),
@@ -425,6 +489,7 @@ export function dailyReportEmail(
 <tr><td><b>New ${escape(sinceWhen)}</b></td><td style="font-size:20px"><b>${fresh.length}</b></td></tr>
 <tr><td><b>Confirmed testers</b></td><td>${testers.length} &nbsp;(${escape(totals)})</td></tr>
 <tr><td><b>Waiting to confirm</b></td><td>${waiting}</td></tr>
+<tr><td><b>Feedback from the app</b></td><td>${feedback}</td></tr>
 </table>
 ${
   testers.length

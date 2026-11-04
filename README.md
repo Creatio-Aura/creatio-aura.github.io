@@ -32,6 +32,20 @@ report shows each list's size, and `npm run waitlist` lists them. The projects a
 `worker/src/waitlist.ts` (`PROJECTS`); a new one needs its page, an entry there, and one in the
 confirmed page's script. Nothing sends the launch email yet: that's for when a project ships.
 
+## Feedback from the Ignis Aura app
+
+During the beta, testers type feedback into the app (its menu → Send feedback) and it comes here:
+`POST /feedback` (`worker/src/feedback.ts`). The service keeps it (table `feedback`,
+`worker/migrations/0006_feedback.sql`) and emails it to `OWNER_EMAIL`, with the app's version, the
+device and the screen. If the tester left an address, the email's Reply-To is them, so replying
+answers them, and it says whether they're on the beta list. An app on a phone sends no Origin, so
+this route alone takes requests without one; from a browser, only the allowed origins (the web
+build's among them). There's no invite code or human check in the app, so limits guard it: 10 per
+connection an hour, 300 kept a day, 60 emailed a day. A note over that is kept, and emailed with
+the next one or the next morning. The app sends its own id with each note, so one it sends again
+(offline, it keeps them until it's back online) is kept once. `npm run feedback` lists the latest,
+and the daily report counts them.
+
 ## How a beta sign-up works
 
 1. **The invite code.** Someone enters the code you gave them, and passes Cloudflare **Turnstile**
@@ -85,6 +99,7 @@ From `worker/` (they need the admin key, below):
 ```
 npm run testers          # everyone confirmed, with where they play, and totals per platform
 npm run waitlist         # everyone confirmed on each project's waiting list
+npm run feedback         # the latest feedback from the app, newest first
 npm run report           # the daily report, shown here; add -- --send to email it now
 
 # Email testers a new build: each gets only the links for the platforms they play on.

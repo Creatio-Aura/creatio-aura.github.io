@@ -36,7 +36,8 @@ confirmed page's script. Nothing sends the launch email yet: that's for when a p
 
 During the beta, testers type feedback into the app (its menu → Send feedback) and it comes here:
 `POST /feedback` (`worker/src/feedback.ts`). The service keeps it (table `feedback`,
-`worker/migrations/0006_feedback.sql`) and emails it to `OWNER_EMAIL`, with the app's version, the
+`worker/migrations/0006_feedback.sql`) and emails it to `FEEDBACK_EMAIL` (feedback@creatio-aura.com,
+in `wrangler.toml`; `OWNER_EMAIL` if that's not set), with the app's version, the
 device and the screen. If the tester left an address, the email's Reply-To is them, so replying
 answers them, and it says whether they're on the beta list. An app on a phone sends no Origin, so
 this route alone takes requests without one; from a browser, only the allowed origins (the web
@@ -154,8 +155,9 @@ DNS):
 e.g. `creatio.aura+support@gmail.com`): contact@ (the site's footer and invite requests), privacy@
 (the privacy policy), legal@ (the beta terms), security@ (`site/.well-known/security.txt`),
 support@ (the sign-up service sends as it, through IONOS's `smtp.ionos.com`, so testers' replies
-land there), billing@, owner@, and the standard postmaster@ and abuse@. The service's own
-notifications go straight to creatio.aura@gmail.com (`OWNER_EMAIL`).
+land there), billing@, owner@, feedback@ (feedback from the app, `FEEDBACK_EMAIL`), and the
+standard postmaster@ and abuse@. The service's other notifications go straight to
+creatio.aura@gmail.com (`OWNER_EMAIL`).
 
 **`security.txt` expires on 31 October 2027.** Move its `Expires` date on before then (at most a year
 ahead), or security researchers may treat it as out of date. The **security.txt date** workflow checks

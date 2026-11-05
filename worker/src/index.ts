@@ -64,6 +64,8 @@ export interface Env {
   OWNER_EMAIL: string;
   /** Where the daily report goes; the owner's email if not set. */
   REPORT_EMAIL?: string;
+  /** Where feedback from the app goes; the owner's email if not set. */
+  FEEDBACK_EMAIL?: string;
   /** "smtp" to send through the mail server, "test" to keep emails in the outbox table. */
   MAIL_MODE: string;
   /** Tries per connection per hour; defaults 8, 6 and 10 (the tests raise them). */

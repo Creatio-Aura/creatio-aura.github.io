@@ -18,6 +18,7 @@ SERVICE_URL = "https://creatio-aura-beta.creatio-aura.workers.dev"
 SMTP_HOST = "smtp.ionos.com"
 SMTP_USER = "support@creatio-aura.com"
 OWNER_EMAIL = "creatio.aura@gmail.com"
+FEEDBACK_EMAIL = "feedback@creatio-aura.com"
 MAIL_MODE = "smtp"
 
 # The daily beta report, every morning: 14:00 UTC is 8 am in Colorado in summer, 7 am in winter.

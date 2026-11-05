@@ -30,6 +30,7 @@ const vars = {
   INTERNAL_TOKEN: "test-internal-key",
   PLAY_ALLOW: "friend@example.com",
   OWNER_EMAIL: "studio@example.com",
+  FEEDBACK_EMAIL: "feedback@example.com",
   // Every test comes from one machine: room for them all, while still testing the limit.
   CODE_LIMIT: "16",
   SIGNUP_LIMIT: "40",
@@ -503,7 +504,7 @@ test("feedback from the app reaches the studio's inbox, with what the app sent, 
   assert.equal(response.status, 200);
   assert.deepEqual(await response.json(), { ok: true });
   const mail = await landed((m) => m.subject === "Ignis Aura feedback: The menu button vanished on my turn.");
-  assert.equal(mail.to_addr, "studio@example.com");
+  assert.equal(mail.to_addr, "feedback@example.com");
   assert.equal(mail.reply_to, null);
   assert.match(mail.body, /The menu button vanished on my turn\.\nIt came back after a reload\./);
   assert.match(mail.body, /From: No address left/);

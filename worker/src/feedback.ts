@@ -117,7 +117,7 @@ export async function sendFeedback(env: Env): Promise<number> {
       : null;
     claimed.push(note);
     emails.push({
-      to: env.OWNER_EMAIL,
+      to: env.FEEDBACK_EMAIL || env.OWNER_EMAIL,
       ...feedbackEmail(note.message, note.email, tester?.name ?? null, JSON.parse(note.details), note.created_at),
       replyTo: note.email ?? undefined,
     });

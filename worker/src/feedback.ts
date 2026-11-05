@@ -15,11 +15,22 @@ import { emailProblem } from "../../site/email-check.js";
 import type { Env } from "./index";
 import { feedbackEmail, sendEmails, type Email } from "./mail";
 
-/** The most a tester can write, and the most of each detail the app sends with it. */
-const MESSAGE_MAX = 4000;
+/** The most of each detail an app sends with a note. */
 const DETAIL_MAX = 200;
-/** What the app may send with a note, in the order the email shows them. */
-export const DETAILS = ["version", "build", "platform", "device", "screen", "game"] as const;
+/** What an app may send with a note, in the order the email shows them. */
+export const DETAILS = ["version", "build", "commit", "platform", "device", "screen", "game"] as const;
+/**
+ * Each app that sends notes: the most it lets someone write, and whether a note may hold links.
+ * A note says which app it's from; one that doesn't is from Ignis Aura, which sent them first.
+ */
+const APPS = {
+  ignis: { max: 4000, links: true },
+  effugium: { max: 1000, links: false },
+} as const;
+type App = keyof typeof APPS;
+/** Anything that reads as a link: a web address, or a name with a web ending. */
+const LINK =
+  /(https?:\/\/|www\.)|\b[a-z0-9-]+\.(com|net|org|io|app|co|me|ly|gg|xyz|info|biz|link|site|online|club|us|uk|ca|de|ru|cn)\b/i;
 /** Per connection per hour (the tests raise it); kept a day from everyone; emailed a day. */
 const PER_HOUR = 10;
 const KEPT_PER_DAY = 300;
@@ -51,14 +62,19 @@ export async function feedback(
   if (!(await allow(env, "feedback", await visitorKey(env, request), perHour))) {
     return reply({ ok: false, error: "too-many" }, 429, headers);
   }
+  const app: App = body.app === "effugium" ? "effugium" : "ignis";
   const message = typeof body.message === "string" ? clean(body.message) : "";
-  if (!message || message.length > MESSAGE_MAX) return reply({ ok: false, error: "bad-message" }, 400, headers);
+  if (!message || message.length > APPS[app].max) return reply({ ok: false, error: "bad-message" }, 400, headers);
+  if (!APPS[app].links && LINK.test(message)) return reply({ ok: false, error: "no-links" }, 400, headers);
   const email = typeof body.email === "string" ? body.email.trim().toLowerCase() : "";
   const emailIssue = email ? emailProblem(email) : null;
   if (emailIssue) return reply({ ok: false, ...emailIssue }, 400, headers);
   // The app's own id for the note: a note it sends again (it never heard back) is kept once.
   const id = typeof body.id === "string" && /^[A-Za-z0-9-]{8,64}$/.test(body.id) ? body.id : null;
-  const details = Object.fromEntries(DETAILS.map((key) => [key, oneLine(body[key])]).filter(([, value]) => value));
+  const details: Record<string, string> = {
+    app,
+    ...Object.fromEntries(DETAILS.map((key) => [key, oneLine(body[key])]).filter(([, value]) => value)),
+  };
 
   const kept = await env.DB.prepare("SELECT COUNT(*) AS n FROM feedback WHERE created_at > ?")
     .bind(dayAgo())
@@ -120,6 +136,8 @@ export async function sendFeedback(env: Env): Promise<number> {
       to: env.FEEDBACK_EMAIL || env.OWNER_EMAIL,
       ...feedbackEmail(note.message, note.email, tester?.name ?? null, JSON.parse(note.details), note.created_at),
       replyTo: note.email ?? undefined,
+      // Andrew (2026-11-05): every note from an app arrives marked urgent.
+      urgent: true,
     });
   }
   if (emails.length === 0) return 0;

@@ -15,6 +15,8 @@ export interface Email {
   leaveUrl?: string;
   /** Where a reply goes instead of support@ (a tester's feedback: to them). */
   replyTo?: string;
+  /** Marked urgent (high priority) for the inbox: feedback from the apps. */
+  urgent?: boolean;
 }
 
 export async function sendEmail(env: Env, email: Email): Promise<void> {
@@ -58,6 +60,8 @@ function message(from: string, email: Email): string {
     `Subject: =?UTF-8?B?${btoa(String.fromCharCode(...new TextEncoder().encode(email.subject)))}?=`,
     `Date: ${new Date().toUTCString()}`,
     `Message-ID: <${crypto.randomUUID()}@creatio-aura.com>`,
+    // Urgent, in each of the ways mail apps look for it.
+    ...(email.urgent ? ["X-Priority: 1 (Highest)", "X-MSMail-Priority: High", "Importance: High", "Priority: urgent"] : []),
     ...(email.leaveUrl
       ? [`List-Unsubscribe: <${email.leaveUrl}>`, "List-Unsubscribe-Post: List-Unsubscribe=One-Click"]
       : []),
@@ -249,9 +253,13 @@ export function newTesterEmail(
 }
 
 /** What the app sends with a note, as the feedback email names it. */
+/** The apps that send feedback, by the name each note gives. */
+export const APP_NAMES: Record<string, string> = { ignis: "Ignis Aura", effugium: "Effugium Aura" };
+
 const DETAIL_LABELS: Record<string, string> = {
   version: "App version",
   build: "Build",
+  commit: "Commit",
   platform: "Plays on",
   device: "Device",
   screen: "Screen",
@@ -281,8 +289,9 @@ export function feedbackEmail(
   const rows = Object.entries(DETAIL_LABELS).flatMap(([key, label]) =>
     details[key] ? [[label, details[key]] as const] : [],
   );
+  const app = APP_NAMES[details.app ?? "ignis"] ?? "Ignis Aura";
   const text = [
-    "Feedback from the Ignis Aura app.",
+    `Feedback from the ${app} app.`,
     "",
     message,
     "",
@@ -291,7 +300,7 @@ export function feedbackEmail(
     `Sent: ${when}`,
   ].join("\n");
   const html = `<!doctype html><html><body style="font-family:Helvetica,Arial,sans-serif;color:#1d1a16">
-<h2 style="margin:0 0 12px">Ignis Aura feedback</h2>
+<h2 style="margin:0 0 12px">${escape(app)} feedback</h2>
 <p style="font-size:16px;line-height:1.5;white-space:pre-wrap;border-left:3px solid #e8792b;padding-left:12px">${escape(message)}</p>
 <table cellpadding="4" style="font-size:14px;color:#4a433b">
 <tr><td valign="top"><b>From</b></td><td>${escape(from)}</td></tr>
@@ -301,7 +310,7 @@ ${rows.map(([label, value]) => `<tr><td><b>${escape(label)}</b></td><td>${escape
 </body></html>`;
   // Its first line, short, so the inbox shows what it's about.
   const gist = message.split("\n")[0]!.trim();
-  const subject = `Ignis Aura feedback: ${gist.length > 60 ? `${gist.slice(0, 57).trimEnd()}…` : gist}`;
+  const subject = `${app} FEEDBACK: ${gist.length > 60 ? `${gist.slice(0, 57).trimEnd()}…` : gist}`;
   return { subject, text, html };
 }
 

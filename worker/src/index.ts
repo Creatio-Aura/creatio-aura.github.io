@@ -6,12 +6,14 @@
 //   GET  /confirm?t=…                                      → confirms, then back to the site
 //   GET|POST /leave?t=…                                    → removes them, then back to the site
 //   POST /waitlist, GET /waitlist/confirm, /waitlist/leave → "tell me when it's out" (waitlist.ts)
+//   POST /feedback                                         → a tester's note from the app (feedback.ts)
 //
 // And for Creatio Aura only, with the admin key (worker/tools/):
 //   GET  /admin/testers                                    → everyone confirmed, with platforms
 //   POST /admin/announce { title, message, links, send }   → emails testers their builds
 //   POST /admin/report { send }                            → the daily report (also sent every morning)
 //   GET  /admin/waitlist                                   → everyone confirmed on each waiting list
+//   GET  /admin/feedback                                   → the latest notes from the app
 //
 // Only people with the invite code get as far as the form; only those who confirm by email
 // join the list. Nothing is kept but what they typed: no IP addresses. The list lives in the
@@ -32,6 +34,7 @@ import {
   visitorKey,
 } from "./guard";
 import { emailProblem } from "../../site/email-check.js";
+import { feedback, feedbackSince, latestFeedback, sendFeedback } from "./feedback";
 import { guests } from "./guests";
 import { internal } from "./play";
 import { waitlistConfirm, waitlistLeave, waitlists, waitlistSignup } from "./waitlist";
@@ -61,11 +64,14 @@ export interface Env {
   OWNER_EMAIL: string;
   /** Where the daily report goes; the owner's email if not set. */
   REPORT_EMAIL?: string;
+  /** Where feedback from the app goes; the owner's email if not set. */
+  FEEDBACK_EMAIL?: string;
   /** "smtp" to send through the mail server, "test" to keep emails in the outbox table. */
   MAIL_MODE: string;
-  /** Tries per connection per hour; defaults 8 and 6 (the tests raise them). */
+  /** Tries per connection per hour; defaults 8, 6 and 10 (the tests raise them). */
   CODE_LIMIT?: string;
   SIGNUP_LIMIT?: string;
+  FEEDBACK_LIMIT?: string;
   // Secrets (wrangler secret put …), never in the repo:
   INVITE_CODE: string;
   TURNSTILE_SECRET: string;
@@ -90,6 +96,7 @@ const PLATFORMS = ["iPhone", "Android", "Web"];
 const limits = (env: Env) => ({
   codeChecks: Number(env.CODE_LIMIT ?? 8),
   signups: Number(env.SIGNUP_LIMIT ?? 6),
+  feedback: Number(env.FEEDBACK_LIMIT ?? 10),
   emailsPerDay: 400,
   emailsPerPerson: 3,
 });
@@ -120,12 +127,14 @@ const redirect = (env: Env, path: string) =>
   Response.redirect(`${env.SITE_URL.replace(/\/$/, "")}${path}`, 303);
 
 export default {
-  // Every morning (wrangler.toml's cron), the studio's report on the beta list.
+  // Every morning (wrangler.toml's cron), the studio's report on the beta list, and any feedback
+  // that couldn't be emailed yet.
   async scheduled(_controller: ScheduledController, env: Env, ctx: ExecutionContext) {
     ctx.waitUntil(dailyReport(env, true).then(() => undefined));
+    ctx.waitUntil(sendFeedback(env).then(() => undefined));
   },
 
-  async fetch(request: Request, env: Env): Promise<Response> {
+  async fetch(request: Request, env: Env, ctx: ExecutionContext): Promise<Response> {
     const url = new URL(request.url);
     const allowed = env.ALLOWED_ORIGINS.split(",").map((o) => o.trim());
     const origin = request.headers.get("Origin");
@@ -158,6 +167,9 @@ export default {
         if (url.pathname === "/admin/waitlist" && request.method === "GET") {
           return json({ ok: true, lists: await waitlists(env) }, 200, null);
         }
+        if (url.pathname === "/admin/feedback" && request.method === "GET") {
+          return json({ ok: true, notes: await latestFeedback(env) }, 200, null);
+        }
         if (url.pathname === "/admin/announce" && request.method === "POST") {
           return await announce(env, (await request.json()) as Record<string, unknown>);
         }
@@ -172,8 +184,10 @@ export default {
       return json({ ok: false, error: "not-found" }, 404, null);
     }
 
-    // Everything else is the sign-up form, and only from our own site.
-    if (!okOrigin) return json({ ok: false, error: "origin" }, 403, null);
+    // Everything else is the sign-up form, and only from our own site; feedback comes from the
+    // app as well, and an app on a phone sends no Origin at all (a browser always does).
+    const fromApp = url.pathname === "/feedback" && origin === null;
+    if (!okOrigin && !fromApp) return json({ ok: false, error: "origin" }, 403, null);
     if (request.method === "OPTIONS") return new Response(null, { status: 204, headers: cors(okOrigin) });
     if (request.method !== "POST") return json({ ok: false, error: "method" }, 405, okOrigin);
 
@@ -187,6 +201,7 @@ export default {
       if (url.pathname === "/check-code") return await checkCode(env, request, body, okOrigin);
       if (url.pathname === "/signup") return await signup(env, request, body, okOrigin);
       if (url.pathname === "/waitlist") return await waitlistSignup(env, request, body, cors(okOrigin), limits(env).signups);
+      if (url.pathname === "/feedback") return await feedback(env, request, body, cors(okOrigin), ctx, limits(env).feedback);
       // Guest creators, from the online creator (on the same site).
       if (url.pathname.startsWith("/guests/")) {
         // Plenty for a guest at work; slow for anyone guessing codes.
@@ -202,7 +217,7 @@ export default {
   },
 };
 
-async function checkCode(env: Env, request: Request, body: Record<string, unknown>, origin: string) {
+async function checkCode(env: Env, request: Request, body: Record<string, unknown>, origin: string | null) {
   const key = await visitorKey(env, request);
   if (!(await allow(env, "code", key, limits(env).codeChecks))) {
     return json({ ok: false, error: "too-many" }, 429, origin);
@@ -212,7 +227,7 @@ async function checkCode(env: Env, request: Request, body: Record<string, unknow
   return json({ ok: true, pass: await newPass(env) }, 200, origin);
 }
 
-async function signup(env: Env, request: Request, body: Record<string, unknown>, origin: string) {
+async function signup(env: Env, request: Request, body: Record<string, unknown>, origin: string | null) {
   if (!(await isPass(env, body.pass))) return json({ ok: false, error: "expired-pass" }, 401, origin);
   const key = await visitorKey(env, request);
   if (!(await allow(env, "signup", key, limits(env).signups))) {
@@ -367,7 +382,7 @@ async function leave(env: Env, url: URL, method: string) {
 }
 
 async function outbox(env: Env) {
-  const rows = await env.DB.prepare("SELECT to_addr, subject, body FROM outbox ORDER BY id DESC LIMIT 20").all();
+  const rows = await env.DB.prepare("SELECT to_addr, subject, body, reply_to FROM outbox ORDER BY id DESC LIMIT 20").all();
   return new Response(JSON.stringify(rows.results), { headers: { "Content-Type": "application/json" } });
 }
 
@@ -415,7 +430,7 @@ async function dailyReport(env: Env, send: boolean) {
     total: l.people.length,
     fresh: l.people.filter((p) => p.confirmed_at > since).length,
   }));
-  const report = dailyReportEmail(list, waiting?.n ?? 0, last ? since : null, lists);
+  const report = dailyReportEmail(list, waiting?.n ?? 0, last ? since : null, lists, await feedbackSince(env, since));
   const to = env.REPORT_EMAIL || env.OWNER_EMAIL;
   if (send) {
     await sendEmail(env, { to, ...report });

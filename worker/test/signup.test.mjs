@@ -30,9 +30,11 @@ const vars = {
   INTERNAL_TOKEN: "test-internal-key",
   PLAY_ALLOW: "friend@example.com",
   OWNER_EMAIL: "studio@example.com",
+  FEEDBACK_EMAIL: "feedback@example.com",
   // Every test comes from one machine: room for them all, while still testing the limit.
   CODE_LIMIT: "16",
   SIGNUP_LIMIT: "40",
+  FEEDBACK_LIMIT: "30",
 };
 
 before(async () => {
@@ -468,4 +470,140 @@ test("one email can wait for several projects", async () => {
   const subjects = (await outbox()).filter((e) => e.to_addr === "ash@example.com").map((e) => e.subject);
   assert.ok(subjects.some((s) => /Secessio Aura/.test(s)));
   assert.ok(subjects.some((s) => /Familia Arbor Aura/.test(s)));
+});
+
+// Feedback from the app. Its email goes after the answer, so the tests wait for it to land.
+const sendNote = (body, origin = null) =>
+  fetch(`${BASE}/feedback`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json", ...(origin ? { Origin: origin } : {}) },
+    body: JSON.stringify(body),
+  });
+async function landed(find) {
+  for (let i = 0; i < 50; i++) {
+    const mail = (await outbox()).find(find);
+    if (mail) return mail;
+    await new Promise((resolve) => setTimeout(resolve, 100));
+  }
+  throw new Error("No such email arrived");
+}
+const note = {
+  id: "note-0001-abcdef",
+  message: "The menu button vanished on my turn.\nIt came back after a reload.",
+  version: "0.13.5",
+  build: "1730000000",
+  platform: "Android",
+  device: "Pixel 8, Android 15",
+  screen: "Encounter",
+  game: "Pass and play · 3 heroes · round 4",
+};
+
+test("feedback from the app reaches the studio's inbox, with what the app sent, once", async () => {
+  // An app on a phone sends no Origin.
+  const response = await sendNote(note);
+  assert.equal(response.status, 200);
+  assert.deepEqual(await response.json(), { ok: true });
+  const mail = await landed((m) => m.subject === "Ignis Aura FEEDBACK: The menu button vanished on my turn.");
+  assert.equal(mail.to_addr, "feedback@example.com");
+  assert.equal(mail.reply_to, null);
+  assert.match(mail.body, /The menu button vanished on my turn\.\nIt came back after a reload\./);
+  assert.match(mail.body, /From: No address left/);
+  assert.match(mail.body, /App version: 0\.13\.5\nBuild: 1730000000\nPlays on: Android\nDevice: Pixel 8, Android 15/);
+  assert.match(mail.body, /Screen: Encounter\nGame: Pass and play · 3 heroes · round 4/);
+
+  // Sent again (the app never heard back): kept once, emailed once.
+  assert.equal((await sendNote(note)).status, 200);
+  await new Promise((resolve) => setTimeout(resolve, 500));
+  assert.equal((await outbox()).filter((m) => m.subject === mail.subject).length, 1);
+  const { notes } = await (await admin("/admin/feedback")).json();
+  assert.equal(notes.filter((n) => n.message.startsWith("The menu button")).length, 1);
+  assert.equal(notes[0].emailed, true);
+  assert.equal(notes[0].details.device, "Pixel 8, Android 15");
+});
+
+test("a note with an address can be answered: replying goes to them, and it says if they're a tester", async () => {
+  assert.equal((await sendNote({ message: "Loving the dice!", email: "Rook@Example.com " })).status, 200);
+  const fromTester = await landed((m) => m.subject === "Ignis Aura FEEDBACK: Loving the dice!");
+  assert.equal(fromTester.reply_to, "rook@example.com");
+  assert.match(fromTester.body, /From: rook@example\.com \(Rook, on the beta list\)\. Reply to this email/);
+
+  assert.equal((await sendNote({ message: "Found it from a friend.", email: "ash@example.com" })).status, 200);
+  const fromStranger = await landed((m) => m.subject === "Ignis Aura FEEDBACK: Found it from a friend.");
+  assert.equal(fromStranger.reply_to, "ash@example.com");
+  assert.match(fromStranger.body, /ash@example\.com \(not on the beta list\)/);
+
+  // A long first line is cut short in the subject.
+  assert.equal((await sendNote({ message: "x".repeat(80) })).status, 200);
+  const long = await landed((m) => m.subject.startsWith("Ignis Aura FEEDBACK: xxx"));
+  assert.equal(long.subject, `Ignis Aura FEEDBACK: ${"x".repeat(57)}…`);
+});
+
+test("feedback from Effugium Aura: its name and FEEDBACK in the subject, a shorter limit, no links", async () => {
+  const fromEffugium = {
+    app: "effugium",
+    id: "note-effugium-0001",
+    message: "The sleep timer stopped early tonight.",
+    version: "0.2.0",
+    build: "1793900000",
+    commit: "db04d40",
+    platform: "iOS 27.1",
+    device: "iPhone18,2",
+  };
+  assert.equal((await sendNote(fromEffugium)).status, 200);
+  const mail = await landed((m) => m.subject === "Effugium Aura FEEDBACK: The sleep timer stopped early tonight.");
+  assert.equal(mail.to_addr, "feedback@example.com");
+  assert.match(mail.body, /^Feedback from the Effugium Aura app\./);
+  assert.match(mail.body, /App version: 0\.2\.0\nBuild: 1793900000\nCommit: db04d40\nPlays on: iOS 27\.1\nDevice: iPhone18,2/);
+
+  const error = async (body) => {
+    const response = await sendNote({ app: "effugium", ...body });
+    return [response.status, (await response.json()).error];
+  };
+  assert.deepEqual(await error({ message: "x".repeat(1001) }), [400, "bad-message"]);
+  for (const message of ["See https://example.com", "look at www.example.org", "my site example.com has it"]) {
+    assert.deepEqual(await error({ message }), [400, "no-links"]);
+  }
+  // Ignis Aura's notes may still be long and hold links.
+  assert.equal((await sendNote({ message: `${"y".repeat(1500)} https://example.com` })).status, 200);
+});
+
+test("feedback needs a message and a real address, and comes only from the app or our own sites", async () => {
+  const error = async (body, origin) => {
+    const response = await sendNote(body, origin);
+    return [response.status, (await response.json()).error];
+  };
+  assert.deepEqual(await error({ message: "   " }), [400, "bad-message"]);
+  assert.deepEqual(await error({ message: "x".repeat(4001) }), [400, "bad-message"]);
+  assert.deepEqual(await error({ message: "Hi", email: "kodi@example" }), [400, "bad-email"]);
+  const typo = await sendNote({ message: "Hi", email: "kodi@gmail.con" });
+  assert.deepEqual(await typo.json(), { ok: false, error: "email-typo", suggestion: "kodi@gmail.com" });
+  // Another website: no. The web build: yes, and its browser may read the answer.
+  assert.deepEqual(await error({ message: "Hi" }, "https://evil.example"), [403, "origin"]);
+  const web = "https://ignis-aura-play.creatio-aura.workers.dev";
+  const fromWeb = await sendNote({ message: "From the web build." }, web);
+  assert.equal(fromWeb.status, 200);
+  assert.equal(fromWeb.headers.get("Access-Control-Allow-Origin"), web);
+  const preflight = await fetch(`${BASE}/feedback`, { method: "OPTIONS", headers: { Origin: web } });
+  assert.equal(preflight.status, 204);
+  // No Origin opens the feedback alone, never the sign-up form.
+  const noOrigin = await fetch(`${BASE}/check-code`, { method: "POST", body: JSON.stringify({ code: CODE }) });
+  assert.equal(noOrigin.status, 403);
+});
+
+test("the feedback tool lists the notes, and the daily report counts them", async () => {
+  const env = { ...process.env, SERVICE_URL: BASE, ADMIN_TOKEN: "test-admin-key" };
+  const tool = spawnSync("node", ["tools/feedback.mjs"], { cwd, env, encoding: "utf8" });
+  assert.match(tool.stdout, /> The menu button vanished on my turn\./);
+  assert.match(tool.stdout, /0\.13\.5 · 1730000000 · Android · Pixel 8, Android 15/);
+  assert.match(tool.stdout, /rook@example\.com/);
+  const report = await (await admin("/admin/report", {})).json();
+  assert.match(report.preview, /Feedback from the app since the last report \(.+\): [1-9]\d*/);
+});
+
+// Last: it uses up this machine's feedback allowance.
+test("a flood of feedback is cut off after a few an hour", async () => {
+  let last;
+  for (let i = 0; i < 35; i++) last = await sendNote({ message: `Note ${i}` });
+  assert.equal(last.status, 429);
+  assert.equal((await last.json()).error, "too-many");
 });

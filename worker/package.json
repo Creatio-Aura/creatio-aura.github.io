@@ -10,6 +10,7 @@
     "typecheck": "tsc --noEmit -p .",
     "testers": "node tools/testers.mjs",
     "waitlist": "node tools/waitlist.mjs",
+    "feedback": "node tools/feedback.mjs",
     "announce": "node tools/announce.mjs",
     "report": "node tools/report.mjs"
   },

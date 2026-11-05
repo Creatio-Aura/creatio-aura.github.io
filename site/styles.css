@@ -72,9 +72,9 @@ p { margin: 0; }
 .hero h1 { font-size: clamp(42px, 6.5vw, 80px); max-width: 16ch; text-wrap: balance; }
 .hero p { font-size: 20px; color: var(--text-soft); max-width: 54ch; }
 .actions { display: flex; gap: 14px; flex-wrap: wrap; justify-content: center; }
-.night { position: relative; display: inline-block; color: var(--amber); }
-.night .moon { position: absolute; left: 50%; top: 50%; width: 1.5em; height: 1.5em; transform: translate(-38%, -62%); border-radius: 50%; background: radial-gradient(circle at 38% 36%, #fff6dc 0%, #f6dfae 45%, #e9c78a 100%); opacity: 0.32; animation: moonglow 6s ease-in-out infinite; }
-.night .word { position: relative; }
+.evening { position: relative; display: inline-block; color: var(--amber); }
+.evening .moon { position: absolute; left: 50%; top: 50%; width: 1.5em; height: 1.5em; transform: translate(-38%, -62%); border-radius: 50%; background: radial-gradient(circle at 38% 36%, #fff6dc 0%, #f6dfae 45%, #e9c78a 100%); opacity: 0.32; animation: moonglow 6s ease-in-out infinite; }
+.evening .word { position: relative; }
 /* Keeps "night," together: the moon makes "night" its own box, so a line could break before the comma. */
 .nowrap { white-space: nowrap; }
 @keyframes moonglow {
@@ -180,7 +180,7 @@ fieldset legend { margin-bottom: 10px; }
 .page .lede { font-size: 20px; }
 
 @media (prefers-reduced-motion: reduce) {
-  .star, .night .moon { animation: none; }
+  .star, .evening .moon { animation: none; }
 }
 @media (max-width: 560px) {
   body { font-size: 16px; }

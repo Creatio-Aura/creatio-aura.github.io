@@ -1,0 +1,533 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Effugium Aura tester guide · Creatio Aura</title>
+<!-- For testers only: kept out of search results and the site's menus. -->
+<meta name="robots" content="noindex">
+<meta name="description" content="For friends and family testing Effugium Aura on iPhone and Android: installing it, what to try, and how to tell us what you think.">
+<meta name="theme-color" content="#120f1f">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Creatio Aura">
+<meta property="og:title" content="Effugium Aura tester guide">
+<meta property="og:description" content="For friends and family testing Effugium Aura on iPhone and Android: installing it, what to try, and how to tell us what you think.">
+<meta property="og:url" content="https://creatio-aura.com/effugium/testers/">
+<meta property="og:image" content="https://creatio-aura.com/images/share-creatio-aura.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="The Creatio Aura world logo and the words: For the evening, and the friends you share it with.">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght,SOFT,WONK@9..144,400..700,100,0&family=Nunito:wght@400;600;700&display=swap">
+<style>
+/* Creatio Aura: Ember Night. A midnight sky, warm ember and amber, a glowing halo and moon,
+   and fixed stars that glitter. Calm rather than playful. */
+
+:root {
+  --sky: #120f1f;
+  --sky-raised: #17132a;
+  --card: #1d1830;
+  --card-line: #34294a;
+  --line: #241d38;
+  --text: #f4eadb;
+  --text-soft: #d8cbb6;
+  --text-muted: #b9a8d6;
+  --ember: #ff8a3d;
+  --amber: #ffb35c;
+  --effugium: #7fd4c6;
+  --secessio: #c9b3ff;
+  --familia: #b3d98c;
+  --ink-on-ember: #1d0f05;
+  --error: #ff9b8a;
+  --serif: "Fraunces", Georgia, serif;
+  --sans: "Nunito", system-ui, sans-serif;
+}
+
+* { box-sizing: border-box; }
+html { background: var(--sky); }
+body {
+  margin: 0;
+  background: var(--sky);
+  color: var(--text);
+  font-family: var(--sans);
+  font-size: 17px;
+  line-height: 1.6;
+  position: relative;
+  overflow-x: hidden;
+}
+a { color: var(--amber); }
+a:hover { color: #ffd59a; }
+:focus-visible { outline: 2px solid var(--amber); outline-offset: 3px; }
+h1, h2, h3 { font-family: var(--serif); font-variation-settings: "SOFT" 100, "WONK" 0; font-weight: 600; line-height: 1.1; margin: 0; }
+p { margin: 0; }
+.wrap { max-width: 1160px; margin: 0 auto; padding: 0 24px; position: relative; }
+.skip { position: absolute; left: -999px; }
+.skip:focus { left: 16px; top: 12px; z-index: 10; background: var(--card); padding: 8px 12px; border-radius: 8px; }
+
+/* Stars: fixed in place, each glittering at its own pace. */
+.sky { position: absolute; inset: 0; pointer-events: none; overflow: hidden; }
+.star { position: absolute; border-radius: 50%; background: #fff1d6; animation: twinkle var(--t, 3.2s) ease-in-out var(--d, 0s) infinite; }
+.star.dot { box-shadow: 0 0 8px 2px rgba(255, 220, 160, 0.55); }
+.star.sparkle { border-radius: 0; background: none; filter: drop-shadow(0 0 4px rgba(255, 220, 160, 0.9)); }
+@keyframes twinkle { 0%, 100% { opacity: 0.35; transform: scale(0.8); } 50% { opacity: 1; transform: scale(1.15); } }
+
+/* Header and footer */
+.site-header { display: flex; flex-wrap: wrap; gap: 16px; align-items: center; justify-content: space-between; padding-top: 22px; padding-bottom: 22px; }
+.brand { display: flex; align-items: center; gap: 12px; color: var(--text); text-decoration: none; font-family: var(--serif); font-variation-settings: "SOFT" 100; font-weight: 650; font-size: 24px; }
+.site-nav { display: flex; gap: 6px; flex-wrap: wrap; }
+.site-nav a { color: #e8dcc8; text-decoration: none; padding: 10px 14px; border-radius: 99px; font-weight: 700; }
+.site-nav a:hover { background: var(--card); }
+.site-footer { border-top: 2px solid var(--line); position: relative; }
+.site-footer .wrap { display: flex; flex-wrap: wrap; gap: 20px; justify-content: space-between; padding-top: 30px; padding-bottom: 30px; font-size: 15px; color: var(--text-muted); }
+.site-footer nav { display: flex; gap: 22px; flex-wrap: wrap; font-weight: 600; }
+.site-footer a { color: #e8dcc8; }
+
+/* Buttons */
+.button { display: inline-flex; align-items: center; justify-content: center; min-height: 54px; padding: 0 28px; border-radius: 99px; background: var(--ember); color: var(--ink-on-ember); font-weight: 700; font-size: 17px; text-decoration: none; border: 0; cursor: pointer; font-family: var(--sans); }
+.button:hover { background: #ff9c58; color: var(--ink-on-ember); }
+.button:disabled { opacity: 0.6; cursor: wait; }
+.button.ghost { background: transparent; border: 2px solid #3a2f4a; color: var(--text); }
+.button.ghost:hover { border-color: var(--amber); }
+
+/* Home */
+.hero { display: flex; flex-direction: column; align-items: center; text-align: center; gap: 24px; padding-top: 32px; padding-bottom: 72px; }
+.hero h1 { font-size: clamp(42px, 6.5vw, 80px); max-width: 16ch; text-wrap: balance; }
+.hero p { font-size: 20px; color: var(--text-soft); max-width: 54ch; }
+.actions { display: flex; gap: 14px; flex-wrap: wrap; justify-content: center; }
+.evening { position: relative; display: inline-block; color: var(--amber); }
+.evening .moon { position: absolute; left: 50%; top: 50%; width: 1.5em; height: 1.5em; transform: translate(-38%, -62%); border-radius: 50%; background: radial-gradient(circle at 38% 36%, #fff6dc 0%, #f6dfae 45%, #e9c78a 100%); opacity: 0.32; animation: moonglow 6s ease-in-out infinite; }
+.evening .word { position: relative; }
+/* Keeps "night," together: the moon makes "night" its own box, so a line could break before the comma. */
+.nowrap { white-space: nowrap; }
+@keyframes moonglow {
+  0%, 100% { box-shadow: 0 0 50px 18px rgba(255, 214, 150, 0.22), 0 0 120px 50px rgba(255, 170, 90, 0.1); }
+  50% { box-shadow: 0 0 64px 24px rgba(255, 214, 150, 0.3), 0 0 150px 64px rgba(255, 170, 90, 0.14); }
+}
+.section { padding-top: 32px; padding-bottom: 88px; }
+.section h2 { font-size: 40px; margin-bottom: 26px; }
+/* At most two across, so four projects sit as a 2×2 of same-size cards. */
+.cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 360px), 1fr)); grid-auto-rows: 1fr; gap: 24px; }
+.card { display: flex; flex-direction: column; gap: 14px; padding: 32px; border-radius: 28px; background: var(--card); border: 2px solid var(--card-line); color: var(--text); text-decoration: none; }
+/* The last line ("Take a look", "More soon.") sits at the bottom, so it lines up across the cards. */
+.card > :last-child { margin-top: auto; }
+a.card:hover { border-color: #5b4d78; color: var(--text); }
+.card-top { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; }
+.eyebrow { font-size: 13px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; color: var(--text-muted); }
+.badge { padding: 6px 14px; border-radius: 99px; background: #3a2618; border: 1px solid var(--ember); color: var(--amber); font-weight: 700; font-size: 13px; }
+/* A project still in the works: no sign-ups yet. */
+.badge.quiet { background: #241d38; border-color: #5b4d78; color: var(--text-soft); }
+/* The Ignis Aura flame beside its name, as in the app. */
+.with-flame { display: inline-flex; align-items: center; gap: 0.12em; }
+.with-flame .flame { width: 0.95em; height: 0.95em; flex: none; margin-left: -0.12em; }
+.project-hero h1.with-flame { flex-direction: column; align-items: flex-start; gap: 0.08em; }
+.project-hero h1.with-flame .flame { width: 0.7em; height: 0.7em; margin-left: -0.1em; }
+.project-name { font-family: var(--serif); font-variation-settings: "SOFT" 100; font-weight: 700; font-size: 54px; line-height: 1; color: var(--amber); }
+/* Each project's own colour for its name. */
+.project-name.effugium { color: var(--effugium); }
+.project-name.secessio { color: var(--secessio); }
+.project-name.familia { color: var(--familia); }
+/* A project page's title, in the project's own colour. */
+.project-hero h1.effugium { color: var(--effugium); }
+.project-hero h1.secessio { color: var(--secessio); }
+.project-hero h1.familia-arbor { color: var(--familia); }
+.chips { display: flex; gap: 8px; flex-wrap: wrap; font-size: 14px; font-weight: 600; }
+.chips span { padding: 6px 12px; border-radius: 99px; background: #2a2240; color: #e8dcc8; }
+.band { background: var(--sky-raised); border-top: 2px solid var(--line); border-bottom: 2px solid var(--line); position: relative; }
+.band .wrap { padding-top: 72px; padding-bottom: 72px; }
+.band p { color: var(--text-soft); font-size: 19px; max-width: 60ch; }
+.closing { display: flex; flex-direction: column; align-items: center; text-align: center; gap: 18px; padding-top: 80px; padding-bottom: 80px; }
+.closing h2 { font-size: 44px; }
+.closing p { color: var(--text-soft); max-width: 46ch; }
+
+/* The Ignis Aura page */
+.project-hero { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 48px; align-items: center; padding-top: 32px; padding-bottom: 64px; }
+.project-hero h1 { font-size: clamp(72px, 10vw, 120px); line-height: 0.9; color: var(--amber); }
+.project-hero p { font-size: 19px; color: var(--text-soft); }
+.features { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 24px; }
+.features h3 { font-size: 20px; margin-bottom: 6px; }
+.features p { color: var(--text-soft); font-size: 16px; }
+.idea { display: block; padding-top: 72px; padding-bottom: 72px; }
+.idea .lede { font-size: 20px; color: var(--text-soft); max-width: 760px; margin-bottom: 32px; }
+.idea .beta-note { margin-top: 40px; gap: 8px; }
+.idea .beta-note p { color: var(--text-soft); }
+.beta { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 48px; padding-top: 72px; padding-bottom: 88px; }
+.beta-intro { display: flex; flex-direction: column; gap: 16px; }
+.beta-intro h2 { font-size: 40px; }
+.beta-intro p { color: var(--text-soft); }
+.small { font-size: 15px; color: var(--text-muted); }
+
+/* Forms */
+.panel { display: flex; flex-direction: column; gap: 18px; padding: 28px; border-radius: 22px; background: var(--card); border: 2px solid var(--card-line); }
+.panel h3 { font-size: 24px; }
+.field { display: flex; flex-direction: column; gap: 8px; }
+.field label, fieldset legend { font-weight: 700; font-size: 15px; }
+.field input { height: 50px; padding: 0 14px; border-radius: 12px; border: 2px solid #3a2f4a; background: var(--sky); color: var(--text); font-size: 16px; font-family: var(--sans); }
+.field input:focus { border-color: var(--amber); outline: none; }
+.field textarea { padding: 12px 14px; border-radius: 12px; border: 2px solid #3a2f4a; background: var(--sky); color: var(--text); font-size: 16px; font-family: var(--sans); resize: vertical; min-height: 84px; }
+.field textarea:focus { border-color: var(--amber); outline: none; }
+.optional { font-weight: 400; color: var(--text-muted); }
+.hint { font-size: 14px; color: var(--text-muted); }
+fieldset { border: 0; margin: 0; padding: 0; }
+fieldset legend { margin-bottom: 10px; }
+.options { display: flex; gap: 10px; flex-wrap: wrap; }
+.option { display: flex; align-items: center; gap: 8px; min-height: 46px; padding: 0 16px; border-radius: 12px; border: 2px solid #3a2f4a; cursor: pointer; font-weight: 600; }
+.option:has(input:checked) { border-color: var(--ember); background: #2a1c1a; }
+.option input, .consent input { width: 18px; height: 18px; accent-color: var(--ember); }
+/* A platform not offered yet: greyed out, with "Coming soon" on hover (or a tap, on phones). */
+.option.unavailable { position: relative; opacity: 0.45; cursor: not-allowed; }
+.option.unavailable::after {
+  content: attr(data-tip);
+  position: absolute; left: 50%; bottom: calc(100% + 8px); transform: translateX(-50%);
+  padding: 6px 12px; border-radius: 8px; background: #fff1d6; color: var(--ink-on-ember);
+  font-size: 13px; font-weight: 700; white-space: nowrap;
+  opacity: 0; pointer-events: none; transition: opacity 0.15s;
+}
+.option.unavailable:hover::after, .option.unavailable:focus::after { opacity: 1; }
+.option.unavailable:hover, .option.unavailable:focus { opacity: 0.7; outline: none; }
+.consent { display: flex; gap: 10px; align-items: flex-start; font-size: 15px; color: var(--text-soft); }
+.consent input { margin-top: 3px; flex: none; }
+.decoy { position: absolute; left: -5000px; width: 1px; height: 1px; overflow: hidden; }
+.error { color: var(--error); font-size: 15px; font-weight: 600; }
+.done h3 { font-size: 28px; }
+.done p { color: var(--text-soft); }
+[hidden] { display: none !important; }
+
+/* Plain pages (privacy, confirmations) */
+.page { max-width: 760px; padding-top: 24px; padding-bottom: 88px; }
+.page h1 { font-size: clamp(36px, 5vw, 52px); margin-bottom: 18px; }
+.page h2 { font-size: 26px; margin: 34px 0 10px; }
+.page p, .page li { color: var(--text-soft); }
+.page p + p { margin-top: 12px; }
+.page ul { padding-left: 22px; }
+.page .lede { font-size: 20px; }
+
+@media (prefers-reduced-motion: reduce) {
+  .star, .evening .moon { animation: none; }
+}
+@media (max-width: 560px) {
+  body { font-size: 16px; }
+  .hero p, .project-hero p { font-size: 18px; }
+  .section h2, .beta-intro h2, .closing h2 { font-size: 32px; }
+  .card { padding: 24px; }
+}
+.link-button { background: none; border: none; padding: 0; font: inherit; font-weight: 700; color: var(--ember, #ff8a3d); text-decoration: underline; cursor: pointer; }
+
+/* Effugium Aura guides: long reading pages on top of the site's Ember Night styles (/styles.css).
+   The project's teal marks guide accents; ember stays for the one button. */
+
+.guide { max-width: 760px; padding-top: 8px; padding-bottom: 88px; }
+.crumbs ol { display: flex; flex-wrap: wrap; gap: 6px 10px; list-style: none; margin: 0 0 28px; padding: 0; font-size: 14px; color: var(--text-muted); }
+.crumbs li + li::before { content: "/"; margin-right: 10px; color: var(--card-line); }
+.crumbs a { color: var(--text-soft); text-decoration: none; }
+.crumbs a:hover { color: var(--amber); }
+
+.guide-head { display: flex; flex-direction: column; gap: 16px; margin-bottom: 32px; }
+.guide-head .eyebrow { color: var(--effugium); }
+.guide-head h1 { font-size: clamp(34px, 5vw, 50px); text-wrap: balance; }
+.guide-head .lede { font-size: 20px; color: var(--text-soft); }
+.byline { font-size: 14px; color: var(--text-muted); }
+
+/* The answer first, for people (and search engines) who only want that. */
+.quick-answer { display: flex; flex-direction: column; gap: 10px; padding: 24px 26px; border-radius: 20px; background: var(--card); border: 2px solid var(--card-line); border-left: 6px solid var(--effugium); margin-bottom: 40px; }
+.quick-answer h2 { font-size: 15px; font-family: var(--sans); font-weight: 700; letter-spacing: 2px; text-transform: uppercase; color: var(--effugium); }
+.quick-answer p { color: var(--text); font-size: 18px; }
+
+.guide-body h2, .faq h2, .sources h2 { font-size: 30px; margin: 44px 0 14px; text-wrap: balance; }
+.guide-body h3, .faq h3 { font-size: 21px; margin: 26px 0 8px; }
+.guide-body p, .guide-body li, .faq p { color: var(--text-soft); }
+.guide-body p + p, .faq p + p { margin-top: 12px; }
+.guide-body ul, .guide-body ol { padding-left: 24px; margin: 12px 0; display: flex; flex-direction: column; gap: 8px; }
+.guide-body strong { color: var(--text); }
+.path { font-weight: 700; color: var(--text); white-space: normal; }
+
+.table-wrap { overflow-x: auto; margin: 18px 0; border-radius: 16px; border: 2px solid var(--card-line); }
+.table-wrap table { width: 100%; border-collapse: collapse; font-size: 16px; min-width: 520px; }
+.table-wrap th, .table-wrap td { text-align: left; vertical-align: top; padding: 12px 16px; border-bottom: 1px solid var(--line); }
+.table-wrap th { background: var(--sky-raised); color: var(--text); font-weight: 700; }
+.table-wrap td { color: var(--text-soft); }
+.table-wrap tr:last-child td { border-bottom: 0; }
+
+.note { padding: 16px 20px; border-radius: 14px; background: var(--sky-raised); border: 1px solid var(--line); color: var(--text-soft); font-size: 16px; margin: 18px 0; }
+
+/* We make the app the guide mentions, so the box says so. */
+.app-note { display: flex; flex-direction: column; gap: 14px; align-items: flex-start; padding: 28px; border-radius: 22px; background: var(--card); border: 2px solid var(--card-line); margin: 48px 0 8px; }
+.app-note h2 { font-size: 26px; color: var(--effugium); }
+.app-note p { color: var(--text-soft); }
+
+.sources ol { padding-left: 22px; display: flex; flex-direction: column; gap: 8px; font-size: 15px; color: var(--text-muted); }
+.sources a { word-break: break-word; }
+
+.related { margin-top: 56px; display: flex; flex-direction: column; gap: 14px; }
+.related h2 { font-size: 24px; }
+.guide-list { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 280px), 1fr)); gap: 18px; list-style: none; margin: 0; padding: 0; }
+.guide-list a { display: flex; flex-direction: column; gap: 8px; height: 100%; padding: 22px; border-radius: 20px; background: var(--card); border: 2px solid var(--card-line); color: var(--text); text-decoration: none; }
+.guide-list a:hover { border-color: var(--effugium); color: var(--text); }
+.guide-list strong { font-family: var(--serif); font-variation-settings: "SOFT" 100; font-size: 20px; line-height: 1.2; }
+.guide-list span { color: var(--text-soft); font-size: 15px; }
+
+@media (max-width: 560px) {
+  .guide-head .lede { font-size: 18px; }
+  .guide-body h2, .faq h2, .sources h2 { font-size: 26px; }
+  .quick-answer, .app-note { padding: 20px; }
+}
+
+:root { color-scheme: dark; }
+.top { position: relative; background: var(--sky-raised); border-bottom: 2px solid var(--line); }
+.top .wrap { display: flex; flex-wrap: wrap; gap: 10px 18px; align-items: center; padding-top: 14px; padding-bottom: 14px; }
+.top .brand { font-size: 20px; }
+.top nav { display: flex; flex-wrap: wrap; gap: 6px; }
+.top nav a { color: var(--text); text-decoration: none; padding: 6px 12px; border-radius: 99px; border: 1px solid var(--card-line); font-weight: 700; font-size: 14px; }
+.top nav a[aria-current="page"] { background: var(--effugium); color: #0d1f1c; border-color: var(--effugium); }
+.guide { padding-top: 28px; }
+.tell { margin-top: 36px; padding: 22px 24px; border-radius: 20px; background: var(--card); border: 2px solid var(--card-line); }
+.tell h3 { font-size: 22px; color: var(--effugium); margin-bottom: 8px; }
+.tell ul { padding-left: 22px; margin: 0 0 10px; display: flex; flex-direction: column; gap: 6px; }
+.tell li, .tell p { color: var(--text-soft); }
+.view > .wrap > .note { margin-top: 40px; font-size: 14px; }
+.guide-body ul.guide-list { padding-left: 0; }
+</style>
+</head>
+<body>
+<a class="skip" href="#main">Skip to the content</a>
+
+<div class="sky" aria-hidden="true"></div>
+<div class="top"><div class="wrap">
+  <a class="brand" href="/effugium/" style="color: inherit; text-decoration: none">Effugium Aura · Tester guide</a>
+  <nav aria-label="Guide"><a href="#welcome">Start here</a><a href="#fan">Your own fan</a><a href="#around">Sounds around you</a><a href="#bell">Meditation bell</a><a href="#dreams">Dream practice</a><a href="#night">How the night ends</a><a href="#noise">Noise colors</a><a href="#phones">iPhone and Android</a></nav>
+</div></div>
+<main id="main"><section class="view" id="view-welcome" data-view="welcome"><div class="wrap guide">
+<header class="guide-head">
+  <p class="eyebrow">Effugium Aura · Test version</p>
+  <h1>Thanks for testing Effugium Aura</h1>
+  <p class="lede">Effugium Aura plays sounds around you: your own recordings and built-in ones, each in its own place, for sleep, focus or quiet moments. You choose the sounds, where they sit, when a cue comes, and how it ends. This is a test version, so things will change, and your notes shape what it becomes.</p>
+</header>
+
+<aside class="quick-answer" aria-labelledby="qa-welcome">
+  <h2 id="qa-welcome">The short version</h2>
+  <p>Install it from the link Andrew sent you, put on headphones, drag a few sounds onto the circle, and press Play. Then try one thing from the list below each night, and tell us how it went.</p>
+</aside>
+
+<div class="guide-body">
+  <h2>Installing it</h2>
+  <ul>
+    <li><strong>iPhone:</strong> the link opens <strong>TestFlight</strong>, Apple's app for test versions. Install TestFlight if asked, then tap <strong>Install</strong> for Effugium Aura. Updates arrive in TestFlight.</li>
+    <li><strong>Android:</strong> first send Andrew the Google account email you use on your phone (usually a Gmail address), so he can add you. Then open the Google Play link he sends on your phone, tap <strong>Accept invite</strong>, then <strong>Download it on Google Play</strong>. Updates arrive through Google Play.</li>
+  </ul>
+
+  <h2>What's different in a test version</h2>
+  <ul>
+    <li><strong>Everything is unlocked,</strong> including the parts that will be paid later. Nothing you do in the test version charges you.</li>
+    <li><strong>It will change.</strong> Some screens are early, and some wording is placeholder.</li>
+    <li><strong>On iPhone, a test version lasts 90 days.</strong> A new one usually arrives before then.</li>
+  </ul>
+
+  <h2>Things to try</h2>
+  <ul class="guide-list">
+    <li><a href="#fan"><strong>Your own fan, anywhere</strong><span>Record a sound from home, and loop it without a bump.</span></a></li>
+    <li><a href="#around"><strong>Sounds around you</strong><span>Put each sound in its own place, and set some moving.</span></a></li>
+    <li><a href="#bell"><strong>A bell to come back to</strong><span>A cue on a timer while you meditate: a sound, or a vibration.</span></a></li>
+    <li><a href="#dreams"><strong>Cues for dream practice</strong><span>A soft cue later in the night, on a timer you set.</span></a></li>
+    <li><a href="#night"><strong>How the night ends</strong><span>All night, or a sleep timer that fades out.</span></a></li>
+    <li><a href="#noise"><strong>White, pink and brown noise</strong><span>Hear the difference, and pick yours.</span></a></li>
+    <li><a href="#phones"><strong>iPhone and Android</strong><span>What each test version has.</span></a></li>
+  </ul>
+
+  <h2>Your privacy</h2>
+  <p>There's no account, and your sounds, recordings and mixes stay on your phone. The app sends nothing unless you choose to share anonymous counts, or send a note. The full privacy page is at <a href="https://creatio-aura.com/privacy/effugium/">creatio-aura.com/privacy/effugium</a>.</p>
+</div>
+<aside class="note" aria-label="About this guide"><p><strong>For information only.</strong> This guide shows what you can try and set up in a test version of Effugium Aura. It isn't medical advice and it doesn't promise any result. Effugium Aura is not a medical device and makes no health claims. Apple, iPhone, AirPods, Apple Watch and Beats are trademarks of Apple Inc., registered in the U.S. and other countries and regions. Android is a trademark of Google LLC.</p></aside></div></section><section class="view" id="view-fan" data-view="fan"><div class="wrap guide">
+<header class="guide-head">
+  <p class="eyebrow">Try it · Your own sounds</p>
+  <h1>Your own fan, anywhere</h1>
+  <p class="lede">If you're used to a particular fan, air conditioner or the rain on your window, record it once and take it with you.</p>
+</header>
+<div class="guide-body">
+  <h2>Record it</h2>
+  <ol>
+    <li>Set your phone down near the sound, not touching it, and turn on Do Not Disturb.</li>
+    <li>In Effugium, tap <strong>Record</strong> (beside Import), or ☰ &gt; <strong>Field recorder</strong>.</li>
+    <li>Record for a minute or two. The tape marks the point where there's enough to loop.</li>
+    <li>Trim it, roll it up, and choose <strong>Make seamless</strong> to smooth the join.</li>
+  </ol>
+  <p>Already have a recording? Tap <strong>Import</strong> to bring it in from the Files app.</p>
+  <h2>Place it</h2>
+  <ol>
+    <li>Drag your new sound onto a place around the circle, where the fan sits in your room.</li>
+    <li>Add anything else you like: rain behind you, a low noise underneath.</li>
+    <li>Put on headphones and press Play.</li>
+  </ol>
+  <p>Want to fine-tune the join? ☰ &gt; <strong>Loop Studio</strong> lets you choose it yourself and hear Before and After.</p>
+</div>
+<div class="tell"><h3>Tell us</h3><ul><li>Did the loop click or bump where it repeats?</li><li>Was it clear how long to record?</li><li>Did your sound end up where you wanted it?</li></ul><p>In the app: ☰ menu &gt; <strong>Send feedback</strong>. It's anonymous, so add your name if you'd like a reply, or just message Andrew.</p></div>
+<aside class="note" aria-label="About this guide"><p><strong>For information only.</strong> This guide shows what you can try and set up in a test version of Effugium Aura. It isn't medical advice and it doesn't promise any result. Effugium Aura is not a medical device and makes no health claims. Apple, iPhone, AirPods, Apple Watch and Beats are trademarks of Apple Inc., registered in the U.S. and other countries and regions. Android is a trademark of Google LLC.</p></aside></div></section><section class="view" id="view-around" data-view="around"><div class="wrap guide">
+<header class="guide-head">
+  <p class="eyebrow">Try it · Spatial sound</p>
+  <h1>Sounds around you</h1>
+  <p class="lede">Each sound can sit in its own place: in front, behind, to the side, above or below. On headphones, the mix sounds like a room around you rather than a track inside your head.</p>
+</header>
+<div class="guide-body">
+  <h2>Place your sounds</h2>
+  <ol>
+    <li>Put on headphones. On speakers, sounds play in plain stereo.</li>
+    <li>Drag sounds from the list onto the places around the circle.</li>
+    <li>Drag a sound to move it, and tap it for its volume and more.</li>
+  </ol>
+  <h2>Set some moving</h2>
+  <ol>
+    <li>Switch from <strong>Flat</strong> to <strong>Gravity</strong> at the top.</li>
+    <li>Tap a sound and choose <strong>Orbit</strong> to send it slowly around you. <strong>Random</strong> gives each its own way; <strong>Reset</strong> puts everything back.</li>
+    <li>Under <strong>Shooting stars</strong>, tap <strong>Add</strong> for a sound that passes by now and then.</li>
+  </ol>
+  <h2>On iPhone with AirPods</h2>
+  <p>On iPhone, Effugium uses Apple's spatial audio on headphones, with your Personalized Spatial Audio profile if you've made one. With AirPods that support it, head tracking keeps sounds in place as you turn your head. Turn it off in ☰ &gt; <strong>Head tracking</strong> if you prefer sounds that turn with you.</p>
+</div>
+<div class="tell"><h3>Tell us</h3><ul><li>Which headphones did you use, and did the sounds seem to come from around you?</li><li>With AirPods, did head tracking feel right, or would you rather it was off?</li><li>Did anything moving get in the way?</li></ul><p>In the app: ☰ menu &gt; <strong>Send feedback</strong>. It's anonymous, so add your name if you'd like a reply, or just message Andrew.</p></div>
+<aside class="note" aria-label="About this guide"><p><strong>For information only.</strong> This guide shows what you can try and set up in a test version of Effugium Aura. It isn't medical advice and it doesn't promise any result. Effugium Aura is not a medical device and makes no health claims. Apple, iPhone, AirPods, Apple Watch and Beats are trademarks of Apple Inc., registered in the U.S. and other countries and regions. Android is a trademark of Google LLC.</p></aside></div></section><section class="view" id="view-bell" data-view="bell"><div class="wrap guide">
+<header class="guide-head">
+  <p class="eyebrow">Try it · Meditation</p>
+  <h1>A bell to come back to</h1>
+  <p class="lede">The Kicker is a cue on a timer, above everything else. While you meditate, it can be a soft bell every few minutes, or a silent vibration on your phone or wrist: a reminder to notice where your attention is and come back.</p>
+</header>
+<div class="guide-body">
+  <h2>Set it up</h2>
+  <ol>
+    <li>Make a quiet soundscape, or pick one, and switch to <strong>Gravity</strong>. The Kicker plays in Gravity while a mix plays.</li>
+    <li>Under <strong>Kicker</strong>, tap <strong>Add</strong>.</li>
+    <li><strong>Kick with:</strong> Sound, Vibrate or Both.</li>
+    <li><strong>Vibrate on:</strong> Phone, Watch or Both (Watch shows if your iPhone has an Apple Watch paired).</li>
+    <li><strong>How often:</strong> try every 3 to 5 minutes for a short sit, longer for a long one.</li>
+    <li>Choose a sound, like the singing bowl, and tap <strong>Try it now</strong>.</li>
+  </ol>
+  <h2>On your Apple Watch</h2>
+  <p>The watch vibrates while your iPhone is locked, through quiet notifications named Kick 1, Kick 2, Kick 3. Allow notifications when asked. If your watch chimes as well, turn on its Silent Mode: press the side button, then tap the bell. The Kicker's own checklist has a test you can send.</p>
+</div>
+<div class="tell"><h3>Tell us</h3><ul><li>Did the cue arrive when you expected it?</li><li>Did you feel each vibration? On the watch: did your phone stay quiet?</li><li>Was anything about setting it up confusing?</li></ul><p>In the app: ☰ menu &gt; <strong>Send feedback</strong>. It's anonymous, so add your name if you'd like a reply, or just message Andrew.</p></div>
+<aside class="note" aria-label="About this guide"><p><strong>For information only.</strong> This guide shows what you can try and set up in a test version of Effugium Aura. It isn't medical advice and it doesn't promise any result. Effugium Aura is not a medical device and makes no health claims. Apple, iPhone, AirPods, Apple Watch and Beats are trademarks of Apple Inc., registered in the U.S. and other countries and regions. Android is a trademark of Google LLC.</p></aside></div></section><section class="view" id="view-dreams" data-view="dreams"><div class="wrap guide">
+<header class="guide-head">
+  <p class="eyebrow">Try it · Dreams</p>
+  <h1>Cues for dream practice</h1>
+  <p class="lede">Some people who practise lucid dreaming use a cue: one soft sound they pair with an awareness check before bed, then hear again quietly later in the night. The Kicker can be that cue. It doesn't make anything happen; it's a cue you control.</p>
+</header>
+<div class="guide-body">
+  <h2>Set it up</h2>
+  <ol>
+    <li>Pick one soft sound for this, like wind chimes, and keep it for this.</li>
+    <li>Before bed, play it a few times with <strong>Try it now</strong>. Each time, look around and ask yourself whether you're dreaming.</li>
+    <li>For the night, add the Kicker in <strong>Gravity</strong>: soft, every 20 minutes or so, or vibrate only on your watch so nobody else hears it.</li>
+    <li>Keep the volume low, and keep a note of what you remember when you wake.</li>
+  </ol>
+  <p class="note">Your rest comes first. If the cue wakes you, turn it down, space it out, or switch it off. Effugium plays on a timer you set; it can't tell when you're dreaming.</p>
+</div>
+<div class="tell"><h3>Tell us</h3><ul><li>Was the cue soft enough?</li><li>Would a start time for the cues (only after a certain hour) be useful?</li><li>Anything you wished you could set?</li></ul><p>In the app: ☰ menu &gt; <strong>Send feedback</strong>. It's anonymous, so add your name if you'd like a reply, or just message Andrew.</p></div>
+<aside class="note" aria-label="About this guide"><p><strong>For information only.</strong> This guide shows what you can try and set up in a test version of Effugium Aura. It isn't medical advice and it doesn't promise any result. Effugium Aura is not a medical device and makes no health claims. Apple, iPhone, AirPods, Apple Watch and Beats are trademarks of Apple Inc., registered in the U.S. and other countries and regions. Android is a trademark of Google LLC.</p></aside></div></section><section class="view" id="view-night" data-view="night"><div class="wrap guide">
+<header class="guide-head">
+  <p class="eyebrow">Try it · Sleep timer</p>
+  <h1>How the night ends</h1>
+  <p class="lede">Play your mix all night, or set a sleep timer that fades it slowly to silence. It's your call.</p>
+</header>
+<div class="guide-body">
+  <h2>The sleep timer</h2>
+  <ol>
+    <li>☰ &gt; <strong>Sleep timer</strong>, and pick a length.</li>
+    <li>At the end, the mix fades slowly to silence, then stops. The fade lengthens with the timer, up to ten minutes.</li>
+    <li>It keeps working with the screen off.</li>
+  </ol>
+  <h2>From the lock screen (iPhone)</h2>
+  <p>While a mix plays, a panel shows on your lock screen and in StandBy, with Pause, Quieter, Louder and <strong>Fade out now</strong>. Fade out now fades the mix over a minute; tap <strong>Cancel fade out</strong> to change your mind. The buttons should work without unlocking your phone.</p>
+  <h2>Volume</h2>
+  <p>The volume slider in the app is your phone's own volume: the side buttons move it, and so do Quieter and Louder on the lock screen and the crown on your Apple Watch.</p>
+</div>
+<div class="tell"><h3>Tell us</h3><ul><li>Did the fade feel too quick or too slow?</li><li>Did the lock screen buttons work without unlocking your phone?</li><li>Did it keep playing all night when you wanted it to?</li></ul><p>In the app: ☰ menu &gt; <strong>Send feedback</strong>. It's anonymous, so add your name if you'd like a reply, or just message Andrew.</p></div>
+<aside class="note" aria-label="About this guide"><p><strong>For information only.</strong> This guide shows what you can try and set up in a test version of Effugium Aura. It isn't medical advice and it doesn't promise any result. Effugium Aura is not a medical device and makes no health claims. Apple, iPhone, AirPods, Apple Watch and Beats are trademarks of Apple Inc., registered in the U.S. and other countries and regions. Android is a trademark of Google LLC.</p></aside></div></section><section class="view" id="view-noise" data-view="noise"><div class="wrap guide">
+<header class="guide-head">
+  <p class="eyebrow">Try it · Sleep sounds</p>
+  <h1>White, pink and brown noise</h1>
+  <p class="lede">All three are a steady hiss made of every pitch at once. White sounds like a hiss, pink like steady rain, brown like a low rumble. There's no right one: listen and pick yours.</p>
+</header>
+<div class="guide-body">
+  <h2>Hear the difference</h2>
+  <ol>
+    <li>Place <strong>White</strong>, <strong>Pink</strong> and <strong>Brown</strong> (in the Noise folder) one at a time, at the same volume.</li>
+    <li>Listen to each for a minute, and keep the one you like.</li>
+    <li>Try mixing: a low brown noise underneath, rain on top, each in its own place.</li>
+  </ol>
+  <div class="table-wrap"><table>
+    <thead><tr><th scope="col">Noise</th><th scope="col">From low to high pitches</th><th scope="col">Sounds like</th></tr></thead>
+    <tbody>
+      <tr><td><strong>White</strong></td><td>The same strength at every pitch</td><td>A hiss, like a fan on high</td></tr>
+      <tr><td><strong>Pink</strong></td><td>Softer as the pitch rises</td><td>Steady rain</td></tr>
+      <tr><td><strong>Brown</strong></td><td>Softer still in the highs</td><td>A low rumble, like distant surf</td></tr>
+    </tbody>
+  </table></div>
+  <p class="note">For a baby's room, keep the phone or speaker well away from the crib and the volume low, and ask your pediatrician.</p>
+</div>
+<div class="tell"><h3>Tell us</h3><ul><li>Which one did you keep, and what did you mix it with?</li><li>Is there a sound you wish was built in?</li></ul><p>In the app: ☰ menu &gt; <strong>Send feedback</strong>. It's anonymous, so add your name if you'd like a reply, or just message Andrew.</p></div>
+<aside class="note" aria-label="About this guide"><p><strong>For information only.</strong> This guide shows what you can try and set up in a test version of Effugium Aura. It isn't medical advice and it doesn't promise any result. Effugium Aura is not a medical device and makes no health claims. Apple, iPhone, AirPods, Apple Watch and Beats are trademarks of Apple Inc., registered in the U.S. and other countries and regions. Android is a trademark of Google LLC.</p></aside></div></section><section class="view" id="view-phones" data-view="phones"><div class="wrap guide">
+<header class="guide-head">
+  <p class="eyebrow">Test versions</p>
+  <h1>iPhone and Android</h1>
+  <p class="lede">Both test versions are built from the same app. A few parts need Apple devices, so they're on iPhone only.</p>
+</header>
+<div class="guide-body">
+  <div class="table-wrap"><table>
+    <thead><tr><th scope="col"></th><th scope="col">iPhone</th><th scope="col">Android</th></tr></thead>
+    <tbody>
+      <tr><td>Your own recordings, placed around you</td><td>Yes</td><td>Yes</td></tr>
+      <tr><td>3D sound on headphones</td><td>Apple's spatial audio, with AirPods head tracking</td><td>Effugium's own 3D sound</td></tr>
+      <tr><td>Gravity: orbits and shooting stars</td><td>Yes</td><td>Yes</td></tr>
+      <tr><td>The Kicker: a cue you hear</td><td>Yes</td><td>Yes</td></tr>
+      <tr><td>The Kicker: a cue you feel</td><td>Phone, Apple Watch or both</td><td>Phone</td></tr>
+      <tr><td>Sleep timer that fades out</td><td>Yes</td><td>Yes</td></tr>
+      <tr><td>Lock screen panel and StandBy</td><td>Yes</td><td>Android's own playback controls</td></tr>
+      <tr><td>Apple Watch app</td><td>An early version: play, pause, volume, soundscapes</td><td>No</td></tr>
+    </tbody>
+  </table></div>
+</div>
+<div class="tell"><h3>Tell us</h3><ul><li>Which phone and headphones you use, so we know what to test on.</li></ul><p>In the app: ☰ menu &gt; <strong>Send feedback</strong>. It's anonymous, so add your name if you'd like a reply, or just message Andrew.</p></div>
+<aside class="note" aria-label="About this guide"><p><strong>For information only.</strong> This guide shows what you can try and set up in a test version of Effugium Aura. It isn't medical advice and it doesn't promise any result. Effugium Aura is not a medical device and makes no health claims. Apple, iPhone, AirPods, Apple Watch and Beats are trademarks of Apple Inc., registered in the U.S. and other countries and regions. Android is a trademark of Google LLC.</p></aside></div></section></main>
+<footer class="site-footer"><div class="wrap"><span>© 2026 Creatio Aura Ltd.</span><nav aria-label="Footer"><a href="https://creatio-aura.com/privacy/effugium/">Privacy</a><a href="mailto:contact@creatio-aura.com">contact@creatio-aura.com</a></nav></div></footer>
+<script>
+// The fixed stars: decoration only, drawn into the .sky layer of each page. Each glitters at its
+// own pace (still, for people who ask for reduced motion: see styles.css).
+(() => {
+  const sky = document.querySelector(".sky");
+  if (!sky) return;
+  // [left %, top px, size px, kind]
+  const stars = [
+    [6, 90, 3, "dot"], [14, 210, 2, "dot"], [9, 360, 12, "sparkle"], [22, 120, 2, "dot"], [30, 300, 3, "dot"],
+    [36, 70, 10, "sparkle"], [44, 190, 2, "dot"], [58, 110, 3, "dot"], [64, 250, 2, "dot"], [71, 60, 14, "sparkle"],
+    [78, 170, 3, "dot"], [86, 320, 2, "dot"], [93, 140, 11, "sparkle"], [97, 420, 3, "dot"], [3, 520, 2, "dot"],
+    [18, 610, 10, "sparkle"], [27, 700, 2, "dot"], [52, 560, 2, "dot"], [74, 640, 3, "dot"], [89, 590, 12, "sparkle"],
+    [8, 880, 3, "dot"], [33, 940, 2, "dot"], [61, 860, 9, "sparkle"], [82, 980, 2, "dot"], [95, 820, 3, "dot"],
+    [12, 1460, 10, "sparkle"], [40, 1520, 2, "dot"], [68, 1480, 3, "dot"], [88, 1560, 11, "sparkle"], [50, 1420, 2, "dot"],
+  ];
+  const sparkle =
+    '<svg viewBox="0 0 20 20" width="100%" height="100%"><path d="M10 0c.8 5.6 3.6 8.6 10 10-6.4 1.4-9.2 4.4-10 10-.8-5.6-3.6-8.6-10-10 6.4-1.4 9.2-4.4 10-10z" fill="#fff1d6"/></svg>';
+  stars.forEach(([left, top, size, kind], i) => {
+    const star = document.createElement("span");
+    star.className = `star ${kind}`;
+    star.style.cssText = `left:${left}%;top:${top}px;width:${size}px;height:${size}px;--t:${2.4 + (i % 5) * 0.7}s;--d:${((i * 0.37) % 3).toFixed(2)}s`;
+    if (kind === "sparkle") star.innerHTML = sparkle;
+    sky.appendChild(star);
+  });
+})();
+
+(() => {
+  const show = () => {
+    const key = (location.hash || "#welcome").slice(1);
+    const known = document.getElementById("view-" + key) ? key : "welcome";
+    document.querySelectorAll(".view").forEach((v) => (v.hidden = v.dataset.view !== known));
+    document.querySelectorAll(".top nav a").forEach((a) => (a.getAttribute("href") === "#" + known ? a.setAttribute("aria-current", "page") : a.removeAttribute("aria-current")));
+    window.scrollTo(0, 0);
+  };
+  addEventListener("hashchange", show);
+  show();
+})();
+</script>
+
+</body>
+</html>

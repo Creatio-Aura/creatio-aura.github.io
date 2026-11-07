@@ -1,6 +1,7 @@
-// Emails the confirmed beta testers about a new build, each with the links for the platforms
-// they play on (people who play none of them get nothing). Shows who'd get what first; nothing
-// is sent without --send.
+// Emails the testers in a beta (Ignis Aura's unless --project names another) about a new build,
+// each with the links for the platforms they play on (people who play none of them get nothing).
+// Shows who'd get what first; nothing is sent without --send. Once sent, the links are the beta's
+// latest builds: whoever's let in later gets them in their welcome.
 //
 //     npm run announce -- --title "Ignis Aura 0.6.0 is ready" --message "What's new: the digital board…" \
 //       --android https://expo.dev/artifacts/eas/….apk --web
@@ -8,7 +9,8 @@
 //
 //   --title "…"           the subject and heading
 //   --message "…"         the note (blank lines make paragraphs), or --message-file note.txt
-//   --android <link>      the Android install link (from the Expo build page)
+//   --project effugium    Effugium Aura's beta (iPhone and Android) instead of Ignis Aura's
+//   --android <link>      the Google Play test's join link (or an APK's, from the Expo build page)
 //   --web [link]          the web version; on its own, the usual address
 //   --iphone <link>       the TestFlight link, once there is one
 //   --send                actually send
@@ -26,6 +28,7 @@ const { values } = parseArgs({
     android: { type: "string" },
     web: { type: "string" },
     iphone: { type: "string" },
+    project: { type: "string", default: "ignis" },
     send: { type: "boolean", default: false },
   },
   allowPositionals: false,
@@ -42,13 +45,13 @@ if (!values.title || !message || Object.keys(links).length === 0) {
   process.exit(1);
 }
 
-const result = await admin("/admin/announce", { title: values.title, message, links, send: values.send });
+const result = await admin("/admin/announce", { project: values.project, title: values.title, message, links, send: values.send });
 if (result.recipients.length === 0) {
   console.log("Nobody plays on those platforms yet: nothing to send.");
   process.exit(0);
 }
 console.log(`${values.send ? "Sent to" : "Would send to"} ${result.recipients.length}:`);
-for (const r of result.recipients) console.log(`  ${r.name} <${r.email}>: ${r.platforms.join(", ")}`);
+for (const r of result.recipients) console.log(`  ${r.name ? `${r.name} ` : ""}<${r.email}>: ${r.platforms.join(", ")}`);
 if (!values.send) {
   console.log("\n— The first email, as text —\n");
   console.log(result.recipients[0].preview);

@@ -1,7 +1,7 @@
 # Creatio Aura's website
 
-**https://creatio-aura.com**: our projects, and beta sign-ups. The first project,
-**Ignis Aura**, takes beta sign-ups by invite code.
+**https://creatio-aura.com**: our projects, and beta sign-ups for **Ignis Aura** and **Effugium
+Aura** (no invite code since 7 November 2026: anyone can sign up, and Andrew lets each one in).
 
 ## What's here
 
@@ -49,20 +49,29 @@ and the daily report counts them.
 
 ## How a beta sign-up works
 
-1. **The invite code.** Someone enters the code you gave them, and passes Cloudflare **Turnstile**
-   (the "are you human" check). The service checks both and hands back a pass that unlocks the
-   form for 30 minutes. Wrong codes are limited to a few tries an hour per connection.
-2. **Their details:** name, email, where they'd play, and consent. A hidden decoy field catches
-   bots. Sign-ups are limited per connection too.
-3. **A confirmation email** from support@creatio-aura.com, sent through IONOS. Only people who click
-   its link (within 48 hours) join the list; unconfirmed sign-ups are deleted after 7 days.
-4. **A "you're on the list" email** once they've confirmed, with a button to leave. Every email has
-   a remove-me link, which deletes them at once.
+Both betas (`worker/src/betas.ts`: Ignis Aura's on `/ignis/`, Effugium Aura's on `/effugium/`) share
+one sign-up, `site/beta.js`; the form's `data-project` says which.
 
-**What's kept:** name, email, platforms, what they agreed to and when. **No IP addresses**: rate
-limits use a salted, anonymous fingerprint, cleared within two days. The list lives in the D1
-database on Creatio Aura's Cloudflare account, and only that account can read it. This repo is
-public, but it holds only code, never sign-ups or secrets. See `site/privacy/`.
+1. **The form:** email, where they'd play (Effugium Aura has no Web), consent, and Cloudflare
+   **Turnstile** (the "are you human" check). A hidden decoy field catches bots, and sign-ups are
+   limited per connection. There's no invite code any more.
+2. **A confirmation email** from support@creatio-aura.com, sent through IONOS. Only people who click
+   its link (within 48 hours) go further; unconfirmed sign-ups are deleted after 7 days.
+3. **Andrew lets them in.** Confirming emails `OWNER_EMAIL` ("… wants in"), with a link to a page with
+   two buttons: **Let them in** or **Turn them away** (`worker/src/approve.ts`; the link only opens
+   the page, so mail apps that check links can't let anyone in). The morning report lists everyone
+   waiting, with the same links. Until they're let in, they can't open the web game or get build
+   emails. For Android, add their Google account to the Play test's testers first.
+4. **"You're in":** letting them in emails them, with the latest links for where they play (the ones
+   the last announcement sent) and, for Ignis Aura, the Beta Tester Terms in short. Turning them
+   away deletes them, and they hear nothing. Every email has a remove-me link, which deletes them
+   at once.
+
+**What's kept:** email, the beta, platforms, what they agreed to and when, and when they were let in
+(testers from before 7 November also gave a name and notes). **No IP addresses**: rate limits use a
+salted, anonymous fingerprint, cleared within two days. The list lives in the D1 database on
+Creatio Aura's Cloudflare account, and only that account can read it. This repo is public, but it
+holds only code, never sign-ups or secrets. See `site/privacy/`.
 
 ## The secrets (never in this repo)
 
@@ -70,10 +79,10 @@ Set once with `npx wrangler secret put <NAME>` in `worker/`:
 
 | Secret               | What it is                                                                        |
 | -------------------- | --------------------------------------------------------------------------------- |
-| `INVITE_CODE`        | The code you share, e.g. `WORD-WORD-WORD-WORD-0000`. Change it any time to retire the old one. |
+| `INVITE_CODE`        | No longer used (the invite code went on 7 November 2026): `npx wrangler secret delete INVITE_CODE`. |
 | `TURNSTILE_SECRET`   | Turnstile's secret key (its public site key is in `site/ignis/index.html`).      |
 | `SMTP_PASSWORD`      | The support@creatio-aura.com mailbox's password (IONOS), so the service can send email. |
-| `PASS_SECRET`        | A long random string that signs the 30-minute passes.                            |
+| `PASS_SECRET`        | A long random string that signs the remove-me and let-them-in links.             |
 | `IP_SALT`            | A long random string for the anonymous rate-limit fingerprints.                  |
 
 ## Reading the list
@@ -84,34 +93,38 @@ from this folder:
 ```
 cd worker
 npx wrangler d1 execute creatio-aura-beta --remote --command \
-  "SELECT name, email, platforms, confirmed_at FROM signups WHERE confirmed_at IS NOT NULL ORDER BY confirmed_at"
+  "SELECT project, email, platforms, approved_at FROM signups WHERE approved_at IS NOT NULL ORDER BY project, approved_at"
 ```
 
 ## The tools: who's signed up, and sending builds
 
-You'll get an email at creatio.aura@gmail.com each time someone **confirms**: their name, email
-and where they play, and how many testers there are now. And **every morning** (14:00 UTC: 8 am in
-Colorado in summer, 7 am in winter) a report: how many confirmed since the last report was sent, everyone on the
-beta with where they play, totals per platform, and how many are still waiting to confirm. It goes
-to `REPORT_EMAIL` if that's set (`wrangler.toml`), otherwise to `OWNER_EMAIL`.
+You'll get an email at creatio.aura@gmail.com each time someone **confirms**: which beta, their
+email and where they play, and the link to let them in. And **every morning** (14:00 UTC: 8 am in
+Colorado in summer, 7 am in winter) a report: everyone waiting for your OK (with the links), and for
+each beta who's been let in since the last report, everyone in it with where they play, totals per
+platform, and how many are still to confirm. It goes to `REPORT_EMAIL` if that's set
+(`wrangler.toml`), otherwise to `OWNER_EMAIL`.
 
 From `worker/` (they need the admin key, below):
 
 ```
-npm run testers          # everyone confirmed, with where they play, and totals per platform
+npm run testers          # everyone in each beta, with where they play, and who's waiting for your OK
 npm run waitlist         # everyone confirmed on each project's waiting list
 npm run feedback         # the latest feedback from the app, newest first
 npm run report           # the daily report, shown here; add -- --send to email it now
 
-# Email testers a new build: each gets only the links for the platforms they play on.
-# Without --send it only shows who'd get what, and the email.
+# Email a beta's testers a new build: each gets only the links for the platforms they play on.
+# Without --send it only shows who'd get what, and the email. Once sent, those links are the
+# beta's latest: testers let in later get them in their welcome.
 npm run announce -- --title "Ignis Aura 0.6.0 is ready" \
   --message "What's new: the digital board. Tell us what you think by replying." \
-  --android https://expo.dev/artifacts/eas/….apk --web
+  --android https://play.google.com/apps/internaltest/… --iphone https://testflight.apple.com/join/… --web
 npm run announce -- …the same… --send
+npm run announce -- --project effugium --title "…" --message "…" --iphone … --android …   # Effugium Aura's
 ```
 
-`--web` on its own means https://creatio-aura.com/ignis-aura-web/. `--message-file note.txt`
+`--web` on its own means https://creatio-aura.com/ignis-aura-web/. An `--android` link to Google
+Play gets Play's instructions; an APK link, the sideloading ones. `--message-file note.txt`
 reads a longer note (blank lines make paragraphs). Every email has the tester's remove-me link,
 and the day's email allowance (400) still applies: anyone over it is listed to send tomorrow.
 
@@ -122,12 +135,12 @@ both.
 ## How testers get each build
 
 - **Web:** a link; it opens in any browser. Nothing to install.
-- **Android:** the install link from the Expo build page (`npx eas-cli build -p android --profile
-  preview` in the game repo makes one). On their phone they open it, download the app, allow
-  installing from their browser when asked, and press Install. Later builds install over it and
-  keep their games, since every build is signed with the same key.
-- **iPhone:** needs the Apple Developer Program (TestFlight). Until then, iPhone testers play the
-  web version.
+- **Android:** the Google Play test's join link (internal testing). It only lets in the Google
+  accounts on the test's tester list, so add each tester's (Play Console → Testing → Testers) when
+  you let them in. An APK link from the Expo build page still works for sideloading; both are
+  signed with the same key, so Play's copy updates a sideloaded one.
+- **iPhone (and iPad):** the TestFlight public link. Testers install TestFlight from the App Store,
+  then open the link.
 
 ## Working on it
 

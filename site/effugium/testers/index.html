@@ -196,6 +196,24 @@ fieldset legend { margin-bottom: 10px; }
 .done p { color: var(--text-soft); }
 [hidden] { display: none !important; }
 
+/* A recording of the app in a phone frame, with its steps beside it (video-steps.js) */
+.tour { display: flex; flex-wrap: wrap; gap: 32px 56px; align-items: center; padding-top: 24px; padding-bottom: 72px; }
+.phone { flex: 0 0 auto; width: min(360px, 100%); margin: 0 auto; padding: 10px; border-radius: 54px; background: #0b0910; box-shadow: 0 30px 80px rgba(0, 0, 0, 0.5), inset 0 0 0 1px rgba(237, 231, 246, 0.14); }
+.phone video { display: block; width: 100%; height: auto; aspect-ratio: 720 / 1566; object-fit: cover; border-radius: 44px; background: #15121f; }
+.tour-side { flex: 1 1 380px; min-width: 0; display: flex; flex-direction: column; gap: 20px; }
+.tour-side h2 { font-size: 36px; }
+.tour-side .lede { font-size: 19px; color: var(--text-soft); }
+.video-steps { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 6px; }
+.video-steps button { width: 100%; min-height: 56px; display: flex; align-items: center; gap: 16px; padding: 8px 14px; border: 0; border-radius: 16px; background: transparent; color: var(--text-soft); font: inherit; text-align: left; cursor: pointer; }
+.video-steps button:hover { background: rgba(29, 24, 48, 0.7); }
+.video-steps .n { flex: 0 0 32px; height: 32px; border-radius: 16px; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 15px; background: #2a2240; color: #e8dcc8; }
+.video-steps .k { display: block; font-size: 12px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; color: var(--text-muted); line-height: 1.3; }
+.video-steps .t { display: block; font-size: 18px; font-weight: 600; line-height: 1.3; }
+.video-steps button[aria-current="step"] { background: var(--card); color: var(--text); }
+.video-steps button[aria-current="step"] .n { background: var(--effugium); color: #0f2a26; }
+.video-steps button.done .n { background: rgba(127, 212, 198, 0.18); color: var(--effugium); }
+.video-toggle { align-self: flex-start; min-height: 44px; padding: 0 20px; font-size: 15px; }
+
 /* Plain pages (privacy, confirmations) */
 .page { max-width: 760px; padding-top: 24px; padding-bottom: 88px; }
 .page h1 { font-size: clamp(36px, 5vw, 52px); margin-bottom: 18px; }
@@ -289,6 +307,11 @@ fieldset legend { margin-bottom: 10px; }
 .tell li, .tell p { color: var(--text-soft); }
 .view > .wrap > .note { margin-top: 40px; font-size: 14px; }
 .guide-body ul.guide-list { padding-left: 0; }
+.guide-body .tour { padding: 8px 0; gap: 24px 36px; }
+.guide-body .phone { width: min(280px, 100%); margin: 0; padding: 8px; border-radius: 44px; }
+.guide-body .phone video { border-radius: 36px; }
+.guide-body .tour-side { flex-basis: 300px; }
+.guide-body ol.video-steps { padding-left: 0; margin: 0; }
 </style>
 </head>
 <body>
@@ -328,12 +351,20 @@ fieldset legend { margin-bottom: 10px; }
   <h2 id="feedback">Telling us what you think</h2>
   <p>Your notes are the point of a test version: something that broke, something that confused you, or something you wish it did. Big or small, send it.</p>
   <h3>Right in the app (iPhone and Android)</h3>
-  <ol>
-    <li>Tap <strong>☰</strong> to open the menu.</li>
-    <li>Tap <strong>Send feedback</strong>, near the bottom.</li>
-    <li>Write your note, then tap <strong>Send</strong>.</li>
-  </ol>
-  <p>Your note goes with the app's version and your phone's model, so we can find the problem, and nothing else: no name, no email. Because it's anonymous we can't reply, so add your name if you'd like Andrew to follow up. Notes are plain text, with no links. Offline? It waits on your phone and goes when you're back online.</p>
+  <!-- Recorded from the app (2026-11-07). The steps follow the video (the site's video-steps.js); the times are
+       where each step starts in feedback.mp4, and data-done is when Thank you shows. -->
+  <div class="tour">
+    <div class="phone"><video id="feedback-video" data-steps="feedback-steps" data-done="17.2" src="/effugium/media/feedback.mp4" poster="/effugium/media/feedback-poster.jpg" muted loop playsinline preload="metadata" aria-label="Sending feedback in Effugium Aura, recorded from the app: the menu, Send feedback, a note, Send, Thank you"></video></div>
+    <div class="tour-side">
+      <ol id="feedback-steps" class="video-steps">
+        <li><button type="button" data-at="0"><span class="n">1</span><span>Tap <strong>☰</strong> to open the menu.</span></button></li>
+        <li><button type="button" data-at="3.1" data-lead="0.3"><span class="n">2</span><span>Tap <strong>Send feedback</strong>, near the bottom.</span></button></li>
+        <li><button type="button" data-at="6.4" data-lead="0.3"><span class="n">3</span><span>Write your note, then tap <strong>Send</strong>.</span></button></li>
+      </ol>
+      <p>Your note goes with the app's version and your phone's model, so we can find the problem, and nothing else: no name, no email. Because it's anonymous we can't reply, so add your name if you'd like Andrew to follow up. Notes are plain text, with no links. Offline? It waits on your phone and goes when you're back online.</p>
+      <button class="button ghost video-toggle" type="button" data-toggle="feedback-video" data-play="Play" data-pause="Pause">Play</button>
+    </div>
+  </div>
   <h3>With a screenshot (iPhone)</h3>
   <ol>
     <li>Take a screenshot where something looks wrong.</li>
@@ -533,6 +564,90 @@ fieldset legend { margin-bottom: 10px; }
     star.style.cssText = `left:${left}%;top:${top}px;width:${size}px;height:${size}px;--t:${2.4 + (i % 5) * 0.7}s;--d:${((i * 0.37) % 3).toFixed(2)}s`;
     if (kind === "sparkle") star.innerHTML = sparkle;
     sky.appendChild(star);
+  });
+})();
+
+// Recordings of the app with their steps listed beside them (the Effugium Aura tour, the tester guide's
+// Send feedback). The step on screen is highlighted, a step can be picked to jump to it, and a button
+// pauses. A video plays only while it's on screen, and never by itself with Reduce Motion on.
+//
+// <video id="v" data-steps="v-steps" [data-done="17.2"] muted loop playsinline ...>
+// <ol id="v-steps" class="video-steps"><li><button type="button" data-at="0"><span class="n">1</span>...</button></li>...</ol>
+// <button type="button" data-toggle="v" data-play="Play" data-pause="Pause">Play</button>
+(() => {
+  let still = false;
+  try {
+    still = matchMedia("(prefers-reduced-motion: reduce)").matches;
+  } catch (e) {}
+
+  document.querySelectorAll("video[data-steps]").forEach((video) => {
+    const list = document.getElementById(video.dataset.steps);
+    const toggle = document.querySelector(`[data-toggle="${video.id}"]`);
+    const buttons = list ? Array.from(list.querySelectorAll("button[data-at]")) : [];
+    const at = buttons.map((b) => parseFloat(b.dataset.at));
+    const doneAt = video.dataset.done ? parseFloat(video.dataset.done) : null;
+    let wanted = !still; // playing, unless the person paused it (or asked for less motion)
+
+    video.muted = true;
+    video.loop = true;
+    video.playsInline = true;
+
+    const play = () => {
+      const p = video.play();
+      if (p && p.catch) p.catch(() => {});
+    };
+    const label = () => {
+      if (toggle) toggle.textContent = video.paused ? toggle.dataset.play : toggle.dataset.pause;
+    };
+    const mark = () => {
+      const t = video.currentTime;
+      let now = 0;
+      at.forEach((a, k) => {
+        if (t >= a) now = k;
+      });
+      const finished = doneAt !== null && t >= doneAt;
+      buttons.forEach((b, k) => {
+        if (k === now && !finished) b.setAttribute("aria-current", "step");
+        else b.removeAttribute("aria-current");
+        const done = doneAt !== null && (k < now || finished);
+        b.classList.toggle("done", done);
+        const n = b.querySelector(".n");
+        if (n && doneAt !== null) n.textContent = done ? "✓" : String(k + 1);
+      });
+    };
+
+    video.addEventListener("timeupdate", mark);
+    video.addEventListener("play", label);
+    video.addEventListener("pause", label);
+    buttons.forEach((b, k) =>
+      b.addEventListener("click", () => {
+        video.currentTime = Math.max(0, at[k] - parseFloat(b.dataset.lead || "0"));
+        wanted = true;
+        play();
+        mark();
+      })
+    );
+    if (toggle)
+      toggle.addEventListener("click", () => {
+        wanted = video.paused;
+        if (wanted) play();
+        else video.pause();
+      });
+
+    // Only while on screen: it saves the battery, and the steps stay in step with what's seen.
+    if ("IntersectionObserver" in window) {
+      new IntersectionObserver(
+        (entries) =>
+          entries.forEach((e) => {
+            if (e.isIntersecting && wanted) play();
+            else if (!e.isIntersecting) video.pause();
+          }),
+        { threshold: 0.25 }
+      ).observe(video);
+    } else if (wanted) play();
+
+    label();
+    mark();
   });
 })();
 

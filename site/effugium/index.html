@@ -28,6 +28,7 @@
   <!-- Checks email addresses for typos; the sign-up service uses the same file. Before waitlist.js. -->
   <script type="module" src="/email-check.js"></script>
   <script src="/waitlist.js" defer></script>
+  <script src="/video-steps.js" defer></script>
   <script src="https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit" async defer></script>
 </head>
 <body>
@@ -46,14 +47,36 @@
   </header>
 
   <main id="main">
-    <!-- Revealed 2026-11-07 (Andrew): what it does, in plain words; no screenshots, prices or store buttons until launch.
-         Wording rule: what people can do with it, never what it does for them. -->
+    <!-- Revealed 2026-11-07 (Andrew): what it does, in plain words; no prices or store buttons until launch.
+         The tour below is the app's own, recorded in the simulator, with its prices step cut (Andrew picked
+         "option B" the same day). Wording rule: what people can do with it, never what it does for them. -->
     <section class="wrap project-hero">
       <div style="display: flex; flex-direction: column; gap: 22px">
         <h1 class="project-title effugium">Effugium Aura</h1>
         <p>An audio player for when you need a little peace.</p>
         <p>Mix your own sounds, put each one where you want it around you, and let it play through the night with the screen off.</p>
         <span class="chips"><span>Testing now</span><span>iPhone · Android</span></span>
+      </div>
+    </section>
+
+    <!-- The tour, as the app shows it on first launch. The steps follow the video (video-steps.js);
+         the times are where each step starts in tour.mp4. -->
+    <section class="wrap tour" aria-labelledby="tour-title">
+      <div class="phone">
+        <video id="tour-video" data-steps="tour-steps" src="/effugium/media/tour.mp4" poster="/effugium/media/tour-poster.jpg" muted loop playsinline preload="metadata" aria-label="Effugium Aura's opening tour, recorded from the app: the splash, then six steps"></video>
+      </div>
+      <div class="tour-side">
+        <h2 id="tour-title">Take the tour</h2>
+        <p class="lede">The same tour the app opens with, recorded on iPhone. Pick a step to jump to it.</p>
+        <ol id="tour-steps" class="video-steps">
+          <li><button type="button" data-at="0"><span class="n">1</span><span><span class="k">Effugium Aura</span><span class="t">Your sounds, all around you</span></span></button></li>
+          <li><button type="button" data-at="5.7"><span class="n">2</span><span><span class="k">Your sounds</span><span class="t">Bring your own sounds</span></span></button></li>
+          <li><button type="button" data-at="13.3"><span class="n">3</span><span><span class="k">Flat</span><span class="t">Place them around you</span></span></button></li>
+          <li><button type="button" data-at="21.8"><span class="n">4</span><span><span class="k">Gravity</span><span class="t">Then set them orbiting</span></span></button></li>
+          <li><button type="button" data-at="32.6"><span class="n">5</span><span><span class="k">Field recorder</span><span class="t">Record your own</span></span></button></li>
+          <li><button type="button" data-at="42"><span class="n">6</span><span><span class="k">Seamless loops</span><span class="t">No seams, all night</span></span></button></li>
+        </ol>
+        <button class="button ghost video-toggle" type="button" data-toggle="tour-video" data-play="Play the tour" data-pause="Pause the tour">Play the tour</button>
       </div>
     </section>
 
@@ -71,6 +94,7 @@
       <div class="panel beta-note">
         <h3>Testing now</h3>
         <p>Friends and family are testing early builds of Effugium Aura on <strong>iPhone and Android</strong> and telling us what to change. On iPhone it also follows your head with AirPods, and the Kicker can vibrate your Apple Watch. When it's ready, it'll be in the App Store and on Google Play.</p>
+        <p>Want to help test it? Message us on <a href="https://www.facebook.com/creatioaura">Facebook</a> or email <a href="mailto:contact@creatio-aura.com">contact@creatio-aura.com</a>, and say whether you use an iPhone or an Android phone.</p>
       </div>
     </section>
 

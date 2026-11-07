@@ -1,38 +1,28 @@
 // The Ignis Aura beta sign-up service (a Cloudflare Worker, with a D1 database).
 //
-//   POST /check-code  { code, turnstile }                 → { pass } unlocks the form for 30 min
-//   POST /signup      { pass, name, email, platforms, consent, website }
+//   POST /signup      { project, email, platforms, consent, turnstile, website } (betas.ts)
 //                                                          → sends a confirmation email
-//   GET  /confirm?t=…                                      → confirms, then back to the site
+//   GET  /confirm?t=…                                      → confirms, asks Andrew to let them in, back to the site
+//   GET  /approve?t=…, POST /approve|/decline?t=…          → Andrew lets them in, or turns them away (approve.ts)
 //   GET|POST /leave?t=…                                    → removes them, then back to the site
 //   POST /waitlist, GET /waitlist/confirm, /waitlist/leave → "tell me when it's out" (waitlist.ts)
 //   POST /feedback                                         → a tester's note from the app (feedback.ts)
 //
 // And for Creatio Aura only, with the admin key (worker/tools/):
-//   GET  /admin/testers                                    → everyone confirmed, with platforms
+//   GET  /admin/testers                                    → every tester, with platforms, and who's waiting
 //   POST /admin/announce { title, message, links, send }   → emails testers their builds
 //   POST /admin/report { send }                            → the daily report (also sent every morning)
 //   GET  /admin/waitlist                                   → everyone confirmed on each waiting list
 //   GET  /admin/feedback                                   → the latest notes from the app
 //
-// Only people with the invite code get as far as the form; only those who confirm by email
-// join the list. Nothing is kept but what they typed: no IP addresses. The list lives in the
-// D1 database, readable only from Andrew's Cloudflare account.
+// Anyone can sign up (since 7 November 2026 there's no invite code): the human check, the decoy
+// field and the rate limits keep bots off, confirming by email proves the address, and Andrew lets
+// each one in. Nothing is kept but what they typed: no IP addresses. The list lives in the D1
+// database, readable only from Andrew's Cloudflare account.
 
-import {
-  allow,
-  allowEmail,
-  isAdmin,
-  isHuman,
-  isInviteCode,
-  isPass,
-  leaveToken,
-  leaveTokenId,
-  newPass,
-  newToken,
-  sha256,
-  visitorKey,
-} from "./guard";
+import { allow, allowEmail, isAdmin, isHuman, leaveToken, leaveTokenId, newToken, sha256, visitorKey } from "./guard";
+import { approval, approveUrl, saveBuilds } from "./approve";
+import { BETAS, betaOf } from "./betas";
 import { emailProblem } from "../../site/email-check.js";
 import { feedback, feedbackSince, forgetOldFeedback, latestFeedback, sendFeedback } from "./feedback";
 import { guests } from "./guests";
@@ -42,10 +32,10 @@ import {
   announcementEmail,
   dailyReportEmail,
   confirmationEmail,
-  newTesterEmail,
+  howTo,
   sendEmail,
   sendEmails,
-  welcomeEmail,
+  waitingEmail,
   type Email,
 } from "./mail";
 
@@ -60,7 +50,7 @@ export interface Env {
   /** The mail server emails go out through, and the mailbox (and From address) it signs in as. */
   SMTP_HOST: string;
   SMTP_USER: string;
-  /** Where "new beta tester" notifications go. */
+  /** Where "someone wants in" notes go. */
   OWNER_EMAIL: string;
   /** Where the daily report goes; the owner's email if not set. */
   REPORT_EMAIL?: string;
@@ -68,12 +58,10 @@ export interface Env {
   FEEDBACK_EMAIL?: string;
   /** "smtp" to send through the mail server, "test" to keep emails in the outbox table. */
   MAIL_MODE: string;
-  /** Tries per connection per hour; defaults 8, 6 and 10 (the tests raise them). */
-  CODE_LIMIT?: string;
+  /** Tries per connection per hour; defaults 6 and 10 (the tests raise them). */
   SIGNUP_LIMIT?: string;
   FEEDBACK_LIMIT?: string;
   // Secrets (wrangler secret put …), never in the repo:
-  INVITE_CODE: string;
   TURNSTILE_SECRET: string;
   PASS_SECRET: string;
   IP_SALT: string;
@@ -87,14 +75,8 @@ export interface Env {
   PLAY_ALLOW?: string;
 }
 
-/** What people agree to by ticking the box; kept with each sign-up. */
-// Exactly what testers agree to, kept with each sign-up: the terms' date says which version.
-const CONSENT_TEXT =
-  "Email me about the Ignis Aura beta. I agree to the Beta Tester Terms (22 October 2026) and I've read the privacy policy.";
-const PLATFORMS = ["iPhone", "Android", "Web"];
-/** Per connection per hour (code checks, sign-ups); emails per day; emails to one address. */
+/** Per connection per hour (sign-ups, feedback); emails per day; emails to one address. */
 const limits = (env: Env) => ({
-  codeChecks: Number(env.CODE_LIMIT ?? 8),
   signups: Number(env.SIGNUP_LIMIT ?? 6),
   feedback: Number(env.FEEDBACK_LIMIT ?? 10),
   emailsPerDay: 400,
@@ -102,8 +84,6 @@ const limits = (env: Env) => ({
 });
 const CONFIRM_HOURS = 48;
 const UNCONFIRMED_DAYS = 7;
-/** The most a tester can write in the sign-up notes. */
-const NOTES_MAX = 500;
 
 const json = (body: unknown, status: number, origin: string | null) =>
   new Response(JSON.stringify(body), {
@@ -150,6 +130,11 @@ export default {
     if (url.pathname === "/waitlist/leave" && (request.method === "GET" || request.method === "POST")) {
       return waitlistLeave(env, url, request.method);
     }
+    // Letting someone in: the link in the studio's email opens a page, whose buttons post back here.
+    if (url.pathname === "/approve" && (request.method === "GET" || request.method === "POST")) {
+      return approval(env, url, request.method, url.pathname);
+    }
+    if (url.pathname === "/decline" && request.method === "POST") return approval(env, url, "POST", url.pathname);
     if (url.pathname === "/__outbox" && env.MAIL_MODE === "test") return outbox(env);
     // The web build's Worker, over a service binding: sign-in links and guest codes.
     if (url.pathname.startsWith("/internal/")) {
@@ -199,7 +184,6 @@ export default {
       return json({ ok: false, error: "bad-request" }, 400, okOrigin);
     }
     try {
-      if (url.pathname === "/check-code") return await checkCode(env, request, body, okOrigin);
       if (url.pathname === "/signup") return await signup(env, request, body, okOrigin);
       if (url.pathname === "/waitlist") return await waitlistSignup(env, request, body, cors(okOrigin), limits(env).signups);
       if (url.pathname === "/feedback") return await feedback(env, request, body, cors(okOrigin), ctx, limits(env).feedback);
@@ -218,18 +202,7 @@ export default {
   },
 };
 
-async function checkCode(env: Env, request: Request, body: Record<string, unknown>, origin: string | null) {
-  const key = await visitorKey(env, request);
-  if (!(await allow(env, "code", key, limits(env).codeChecks))) {
-    return json({ ok: false, error: "too-many" }, 429, origin);
-  }
-  if (!(await isHuman(env, body.turnstile))) return json({ ok: false, error: "human-check" }, 403, origin);
-  if (!isInviteCode(env, body.code)) return json({ ok: false, error: "bad-code" }, 401, origin);
-  return json({ ok: true, pass: await newPass(env) }, 200, origin);
-}
-
 async function signup(env: Env, request: Request, body: Record<string, unknown>, origin: string | null) {
-  if (!(await isPass(env, body.pass))) return json({ ok: false, error: "expired-pass" }, 401, origin);
   const key = await visitorKey(env, request);
   if (!(await allow(env, "signup", key, limits(env).signups))) {
     return json({ ok: false, error: "too-many" }, 429, origin);
@@ -239,25 +212,20 @@ async function signup(env: Env, request: Request, body: Record<string, unknown>,
     return json({ ok: true }, 200, origin);
   }
 
-  const name = typeof body.name === "string" ? body.name.trim().replace(/\s+/g, " ") : "";
+  const project = betaOf(body.project);
+  if (!project) return json({ ok: false, error: "bad-project" }, 400, origin);
+  const beta = BETAS[project]!;
   const email = typeof body.email === "string" ? body.email.trim().toLowerCase() : "";
   const platforms = Array.isArray(body.platforms)
-    ? PLATFORMS.filter((p) => (body.platforms as unknown[]).includes(p))
+    ? beta.platforms.filter((p) => (body.platforms as unknown[]).includes(p))
     : [];
-  if (name.length < 1 || name.length > 60 || /[\r\n<>]/.test(name)) {
-    return json({ ok: false, error: "bad-name" }, 400, origin);
-  }
   // The same check as the form's (site/email-check.js): a real address, and no typo like ".con".
   const emailIssue = emailProblem(email);
   if (emailIssue) return json({ ok: false, ...emailIssue }, 400, origin);
   if (platforms.length === 0) return json({ ok: false, error: "pick-platform" }, 400, origin);
-  // Optional notes, kept as plain text: line breaks allowed, other control characters dropped.
-  const notes =
-    typeof body.notes === "string"
-      ? body.notes.replace(/\r\n?/g, "\n").replace(/[\u0000-\u0009\u000b-\u001f\u007f]/g, "").trim()
-      : "";
-  if (notes.length > NOTES_MAX) return json({ ok: false, error: "bad-notes" }, 400, origin);
   if (body.consent !== true) return json({ ok: false, error: "need-consent" }, 400, origin);
+  // With no invite code, the human check is what stands between the form and bots.
+  if (!(await isHuman(env, body.turnstile))) return json({ ok: false, error: "human-check" }, 403, origin);
 
   const now = new Date();
   // Unconfirmed sign-ups don't linger.
@@ -266,9 +234,9 @@ async function signup(env: Env, request: Request, body: Record<string, unknown>,
     .run();
 
   const existing = await env.DB.prepare(
-    "SELECT confirmed_at, emails_sent, last_email_at FROM signups WHERE email = ?",
+    "SELECT confirmed_at, emails_sent, last_email_at FROM signups WHERE project = ? AND email = ?",
   )
-    .bind(email)
+    .bind(project, email)
     .first<{ confirmed_at: string | null; emails_sent: number; last_email_at: string | null }>();
   // Already on the list: say the same thing as for anyone else, so the form never reveals who
   // has signed up.
@@ -282,11 +250,10 @@ async function signup(env: Env, request: Request, body: Record<string, unknown>,
   const legacyLeave = await newToken();
   const expires = new Date(now.getTime() + CONFIRM_HOURS * 3_600_000).toISOString();
   const row = await env.DB.prepare(
-    `INSERT INTO signups (email, name, platforms, notes, consent_text, consent_at, created_at,
+    `INSERT INTO signups (project, email, platforms, consent_text, consent_at, created_at,
        confirm_hash, confirm_expires, leave_hash, emails_sent, last_email_at)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 1, ?)
-     ON CONFLICT (email) DO UPDATE SET name = excluded.name, platforms = excluded.platforms,
-       notes = excluded.notes,
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 1, ?)
+     ON CONFLICT (project, email) DO UPDATE SET platforms = excluded.platforms,
        consent_text = excluded.consent_text, consent_at = excluded.consent_at,
        confirm_hash = excluded.confirm_hash, confirm_expires = excluded.confirm_expires,
        leave_hash = excluded.leave_hash, emails_sent = signups.emails_sent + 1,
@@ -294,11 +261,10 @@ async function signup(env: Env, request: Request, body: Record<string, unknown>,
      RETURNING id`,
   )
     .bind(
+      project,
       email,
-      name,
       platforms.join(","),
-      notes,
-      CONSENT_TEXT,
+      beta.consent,
       now.toISOString(),
       now.toISOString(),
       confirmToken.hash,
@@ -310,14 +276,14 @@ async function signup(env: Env, request: Request, body: Record<string, unknown>,
 
   const service = env.SERVICE_URL.replace(/\/$/, "");
   const leaveUrl = `${service}/leave?t=${await leaveToken(env, row!.id)}`;
-  const content = confirmationEmail(name, `${service}/confirm?t=${confirmToken.token}`, leaveUrl);
+  const content = confirmationEmail(beta.name, "", `${service}/confirm?t=${confirmToken.token}`, leaveUrl);
   try {
     await sendEmail(env, { to: email, ...content, leaveUrl });
   } catch (error) {
     // Couldn't send: don't count it against them, and say so plainly.
     console.error("Sending the confirmation email failed:", error);
-    await env.DB.prepare("UPDATE signups SET emails_sent = MAX(emails_sent - 1, 0) WHERE email = ?")
-      .bind(email)
+    await env.DB.prepare("UPDATE signups SET emails_sent = MAX(emails_sent - 1, 0) WHERE project = ? AND email = ?")
+      .bind(project, email)
       .run();
     return json({ ok: false, error: "mail" }, 502, origin);
   }
@@ -328,15 +294,14 @@ async function confirm(env: Env, url: URL) {
   const token = url.searchParams.get("t") ?? "";
   if (!token) return redirect(env, "/beta/link-expired/");
   const row = await env.DB.prepare(
-    "SELECT id, name, email, platforms, notes, confirm_expires, confirmed_at FROM signups WHERE confirm_hash = ?",
+    "SELECT id, project, email, platforms, confirm_expires, confirmed_at FROM signups WHERE confirm_hash = ?",
   )
     .bind(await sha256(token))
     .first<{
       id: number;
-      name: string;
+      project: string;
       email: string;
       platforms: string;
-      notes: string;
       confirm_expires: string;
       confirmed_at: string | null;
     }>();
@@ -346,24 +311,19 @@ async function confirm(env: Env, url: URL) {
   await env.DB.prepare("UPDATE signups SET confirmed_at = ? WHERE id = ?")
     .bind(new Date().toISOString(), row.id)
     .run();
-  // Tell them they're on the list (with the way off it), and tell the studio. If either email
-  // fails, they're confirmed all the same.
+  // Ask Andrew to let them in. If the email fails, they're confirmed all the same, and the
+  // morning report lists them too.
   try {
-    const count = await env.DB.prepare("SELECT COUNT(*) AS n FROM signups WHERE confirmed_at IS NOT NULL")
-      .first<{ n: number }>();
-    const emails: Email[] = [];
-    if (await allowEmail(env, limits(env).emailsPerDay)) {
-      const leaveUrl = `${env.SERVICE_URL.replace(/\/$/, "")}/leave?t=${await leaveToken(env, row.id)}`;
-      emails.push({ to: row.email, ...welcomeEmail(row.name, leaveUrl), leaveUrl });
-    }
-    const note = newTesterEmail(row.name, row.email, row.platforms.split(","), row.notes, count?.n ?? 0);
-    emails.push({ to: env.OWNER_EMAIL, ...note });
-    const results = await sendEmails(env, emails);
-    results.forEach((result, i) => {
-      if (result instanceof Error) console.error(`Emailing ${emails[i]!.to === env.OWNER_EMAIL ? "the studio" : "the new tester"} failed:`, result);
+    const waiting = await env.DB.prepare(
+      "SELECT COUNT(*) AS n FROM signups WHERE confirmed_at IS NOT NULL AND approved_at IS NULL",
+    ).first<{ n: number }>();
+    const app = BETAS[row.project]?.name ?? row.project;
+    await sendEmail(env, {
+      to: env.OWNER_EMAIL,
+      ...waitingEmail(app, row.email, row.platforms.split(","), await approveUrl(env, row.id), waiting?.n ?? 0),
     });
   } catch (error) {
-    console.error("Emailing about a new tester failed:", error);
+    console.error("Asking the studio to let a tester in failed:", error);
   }
   return redirect(env, "/beta/confirmed/");
 }
@@ -389,49 +349,77 @@ async function outbox(env: Env) {
 
 interface Tester {
   id: number;
+  project: string;
   name: string;
   email: string;
   platforms: string;
   notes: string;
   confirmed_at: string;
+  approved_at: string | null;
 }
 
-const confirmedTesters = async (env: Env) =>
+/** Everyone let into a beta, oldest first. */
+const testersIn = async (env: Env, project: string) =>
   (
     await env.DB.prepare(
-      "SELECT id, name, email, platforms, notes, confirmed_at FROM signups WHERE confirmed_at IS NOT NULL ORDER BY confirmed_at",
+      "SELECT id, project, name, email, platforms, notes, confirmed_at, approved_at FROM signups WHERE project = ? AND approved_at IS NOT NULL ORDER BY approved_at",
+    )
+      .bind(project)
+      .all<Tester>()
+  ).results;
+
+/** Everyone who's confirmed and waits for Andrew, in every beta, oldest first. */
+const waitingForOk = async (env: Env) =>
+  (
+    await env.DB.prepare(
+      "SELECT id, project, name, email, platforms, notes, confirmed_at, approved_at FROM signups WHERE confirmed_at IS NOT NULL AND approved_at IS NULL ORDER BY confirmed_at",
     ).all<Tester>()
   ).results;
 
 /**
- * The daily report: everyone confirmed (newest first), who's confirmed since the last report was
- * sent (or in the last day, before the first), and how many are still waiting to confirm. Sent
- * when asked, and then remembered; otherwise just shown.
+ * The daily report: who's waiting to be let in (with the links to decide), and for each beta who's
+ * been let in since the last report was sent (or in the last day, before the first), everyone in
+ * it, and how many are still to confirm. Sent when asked, and then remembered; otherwise shown.
  */
 async function dailyReport(env: Env, send: boolean) {
   const last = await env.DB.prepare("SELECT sent_at FROM reports ORDER BY sent_at DESC LIMIT 1").first<{
     sent_at: string;
   }>();
   const since = last?.sent_at ?? new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
-  const list = [...(await confirmedTesters(env))].reverse().map((t) => ({
-    name: t.name,
-    email: t.email,
-    platforms: t.platforms.split(","),
-    notes: t.notes,
-    confirmedAt: t.confirmed_at,
-    isNew: t.confirmed_at > since,
-  }));
-  const waiting = await env.DB.prepare(
-    "SELECT COUNT(*) AS n FROM signups WHERE confirmed_at IS NULL AND confirm_expires > ?",
-  )
-    .bind(new Date().toISOString())
-    .first<{ n: number }>();
+  const now = new Date().toISOString();
+  const betas = [];
+  for (const [project, beta] of Object.entries(BETAS)) {
+    const testers = [...(await testersIn(env, project))].reverse().map((t) => ({
+      name: t.name,
+      email: t.email,
+      platforms: t.platforms.split(","),
+      notes: t.notes,
+      inSince: t.approved_at!,
+      isNew: t.approved_at! > since,
+    }));
+    const unconfirmed = await env.DB.prepare(
+      "SELECT COUNT(*) AS n FROM signups WHERE project = ? AND confirmed_at IS NULL AND confirm_expires > ?",
+    )
+      .bind(project, now)
+      .first<{ n: number }>();
+    betas.push({ name: beta.name, platforms: beta.platforms, testers, waitingToConfirm: unconfirmed?.n ?? 0 });
+  }
+  const waitingForYou = [];
+  for (const t of await waitingForOk(env)) {
+    waitingForYou.push({
+      app: BETAS[t.project]?.name ?? t.project,
+      email: t.email,
+      platforms: t.platforms.split(","),
+      confirmedAt: t.confirmed_at,
+      approveUrl: await approveUrl(env, t.id),
+    });
+  }
   const lists = (await waitlists(env)).map((l) => ({
     name: l.name,
     total: l.people.length,
     fresh: l.people.filter((p) => p.confirmed_at > since).length,
   }));
-  const report = dailyReportEmail(list, waiting?.n ?? 0, last ? since : null, lists, await feedbackSince(env, since));
+  const report = dailyReportEmail(betas, waitingForYou, last ? since : null, lists, await feedbackSince(env, since));
   const to = env.REPORT_EMAIL || env.OWNER_EMAIL;
   if (send) {
     await sendEmail(env, { to, ...report });
@@ -440,29 +428,31 @@ async function dailyReport(env: Env, send: boolean) {
   return { sent: send, to, subject: report.subject, preview: report.text };
 }
 
+/** Everyone in each beta, and who's waiting to be let in: for npm run testers. */
 async function testers(env: Env) {
-  const list = await confirmedTesters(env);
-  return json(
-    { ok: true, testers: list.map(({ name, email, platforms, notes, confirmed_at }) => ({ name, email, platforms: platforms.split(","), notes, confirmed_at })) },
-    200,
-    null,
-  );
+  const shape = (t: Tester) => ({
+    project: t.project,
+    name: t.name,
+    email: t.email,
+    platforms: t.platforms.split(","),
+    notes: t.notes,
+    confirmed_at: t.confirmed_at,
+    approved_at: t.approved_at,
+  });
+  const inBetas = [];
+  for (const project of Object.keys(BETAS)) inBetas.push(...(await testersIn(env, project)).map(shape));
+  return json({ ok: true, testers: inBetas, waiting: (await waitingForOk(env)).map(shape) }, 200, null);
 }
 
-/** How to get the build, for each platform, in the announcement. */
-const HOW: Record<string, string> = {
-  Android:
-    "Open the link on your Android phone and download the app. If your phone asks, allow installing apps from your browser, then press Install. A newer build installs over the old one and keeps your games.",
-  Web: "Opens in any browser, on a phone, tablet or computer. Nothing to install.",
-  iPhone: "Opens TestFlight, Apple's app for beta testing: install it from the App Store if you haven't already.",
-};
-
 async function announce(env: Env, body: Record<string, unknown>) {
+  const project = betaOf(body.project);
+  if (!project) return json({ ok: false, error: "project" }, 400, null);
+  const beta = BETAS[project]!;
   const title = typeof body.title === "string" ? body.title.trim() : "";
   const message = typeof body.message === "string" ? body.message.trim() : "";
   const given = (body.links ?? {}) as Record<string, unknown>;
   const links: Record<string, string> = {};
-  for (const platform of PLATFORMS) {
+  for (const platform of beta.platforms) {
     const url = given[platform];
     if (typeof url === "string" && /^https:\/\/\S+$/.test(url)) links[platform] = url;
   }
@@ -473,17 +463,18 @@ async function announce(env: Env, body: Record<string, unknown>) {
   // Each tester gets the links for the platforms they play on; nobody gets an empty email.
   const service = env.SERVICE_URL.replace(/\/$/, "");
   const plan: { tester: Tester; email: Email }[] = [];
-  for (const tester of await confirmedTesters(env)) {
+  for (const tester of await testersIn(env, project)) {
     const theirs = tester.platforms.split(",").filter((p) => links[p]);
     if (theirs.length === 0) continue;
     const leaveUrl = `${service}/leave?t=${await leaveToken(env, tester.id)}`;
     const content = announcementEmail(
+      beta.name,
       tester.name,
       title,
       message,
-      theirs.map((platform) => ({ platform, url: links[platform]!, how: HOW[platform]! })),
+      theirs.map((platform) => ({ platform, url: links[platform]!, how: howTo(platform, links[platform]!, beta.name) })),
       leaveUrl,
-      `${env.SITE_URL.replace(/\/$/, "")}/beta/terms/`,
+      beta.terms ? `${env.SITE_URL.replace(/\/$/, "")}/beta/terms/` : "",
     );
     plan.push({ tester, email: { to: tester.email, ...content, leaveUrl } });
   }
@@ -494,6 +485,8 @@ async function announce(env: Env, body: Record<string, unknown>) {
     preview: email.text,
   }));
   if (body.send !== true) return json({ ok: true, sent: 0, recipients }, 200, null);
+  // These are the latest builds now: whoever's let in later gets them straight away.
+  await saveBuilds(env, project, links);
 
   // Within the day's email allowance; anyone over it is reported, not dropped silently.
   const allowed: typeof plan = [];

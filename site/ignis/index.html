@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Ignis Aura · Creatio Aura</title>
-  <meta name="description" content="Ignis Aura is a fantasy tabletop adventure: hand-crafted pieces that click together with magnets, and a companion app that runs the game. Beta sign-ups are open with an invite code.">
+  <meta name="description" content="Ignis Aura is a fantasy tabletop adventure: hand-crafted pieces that click together with magnets, and a companion app that runs the game. Beta sign-ups are open.">
   <link rel="canonical" href="https://creatio-aura.com/ignis/">
   <meta name="theme-color" content="#120f1f">
   <link rel="icon" href="/ignis/flame.svg" type="image/svg+xml">
@@ -13,7 +13,7 @@
   <meta property="og:type" content="website">
   <meta property="og:site_name" content="Creatio Aura">
   <meta property="og:title" content="Ignis Aura">
-  <meta property="og:description" content="A fantasy tabletop adventure made to be held, with a companion app that runs the game. Beta sign-ups are open with an invite code.">
+  <meta property="og:description" content="A fantasy tabletop adventure made to be held, with a companion app that runs the game. Beta sign-ups are open.">
   <meta property="og:url" content="https://creatio-aura.com/ignis/">
   <meta property="og:image" content="https://creatio-aura.com/images/share-ignis-aura.png">
   <meta property="og:image:width" content="1200">
@@ -70,31 +70,14 @@
     <section class="wrap beta" id="beta">
       <div class="beta-intro">
         <h2>Join the beta</h2>
-        <p>Beta testers get early builds of Ignis Aura and tell us what to change. The beta is <strong>invite only</strong>: if someone gave you an invite code, enter it to begin.</p>
-        <p>Interested, but no code? Email the creator at <a href="mailto:contact@creatio-aura.com?subject=Ignis%20Aura%20beta%20invite">contact@creatio-aura.com</a> to ask for an invite key.</p>
-        <p class="small">We only use your name and email for the Ignis Aura beta, and you can leave any time. See the <a href="/privacy/">privacy policy</a>.</p>
+        <p>Beta testers get early builds of Ignis Aura and tell us what to change. Sign up with your email and where you'd play, and confirm it from your inbox; we'll email you as soon as you're in.</p>
+        <p class="small">We only use your email for the Ignis Aura beta, and you can leave any time. See the <a href="/privacy/">privacy policy</a>.</p>
       </div>
 
       <!-- Where the sign-up service is, and the public Turnstile key (not a secret). -->
-      <div id="beta-signup" data-service="https://creatio-aura-beta.creatio-aura.workers.dev" data-sitekey="0x4AAAAAAFf0XajRbISI5mg7">
-        <form class="panel" id="step-code" novalidate>
-          <h3>Your invite code</h3>
-          <div class="field">
-            <label for="code">Invite code</label>
-            <input id="code" name="code" autocomplete="off" autocapitalize="characters" spellcheck="false" placeholder="WORD-WORD-WORD-WORD-0000" required>
-            <span class="hint">Capitals and dashes don't matter.</span>
-          </div>
-          <div id="turnstile"></div>
-          <p class="error" id="code-error" role="alert" hidden></p>
-          <button class="button" type="submit">Continue</button>
-        </form>
-
-        <form class="panel" id="step-details" novalidate hidden>
-          <h3>Your details</h3>
-          <div class="field">
-            <label for="name">Name</label>
-            <input id="name" name="name" autocomplete="name" maxlength="60" required>
-          </div>
+      <div id="beta-signup" data-project="ignis" data-service="https://creatio-aura-beta.creatio-aura.workers.dev" data-sitekey="0x4AAAAAAFf0XajRbISI5mg7">
+        <form class="panel" id="beta-form" novalidate>
+          <h3>Join the beta</h3>
           <div class="field">
             <label for="email">Email</label>
             <input id="email" name="email" type="email" autocomplete="email" maxlength="254" required>
@@ -102,31 +85,27 @@
           <fieldset>
             <legend>Where would you play?</legend>
             <div class="options">
-              <!-- iPhone needs TestFlight (the Apple Developer Program): not yet. -->
-              <span class="option unavailable" tabindex="0" data-tip="Coming soon" aria-label="iPhone: coming soon"><input type="checkbox" value="iPhone" disabled aria-hidden="true"> iPhone</span>
+              <label class="option"><input type="checkbox" name="platforms" value="iPhone"> iPhone</label>
               <label class="option"><input type="checkbox" name="platforms" value="Android"> Android</label>
               <label class="option"><input type="checkbox" name="platforms" value="Web"> Web</label>
             </div>
-            <span class="hint">On iPhone? It's coming soon: pick Web for now, and say so in the notes.</span>
+            <span class="hint">iPhone and iPad play through Apple's TestFlight app. On Android, sign up with your Google account's email (usually Gmail): Google Play only lets that one into the test.</span>
           </fieldset>
-          <div class="field">
-            <label for="notes">Notes <span class="optional">(optional)</span></label>
-            <textarea id="notes" name="notes" rows="3" maxlength="500" placeholder="Anything we should know, e.g. &quot;I'd play on iPhone when it's out.&quot;"></textarea>
-          </div>
           <!-- Hidden from people; bots fill it in. -->
           <div class="decoy" aria-hidden="true">
             <label for="website">Website</label>
             <input id="website" name="website" tabindex="-1" autocomplete="off">
           </div>
           <label class="consent"><input type="checkbox" name="consent" id="consent"> <span>Email me about the Ignis Aura beta. I agree to the <a href="/beta/terms/" target="_blank" rel="noopener">Beta Tester Terms</a> and I've read the <a href="/privacy/" target="_blank" rel="noopener">privacy policy</a>.</span></label>
-          <p class="small">We'll email you a link to confirm your place. It can land in your spam or junk folder, so check there too. If you don't confirm within 48 hours, you won't be added to the beta list.</p>
-          <p class="error" id="details-error" role="alert" hidden></p>
+          <div id="turnstile"></div>
+          <p class="small">We'll email you a link to confirm. It can land in your spam or junk folder, so check there too. If you don't confirm within 48 hours, you won't be added.</p>
+          <p class="error" id="beta-error" role="alert" hidden></p>
           <button class="button" type="submit">Join the beta</button>
         </form>
 
-        <div class="panel done" id="step-done" role="status" hidden>
+        <div class="panel done" id="beta-done" role="status" tabindex="-1" hidden>
           <h3>Check your email</h3>
-          <p>We've sent a link to <strong id="done-email"></strong>. Open it within 48 hours to confirm your place: until you do, you're not on the beta list.</p>
+          <p>We've sent a link to <strong id="beta-done-email"></strong>. Open it within 48 hours to confirm. Then we'll look at your sign-up and email you when you're in.</p>
           <p>Can't find it? Check your <strong>spam or junk folder</strong>; it often lands there. Marking it "not spam" helps our next emails reach you.</p>
         </div>
       </div>

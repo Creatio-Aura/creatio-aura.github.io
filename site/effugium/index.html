@@ -25,9 +25,9 @@
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght,SOFT,WONK@9..144,400..700,100,0&family=Nunito:wght@400;600;700&display=swap">
   <link rel="stylesheet" href="/styles.css">
   <script src="/stars.js" defer></script>
-  <!-- Checks email addresses for typos; the sign-up service uses the same file. Before waitlist.js. -->
+  <!-- Checks email addresses for typos; the sign-up service uses the same file. Before beta.js. -->
   <script type="module" src="/email-check.js"></script>
-  <script src="/waitlist.js" defer></script>
+  <script src="/beta.js" defer></script>
   <script src="/video-steps.js" defer></script>
   <script src="https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit" async defer></script>
 </head>
@@ -42,7 +42,7 @@
     </a>
     <nav class="site-nav" aria-label="Main">
       <a href="/">All projects</a>
-      <a href="#notify">Hear when it's out</a>
+      <a href="#beta">Join the beta</a>
     </nav>
   </header>
 
@@ -94,40 +94,50 @@
       <div class="panel beta-note">
         <h3>Testing now</h3>
         <p>Friends and family are testing early builds of Effugium Aura on <strong>iPhone and Android</strong> and telling us what to change. On iPhone it also follows your head with AirPods, and the Kicker can vibrate your Apple Watch. When it's ready, it'll be in the App Store and on Google Play.</p>
-        <p>Want to help test it? Message us on <a href="https://www.facebook.com/creatioaura">Facebook</a> or email <a href="mailto:contact@creatio-aura.com">contact@creatio-aura.com</a>, and say whether you use an iPhone or an Android phone.</p>
+        <p>Want to help test it? <a href="#beta">Join the beta</a> below.</p>
       </div>
     </section>
 
-    <section class="wrap beta" id="notify">
+    <!-- The beta sign-up (2026-11-07, Andrew): replaced "Hear when it's out"; people already on that
+         waiting list stay on it and still get the launch email. -->
+    <section class="wrap beta" id="beta">
       <div class="beta-intro">
-        <h2>Hear when it's out</h2>
-        <p>Leave your email and we'll tell you when Effugium Aura is out. We'll only email you about Effugium Aura, and you can leave the list any time.</p>
-        <p class="small">See the <a href="/privacy/">privacy policy</a>.</p>
+        <h2>Join the beta</h2>
+        <p>Try Effugium Aura before it's out, on iPhone or Android, and tell us what you think. Sign up with your email and where you'd use it, and confirm it from your inbox; we'll email you as soon as you're in.</p>
+        <p class="small">We only use your email for the Effugium Aura beta, and you can leave any time. See the <a href="/privacy/">privacy policy</a>.</p>
       </div>
 
       <!-- Where the sign-up service is, and the public Turnstile key (not a secret). -->
-      <div id="waitlist" data-project="effugium" data-service="https://creatio-aura-beta.creatio-aura.workers.dev" data-sitekey="0x4AAAAAAFf0XajRbISI5mg7">
-        <form class="panel" id="waitlist-form" novalidate>
-          <h3>Tell me when it's out</h3>
+      <div id="beta-signup" data-project="effugium" data-service="https://creatio-aura-beta.creatio-aura.workers.dev" data-sitekey="0x4AAAAAAFf0XajRbISI5mg7">
+        <form class="panel" id="beta-form" novalidate>
+          <h3>Join the beta</h3>
           <div class="field">
             <label for="email">Email</label>
             <input id="email" name="email" type="email" autocomplete="email" maxlength="254" required>
           </div>
+          <fieldset>
+            <legend>Where would you use it?</legend>
+            <div class="options">
+              <label class="option"><input type="checkbox" name="platforms" value="iPhone"> iPhone</label>
+              <label class="option"><input type="checkbox" name="platforms" value="Android"> Android</label>
+            </div>
+            <span class="hint">iPhone testers use Apple's TestFlight app. On Android, sign up with your Google account's email (usually Gmail): Google Play only lets that one into the test.</span>
+          </fieldset>
           <!-- Hidden from people; bots fill it in. -->
           <div class="decoy" aria-hidden="true">
             <label for="website">Website</label>
             <input id="website" name="website" tabindex="-1" autocomplete="off">
           </div>
-          <label class="consent"><input type="checkbox" name="consent" id="consent"> <span>Email me when Effugium Aura is out. I've read the <a href="/privacy/" target="_blank" rel="noopener">privacy policy</a>.</span></label>
+          <label class="consent"><input type="checkbox" name="consent" id="consent"> <span>Email me about the Effugium Aura beta. I've read the <a href="/privacy/" target="_blank" rel="noopener">privacy policy</a>.</span></label>
           <div id="turnstile"></div>
-          <p class="small">We'll email you a link to confirm. It can land in your spam or junk folder, so check there too. If you don't confirm within 48 hours, you won't be added to the list.</p>
-          <p class="error" id="waitlist-error" role="alert" hidden></p>
-          <button class="button" type="submit">Tell me when it's out</button>
+          <p class="small">We'll email you a link to confirm. It can land in your spam or junk folder, so check there too. If you don't confirm within 48 hours, you won't be added.</p>
+          <p class="error" id="beta-error" role="alert" hidden></p>
+          <button class="button" type="submit">Join the beta</button>
         </form>
 
-        <div class="panel done" id="waitlist-done" role="status" hidden>
+        <div class="panel done" id="beta-done" role="status" tabindex="-1" hidden>
           <h3>Check your email</h3>
-          <p>We've sent a link to <strong id="waitlist-done-email"></strong>. Open it within 48 hours to confirm: until you do, you're not on the list.</p>
+          <p>We've sent a link to <strong id="beta-done-email"></strong>. Open it within 48 hours to confirm. Then we'll look at your sign-up and email you when you're in.</p>
           <p>Can't find it? Check your <strong>spam or junk folder</strong>; it often lands there.</p>
         </div>
       </div>

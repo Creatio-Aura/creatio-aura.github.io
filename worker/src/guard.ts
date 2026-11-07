@@ -1,5 +1,5 @@
-// What keeps the beta list safe: the invite code, the human check, a short-lived pass that
-// unlocks the form, rate limits, and the tokens in the email links (only their hashes are kept).
+// What keeps the beta list safe: the human check, rate limits, and the tokens in the email links
+// (only their hashes are kept, or they're signed).
 
 import type { Env } from "./index";
 
@@ -31,13 +31,6 @@ function sameText(a: string, b: string): boolean {
   return crypto.subtle.timingSafeEqual(x, y);
 }
 
-/** The invite code, forgiving case, spaces and dashes: "ember raven" = "EMBER-RAVEN". */
-const normalize = (code: string) => code.toUpperCase().replace(/[^A-Z0-9]/g, "");
-
-export function isInviteCode(env: Env, code: unknown): boolean {
-  return typeof code === "string" && code.length <= 80 && sameText(normalize(code), normalize(env.INVITE_CODE));
-}
-
 /** Cloudflare Turnstile: is this a person? */
 export async function isHuman(env: Env, token: unknown): Promise<boolean> {
   if (typeof token !== "string" || token.length === 0 || token.length > 2048) return false;
@@ -52,8 +45,6 @@ export async function isHuman(env: Env, token: unknown): Promise<boolean> {
   return result.success === true;
 }
 
-const PASS_MINUTES = 30;
-
 async function sign(env: Env, text: string): Promise<string> {
   const key = await crypto.subtle.importKey(
     "raw",
@@ -63,19 +54,6 @@ async function sign(env: Env, text: string): Promise<string> {
     ["sign"],
   );
   return hex(await crypto.subtle.sign("HMAC", key, encoder.encode(text)));
-}
-
-/** A pass that unlocks the sign-up form for half an hour, once the code and the check pass. */
-export async function newPass(env: Env): Promise<string> {
-  const expires = Date.now() + PASS_MINUTES * 60_000;
-  return `${expires}.${await sign(env, `pass:${expires}`)}`;
-}
-
-export async function isPass(env: Env, pass: unknown): Promise<boolean> {
-  if (typeof pass !== "string") return false;
-  const [expires, signature] = pass.split(".");
-  if (!expires || !signature || Number(expires) < Date.now()) return false;
-  return sameText(signature, await sign(env, `pass:${expires}`));
 }
 
 /** An anonymous key for this connection: a salted hash, never the address itself. */

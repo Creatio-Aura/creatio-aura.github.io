@@ -1,6 +1,7 @@
 // Runs the sign-up service locally (Cloudflare's own runtime, through wrangler dev, with a
 // throwaway local database) and walks people through it: npm test. Emails are kept in the
-// test outbox instead of sent. Turnstile uses Cloudflare's always-passes test key.
+// test outbox instead of sent. Turnstile uses Cloudflare's always-passes test key (any token but
+// an empty one passes).
 
 import { execFileSync, spawn, spawnSync } from "node:child_process";
 import { mkdtempSync, rmSync } from "node:fs";
@@ -13,14 +14,12 @@ import assert from "node:assert/strict";
 const PORT = 8797;
 const BASE = `http://127.0.0.1:${PORT}`;
 const SITE = "https://creatio-aura.com";
-const CODE = "EMBER-RAVEN-LANTERN-THORN-4821";
 const cwd = new URL("..", import.meta.url);
 const state = mkdtempSync(join(tmpdir(), "beta-test-"));
 let server;
 
 const vars = {
   MAIL_MODE: "test",
-  INVITE_CODE: CODE,
   TURNSTILE_SECRET: "1x0000000000000000000000000000000AA",
   PASS_SECRET: "test-pass-secret",
   IP_SALT: "test-salt",
@@ -32,7 +31,6 @@ const vars = {
   OWNER_EMAIL: "studio@example.com",
   FEEDBACK_EMAIL: "feedback@example.com",
   // Every test comes from one machine: room for them all, while still testing the limit.
-  CODE_LIMIT: "16",
   SIGNUP_LIMIT: "40",
   FEEDBACK_LIMIT: "30",
 };
@@ -78,68 +76,78 @@ const post = (path, body, origin = SITE) =>
     body: JSON.stringify(body),
   });
 
-const passFor = async (code = CODE) => {
-  const response = await post("/check-code", { code, turnstile: "XXXX.DUMMY.TOKEN.XXXX" });
-  return { status: response.status, body: await response.json() };
-};
-
 const outbox = async () => (await fetch(`${BASE}/__outbox`)).json();
+const HUMAN = "XXXX.DUMMY.TOKEN.XXXX";
 
-const person = (pass, extra = {}) => ({
-  pass,
-  name: "Kodi",
+/** A sign-up as the form sends it: Ignis Aura's beta unless it says otherwise. */
+const person = (extra = {}) => ({
   email: "kodi@example.com",
   platforms: ["Android", "Web", "Toaster"],
   consent: true,
+  turnstile: HUMAN,
   website: "",
   ...extra,
 });
 
+const admin = (path, body, key = "test-admin-key") =>
+  fetch(`${BASE}${path}`, {
+    method: body ? "POST" : "GET",
+    headers: { Authorization: `Bearer ${key}`, "Content-Type": "application/json" },
+    body: body ? JSON.stringify(body) : undefined,
+  });
+
+/** The link in the studio's "wants in" email for this address. */
+async function approveLinkFor(email) {
+  const note = (await outbox()).find((e) => e.to_addr === "studio@example.com" && e.subject.includes(`: ${email} wants in`));
+  return note.body.match(/(http\S+\/approve\?t=\S+)/)[1];
+}
+
+/** Presses a button on the page that link opens: "approve" lets them in, "decline" turns them away. */
+const press = (approveLink, button = "approve") =>
+  fetch(approveLink.replace("/approve?", `/${button}?`), { method: "POST" });
+
+/** Signs someone up, confirms them through the link in their email, and lets them in. */
+async function tester(email, platforms, project) {
+  await post("/signup", person({ email, platforms, ...(project ? { project } : {}) }));
+  const mail = (await outbox()).find((e) => e.to_addr === email);
+  await fetch(mail.body.match(/(http\S+\/confirm\?t=\S+)/)[1], { redirect: "manual" });
+  await press(await approveLinkFor(email));
+}
+
 test("only our own site can use it", async () => {
-  const response = await post("/check-code", { code: CODE, turnstile: "x" }, "https://evil.example");
+  const response = await post("/signup", person(), "https://evil.example");
   assert.equal(response.status, 403);
   assert.equal(response.headers.get("Access-Control-Allow-Origin"), null);
+  // The invite code's step is gone.
+  assert.equal((await post("/check-code", { code: "ANY", turnstile: HUMAN })).status, 404);
 });
 
-test("the invite code opens the form; a wrong one, or no human check, doesn't", async () => {
-  assert.equal((await post("/check-code", { code: CODE, turnstile: "" })).status, 403);
-  const wrong = await passFor("EMBER-RAVEN-LANTERN-THORN-0000");
-  assert.equal(wrong.status, 401);
-  assert.equal(wrong.body.error, "bad-code");
-  // Case, spaces and dashes don't matter.
-  const right = await passFor("ember raven lantern thorn 4821");
-  assert.equal(right.status, 200);
-  assert.match(right.body.pass, /^\d+\.[0-9a-f]{64}$/);
-});
-
-test("no pass, no sign-up", async () => {
-  const response = await post("/signup", person("123.abc"));
-  assert.equal(response.status, 401);
-  assert.equal((await response.json()).error, "expired-pass");
+test("no human check, no sign-up", async () => {
+  const response = await post("/signup", person({ turnstile: "" }));
+  assert.equal(response.status, 403);
+  assert.equal((await response.json()).error, "human-check");
 });
 
 test("bad details are turned away, each with its reason", async () => {
-  const { body } = await passFor();
   const cases = [
-    [{ name: "" }, "bad-name"],
-    [{ name: "x".repeat(61) }, "bad-name"],
     [{ email: "not-an-email" }, "bad-email"],
     [{ email: "kodi@example" }, "bad-email"],
     [{ email: "kodi@gmail.con" }, "email-typo"],
     [{ platforms: ["Toaster"] }, "pick-platform"],
+    // Effugium Aura has no web version.
+    [{ project: "effugium", platforms: ["Web"] }, "pick-platform"],
+    [{ project: "nope" }, "bad-project"],
     [{ consent: false }, "need-consent"],
-    [{ notes: "x".repeat(501) }, "bad-notes"],
   ];
   for (const [change, error] of cases) {
-    const response = await post("/signup", person(body.pass, change));
+    const response = await post("/signup", person(change));
     assert.equal(response.status, 400, error);
     assert.equal((await response.json()).error, error);
   }
 });
 
 test("a typo'd email is turned away with the likely right address", async () => {
-  const { body } = await passFor();
-  const response = await post("/signup", person(body.pass, { email: "kodi@gmail.con" }));
+  const response = await post("/signup", person({ email: "kodi@gmail.con" }));
   assert.deepEqual(await response.json(), { ok: false, error: "email-typo", suggestion: "kodi@gmail.com" });
 });
 
@@ -165,31 +173,31 @@ test("the email check (shared by the form and the service) catches typos, and pa
 });
 
 test("bots that fill in the hidden field are quietly ignored", async () => {
-  const { body } = await passFor();
   const before = (await outbox()).length;
-  const response = await post("/signup", person(body.pass, { email: "bot@example.com", website: "spam" }));
+  const response = await post("/signup", person({ email: "bot@example.com", website: "spam" }));
   assert.equal(response.status, 200);
   assert.equal((await outbox()).length, before);
 });
 
-test("signing up sends a confirmation email; the link confirms and says so by email; leaving removes them", async () => {
-  const { body } = await passFor();
-  const response = await post("/signup", person(body.pass));
+test("signing up: a confirmation email; confirming asks Andrew; he lets them in and they're told; leaving removes them", async () => {
+  const response = await post("/signup", person());
   assert.equal(response.status, 200);
   const [email] = await outbox();
   assert.equal(email.to_addr, "kodi@example.com");
   assert.match(email.subject, /Confirm your place in the Ignis Aura beta/);
-  assert.match(email.body, /Hi Kodi,/);
+  assert.match(email.body, /^Hi,/);
   const confirmLink = email.body.match(/(http\S+\/confirm\?t=\S+)/)[1];
 
   const confirmed = await fetch(confirmLink, { redirect: "manual" });
   assert.equal(confirmed.status, 303);
   assert.equal(confirmed.headers.get("Location"), `${SITE}/beta/confirmed/`);
-  // They're told they're on the list, with the way off it.
-  const welcome = (await outbox()).find((e) => e.to_addr === "kodi@example.com");
-  assert.match(welcome.subject, /You're on the Ignis Aura beta list/);
-  assert.match(welcome.body, /Hi Kodi,/);
-  const leaveLink = welcome.body.match(/(http\S+\/leave\?t=\S+)/)[1];
+  // Nothing to them yet; the studio is asked, with the link to decide.
+  assert.equal((await outbox()).filter((e) => e.to_addr === "kodi@example.com").length, 1);
+  const [note] = (await outbox()).filter((e) => e.to_addr === "studio@example.com");
+  assert.equal(note.subject, "Ignis Aura beta: kodi@example.com wants in (Android, Web)");
+  assert.match(note.body, /Plays on: Android, Web/);
+  assert.match(note.body, /add their Google account to the Play test's testers/);
+  const approveLink = await approveLinkFor("kodi@example.com");
   // A used link still says confirmed; a made-up one, expired.
   assert.equal((await fetch(confirmLink, { redirect: "manual" })).headers.get("Location"), `${SITE}/beta/confirmed/`);
   assert.equal(
@@ -197,40 +205,46 @@ test("signing up sends a confirmation email; the link confirms and says so by em
     `${SITE}/beta/link-expired/`,
   );
 
-  // Signing up again once confirmed says the same as always, and sends nothing; nor does
-  // confirming again.
-  const again = await post("/signup", person((await passFor()).body.pass));
-  assert.equal(again.status, 200);
+  // Opening the link only shows a page (a mail app checking links lets nobody in).
+  const page = await fetch(approveLink);
+  assert.equal(page.status, 200);
+  const html = await page.text();
+  assert.match(html, /kodi@example\.com<\/b> wants to join the Ignis Aura beta, on Android, Web/);
+  assert.match(html, /Let them in/);
+  assert.equal((await (await admin("/admin/testers")).json()).testers.find((t) => t.email === "kodi@example.com"), undefined);
+  assert.equal((await (await admin("/admin/testers")).json()).waiting.find((t) => t.email === "kodi@example.com").project, "ignis");
+  // A made-up link: nothing.
+  assert.equal((await fetch(`${BASE}/approve?t=1.abc`)).status, 404);
+
+  // Let in: they're told, with the way off it (no build links have gone out yet).
+  const letIn = await press(approveLink);
+  assert.match(await letIn.text(), /is in the Ignis Aura beta/);
+  const welcome = (await outbox()).find((e) => e.to_addr === "kodi@example.com");
+  assert.equal(welcome.subject, "You're in the Ignis Aura beta");
+  assert.match(welcome.body, /We'll email you when there's a build for you to play\./);
+  const leaveLink = welcome.body.match(/(http\S+\/leave\?t=\S+)/)[1];
+  assert.match(await (await fetch(approveLink)).text(), /already in the Ignis Aura beta/);
+
+  // Signing up again once in says the same as always, and sends nothing.
+  assert.equal((await post("/signup", person())).status, 200);
   assert.equal((await outbox()).filter((e) => e.to_addr === "kodi@example.com").length, 2);
 
   const left = await fetch(leaveLink, { redirect: "manual" });
   assert.equal(left.headers.get("Location"), `${SITE}/beta/left/`);
   // Gone: signing up again starts over with a new email.
-  await post("/signup", person((await passFor()).body.pass));
+  await post("/signup", person());
   assert.equal((await outbox()).filter((e) => e.to_addr === "kodi@example.com").length, 3);
 });
 
-
-const admin = (path, body, key = "test-admin-key") =>
-  fetch(`${BASE}${path}`, {
-    method: body ? "POST" : "GET",
-    headers: { Authorization: `Bearer ${key}`, "Content-Type": "application/json" },
-    body: body ? JSON.stringify(body) : undefined,
-  });
-
-/** Signs someone up and confirms them through the link in their email. */
-async function tester(name, email, platforms) {
-  await post("/signup", person((await passFor()).body.pass, { name, email, platforms }));
-  const mail = (await outbox()).find((e) => e.to_addr === email);
+test("turning someone away removes them, and they hear nothing", async () => {
+  await post("/signup", person({ email: "spammy@example.com", platforms: ["Web"] }));
+  const mail = (await outbox()).find((e) => e.to_addr === "spammy@example.com");
   await fetch(mail.body.match(/(http\S+\/confirm\?t=\S+)/)[1], { redirect: "manual" });
-}
-
-test("confirming tells the studio, with their name, email and platforms", async () => {
-  await tester("Mira", "mira@example.com", ["Android", "Web"]);
-  const [note] = (await outbox()).filter((e) => e.to_addr === "studio@example.com");
-  assert.match(note.subject, /New Ignis Aura beta tester: Mira \(Android, Web\)/);
-  assert.match(note.body, /Email: mira@example.com/);
-  assert.match(note.body, /Plays on: Android, Web/);
+  const link = await approveLinkFor("spammy@example.com");
+  assert.match(await (await press(link, "decline")).text(), /has been removed/);
+  assert.equal((await fetch(link)).status, 404);
+  assert.equal((await outbox()).filter((e) => e.to_addr === "spammy@example.com").length, 1);
+  assert.equal((await (await admin("/admin/testers")).json()).waiting.find((t) => t.email === "spammy@example.com"), undefined);
 });
 
 test("the admin tools need the admin key", async () => {
@@ -238,18 +252,20 @@ test("the admin tools need the admin key", async () => {
   assert.equal((await fetch(`${BASE}/admin/testers`)).status, 401);
 });
 
-test("the tester list has everyone confirmed, with where they play", async () => {
-  await tester("Rook", "rook@example.com", ["iPhone"]);
-  const { testers } = await (await admin("/admin/testers")).json();
+test("the tester list has everyone let in, with where they play, and who's waiting", async () => {
+  await tester("mira@example.com", ["Android", "Web"]);
+  await tester("rook@example.com", ["iPhone"]);
+  const { testers, waiting } = await (await admin("/admin/testers")).json();
   const byEmail = Object.fromEntries(testers.map((t) => [t.email, t.platforms]));
   assert.deepEqual(byEmail["mira@example.com"], ["Android", "Web"]);
   assert.deepEqual(byEmail["rook@example.com"], ["iPhone"]);
-  // Kodi re-signed up earlier but hasn't confirmed: not on the list.
+  // Kodi signed up again but hasn't confirmed: neither in nor waiting.
   assert.equal(byEmail["kodi@example.com"], undefined);
+  assert.equal(waiting.find((t) => t.email === "kodi@example.com"), undefined);
 });
 
-test("an announcement goes only to people who play there, with only their links", async () => {
-  const links = { Android: "https://expo.dev/artifacts/eas/test.apk", Web: "https://creatio-aura.com/ignis-aura-web/" };
+test("an announcement goes only to testers let in who play there, with only their links, and later testers get those links", async () => {
+  const links = { Android: "https://play.google.com/apps/internaltest/1234", Web: "https://creatio-aura.com/ignis-aura-web/" };
   const dry = await (await admin("/admin/announce", { title: "Ignis Aura 0.6.0 is ready", message: "The board is in.", links })).json();
   assert.deepEqual(dry.recipients.map((r) => [r.email, r.platforms]), [["mira@example.com", ["Android", "Web"]]]);
   assert.equal(dry.sent, 0);
@@ -259,13 +275,20 @@ test("an announcement goes only to people who play there, with only their links"
   assert.equal(sent.sent, 1);
   const mails = (await outbox()).slice(0, (await outbox()).length - before);
   assert.deepEqual(mails.map((m) => m.to_addr), ["mira@example.com"]);
-  assert.match(mails[0].body, /Android: https:\/\/expo.dev\/artifacts\/eas\/test.apk/);
+  assert.match(mails[0].body, /Android: https:\/\/play\.google\.com\/apps\/internaltest\/1234\n  Open the link on your Android phone, signed in to the Google account you signed up with/);
   assert.match(mails[0].body, /Web: https:\/\/creatio-aura.com\/ignis-aura-web\//);
   // Every download email carries the Beta Tester Terms: at your own risk, and confidential.
   assert.match(mails[0].body, /you agree to the Beta Tester Terms/);
   assert.match(mails[0].body, /at your own risk/);
   assert.match(mails[0].body, /confidential/);
   assert.match(mails[0].body, new RegExp(`${SITE}/beta/terms/`));
+
+  // Someone let in afterwards gets those links in their welcome, with the terms.
+  await tester("late@example.com", ["Web"]);
+  const welcome = (await outbox()).find((e) => e.to_addr === "late@example.com" && e.subject.startsWith("You're in"));
+  assert.match(welcome.body, /Here's how to play:\n\nWeb: https:\/\/creatio-aura.com\/ignis-aura-web\//);
+  assert.doesNotMatch(welcome.body, /Android:/);
+  assert.match(welcome.body, /you agree to the Beta Tester Terms/);
 
   // Its remove-me link works.
   const leave = mails[0].body.match(/(http\S+\/leave\?t=\d+\.[0-9a-f]+)/)[1];
@@ -274,61 +297,84 @@ test("an announcement goes only to people who play there, with only their links"
   assert.equal(testers.find((t) => t.email === "mira@example.com"), undefined);
 });
 
-test("notes written at sign-up reach the studio's email, the testers list and the report", async () => {
-  const { body } = await passFor();
-  const notes = "I'd play on iPhone when it's out.\nHappy to test the web version now.";
-  assert.equal((await post("/signup", person(body.pass, { email: "noor@example.com", name: "Noor", platforms: ["Web"], notes }))).status, 200);
-  const confirmLink = (await outbox())[0].body.match(/(http\S+\/confirm\?t=\S+)/)[1];
-  await fetch(confirmLink, { redirect: "manual" });
-  const [studio] = await outbox();
-  assert.match(studio.subject, /New Ignis Aura beta tester: Noor/);
-  assert.match(studio.body, /Notes: I'd play on iPhone when it's out\./);
+test("Effugium Aura's beta: the same sign-up, its own list, links and emails, no Beta Tester Terms, and no web game", async () => {
+  // One address can be in both betas.
+  await tester("rook@example.com", ["iPhone", "Android"], "effugium");
+  const note = (await outbox()).find((e) => e.subject === "Effugium Aura beta: rook@example.com wants in (iPhone, Android)");
+  assert.ok(note);
+  const welcome = (await outbox()).find((e) => e.to_addr === "rook@example.com" && e.subject === "You're in the Effugium Aura beta");
+  assert.match(welcome.body, /You're in: you're an Effugium Aura beta tester now\./);
   const { testers } = await (await admin("/admin/testers")).json();
-  assert.equal(testers.find((t) => t.email === "noor@example.com").notes, notes);
-  const report = await (await admin("/admin/report", {})).json();
-  assert.match(report.preview, /Notes: I'd play on iPhone when it's out\. \/ Happy to test/);
+  assert.deepEqual(
+    testers.filter((t) => t.email === "rook@example.com").map((t) => [t.project, t.platforms]),
+    [["ignis", ["iPhone"]], ["effugium", ["iPhone", "Android"]]],
+  );
+
+  const links = { iPhone: "https://testflight.apple.com/join/EFFUG", Web: "https://example.com/not-for-effugium" };
+  const sent = await (await admin("/admin/announce", { project: "effugium", title: "Effugium Aura 0.2 is ready", message: "Try it.", links, send: true })).json();
+  assert.deepEqual(sent.recipients.map((r) => [r.email, r.platforms]), [["rook@example.com", ["iPhone"]]]);
+  const [mail] = (await outbox()).filter((e) => e.subject === "Effugium Aura 0.2 is ready");
+  assert.match(mail.body, /iPhone: https:\/\/testflight\.apple\.com\/join\/EFFUG/);
+  assert.doesNotMatch(mail.body, /Beta Tester Terms|confidential|not-for-effugium/);
+  assert.match(mail.body, /Thanks for testing Effugium Aura\./);
+
+  // Someone only in Effugium Aura's beta can't open Ignis Aura's web game.
+  await tester("calm@example.com", ["Android"], "effugium");
+  const internal = (body) =>
+    fetch(`${BASE}/internal/play-link`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", Authorization: "Bearer test-internal-key" },
+      body: JSON.stringify(body),
+    });
+  await internal({ email: "calm@example.com", link: "https://play.example.com/ignis-aura-web/__login/link?t=abc" });
+  assert.equal((await outbox()).filter((e) => e.to_addr === "calm@example.com" && /sign-in|link to the Ignis/i.test(e.subject)).length, 0);
 });
 
-test("the daily report lists everyone confirmed, marks the day's new testers, and emails the studio", async () => {
+test("the daily report: who's waiting for Andrew (with the links), and for each beta who's in and who's new; it emails the studio", async () => {
+  // Someone confirmed, not yet let in.
+  await post("/signup", person({ email: "noor@example.com", platforms: ["iPhone"], project: "effugium" }));
+  const mail = (await outbox()).find((e) => e.to_addr === "noor@example.com");
+  await fetch(mail.body.match(/(http\S+\/confirm\?t=\S+)/)[1], { redirect: "manual" });
+
   const shown = await (await admin("/admin/report", {})).json();
   assert.equal(shown.sent, false);
-  assert.match(shown.preview, /New (in the last day|since the last report \(.+\)): \d+/);
-  assert.match(shown.preview, /Confirmed testers: \d+ \(iPhone \d+ · Android \d+ · Web \d+\)/);
+  assert.match(shown.preview, /Waiting for your OK: 1\n  \? Effugium Aura: noor@example\.com, iPhone \(confirmed \d{4}-\d\d-\d\d\)\. Let in or turn away: http\S+\/approve\?t=\S+/);
+  assert.match(shown.preview, /Ignis Aura beta\n  Let in (in the last day|since the last report \(.+\)): \d+/);
+  assert.match(shown.preview, /  Testers: \d+ \(iPhone \d+ · Android \d+ · Web \d+\)/);
+  assert.match(shown.preview, /Effugium Aura beta\n  Let in .+: \d+/);
+  assert.match(shown.preview, /  Testers: \d+ \(iPhone \d+ · Android \d+\)/);
   assert.match(shown.preview, /Signed up, waiting to confirm: \d+/);
 
   const sent = await (await admin("/admin/report", { send: true })).json();
   assert.equal(sent.sent, true);
   const [latest] = await outbox();
   assert.equal(latest.to_addr, "studio@example.com");
-  assert.match(latest.subject, /^Ignis Aura beta: \d+ new, \d+ in all$/);
+  assert.match(latest.subject, /^Creatio Aura betas: \d+ new, 1 waiting for your OK$/);
 
-  // The next report counts only who's new since that one: nobody, here.
+  // The next report counts only who's let in since that one: nobody, here.
   const after = await (await admin("/admin/report", {})).json();
-  assert.match(after.preview, /New since the last report \(.+\): 0/);
+  assert.match(after.preview, /Ignis Aura beta\n  Let in since the last report \(.+\): 0/);
 });
 
-test("announcements need a title, a message and real https links", async () => {
+test("announcements need a title, a message, real https links and a beta there is", async () => {
   const bad = async (body) => (await admin("/admin/announce", body)).status;
   assert.equal(await bad({ message: "x", links: { Web: "https://a.b/" } }), 400);
   assert.equal(await bad({ title: "x", links: { Web: "https://a.b/" } }), 400);
   assert.equal(await bad({ title: "x", message: "y", links: { Web: "http://a.b/" } }), 400);
+  assert.equal(await bad({ project: "nope", title: "x", message: "y", links: { Web: "https://a.b/" } }), 400);
 });
 
 test("the announce and testers tools work from the command line", () => {
   const env = { ...process.env, SERVICE_URL: BASE, ADMIN_TOKEN: "test-admin-key" };
   const testers = spawnSync("node", ["tools/testers.mjs"], { cwd, env, encoding: "utf8" });
-  assert.match(testers.stdout, /Rook/);
+  assert.match(testers.stdout, /Ignis Aura beta: \d+ in/);
+  assert.match(testers.stdout, /rook@example\.com/);
+  assert.match(testers.stdout, /Effugium Aura beta: \d+ in/);
+  assert.match(testers.stdout, /Waiting for your OK: 1/);
+  assert.match(testers.stdout, /noor@example\.com/);
   const dry = spawnSync("node", ["tools/announce.mjs", "--title", "Hi", "--message", "Test", "--iphone", "https://testflight.apple.com/join/x"], { cwd, env, encoding: "utf8" });
   assert.match(dry.stdout, /Would send to 1:/);
   assert.match(dry.stdout, /Nothing was sent/);
-});
-
-// Last: it uses up this machine's code-check allowance.
-test("guessing the code is cut off after a few tries an hour", async () => {
-  let last;
-  for (let i = 0; i < 20; i++) last = await passFor("WRONG-CODE");
-  assert.equal(last.status, 429);
-  assert.equal(last.body.error, "too-many");
 });
 
 // Guest creators: Andrew (here with the admin key) makes a code; the guest submits, he reviews.
@@ -404,6 +450,15 @@ test("the web build's sign-in: a link only for those who may play, and only with
   assert.equal(friend.length, 1);
   assert.match(friend[0].body, /play\.example\.com/);
   assert.equal((await mailsTo("stranger@example.com")).length, 0);
+  // Confirmed but not yet let in: no link either; once let in, yes.
+  await post("/signup", person({ email: "soon@example.com", platforms: ["Web"] }));
+  const confirmMail = (await mailsTo("soon@example.com"))[0];
+  await fetch(confirmMail.body.match(/(http\S+\/confirm\?t=\S+)/)[1], { redirect: "manual" });
+  await internal("/internal/play-link", { email: "soon@example.com", link });
+  assert.equal((await mailsTo("soon@example.com")).filter((m) => m.body.includes("play.example.com")).length, 0);
+  await press(await approveLinkFor("soon@example.com"));
+  await internal("/internal/play-link", { email: "soon@example.com", link });
+  assert.equal((await mailsTo("soon@example.com")).filter((m) => m.body.includes("play.example.com")).length, 1);
   // A guest creator's code that isn't one: no.
   assert.equal((await (await internal("/internal/guest-check", { code: "NOT-A-CODE" })).json()).ok, false);
 });
@@ -525,7 +580,7 @@ test("a note with an address can be answered: replying goes to them, and it says
   assert.equal((await sendNote({ message: "Loving the dice!", email: "Rook@Example.com " })).status, 200);
   const fromTester = await landed((m) => m.subject === "Ignis Aura FEEDBACK: Loving the dice!");
   assert.equal(fromTester.reply_to, "rook@example.com");
-  assert.match(fromTester.body, /From: rook@example\.com \(Rook, on the beta list\)\. Reply to this email/);
+  assert.match(fromTester.body, /From: rook@example\.com \(on the beta list\)\. Reply to this email/);
 
   assert.equal((await sendNote({ message: "Found it from a friend.", email: "ash@example.com" })).status, 200);
   const fromStranger = await landed((m) => m.subject === "Ignis Aura FEEDBACK: Found it from a friend.");
@@ -586,7 +641,7 @@ test("feedback needs a message and a real address, and comes only from the app o
   const preflight = await fetch(`${BASE}/feedback`, { method: "OPTIONS", headers: { Origin: web } });
   assert.equal(preflight.status, 204);
   // No Origin opens the feedback alone, never the sign-up form.
-  const noOrigin = await fetch(`${BASE}/check-code`, { method: "POST", body: JSON.stringify({ code: CODE }) });
+  const noOrigin = await fetch(`${BASE}/signup`, { method: "POST", body: JSON.stringify(person()) });
   assert.equal(noOrigin.status, 403);
 });
 
@@ -597,13 +652,21 @@ test("the feedback tool lists the notes, and the daily report counts them", asyn
   assert.match(tool.stdout, /0\.13\.5 · 1730000000 · Android · Pixel 8, Android 15/);
   assert.match(tool.stdout, /rook@example\.com/);
   const report = await (await admin("/admin/report", {})).json();
-  assert.match(report.preview, /Feedback from the app since the last report \(.+\): [1-9]\d*/);
+  assert.match(report.preview, /Feedback from the apps since the last report \(.+\): [1-9]\d*/);
 });
 
 // Last: it uses up this machine's feedback allowance.
 test("a flood of feedback is cut off after a few an hour", async () => {
   let last;
   for (let i = 0; i < 35; i++) last = await sendNote({ message: `Note ${i}` });
+  assert.equal(last.status, 429);
+  assert.equal((await last.json()).error, "too-many");
+});
+
+// Last: it uses up this machine's sign-up allowance.
+test("a flood of sign-ups from one connection is cut off after a few an hour", async () => {
+  let last;
+  for (let i = 0; i < 45; i++) last = await post("/signup", person({ email: `flood${i}@example.com`, turnstile: "" }));
   assert.equal(last.status, 429);
   assert.equal((await last.json()).error, "too-many");
 });

@@ -1,7 +1,7 @@
 // For the beta's web build, which only signed-in testers can open: it lives behind its own
 // Worker, which asks this one (over a service binding, with a shared key) to email a tester their
 // sign-in link, or whether a guest creator's code is good. Nothing here says who is a tester: a
-// sign-in link goes only to a confirmed tester (or an address on the allow list), and the answer
+// sign-in link goes only to an Ignis Aura tester Andrew has let in (or an address on the allow list), and the answer
 // is the same either way.
 
 import { allow, isInternal, sha256 } from "./guard";
@@ -11,7 +11,7 @@ import { sendEmail } from "./mail";
 const json = (body: unknown, status = 200) =>
   new Response(JSON.stringify(body), { status, headers: { "Content-Type": "application/json" } });
 
-/** Whether this address may play: a confirmed tester, or one on the allow list (a secret). */
+/** Whether this address may play: an Ignis Aura tester who's been let in, or one on the allow list (a secret). */
 async function mayPlay(env: Env, email: string): Promise<boolean> {
   const allowed = (env.PLAY_ALLOW ?? "")
     .split(",")
@@ -19,7 +19,7 @@ async function mayPlay(env: Env, email: string): Promise<boolean> {
     .filter(Boolean);
   if (allowed.includes(email) || email === env.OWNER_EMAIL.toLowerCase()) return true;
   const row = await env.DB.prepare(
-    "SELECT 1 AS ok FROM signups WHERE email = ? AND confirmed_at IS NOT NULL",
+    "SELECT 1 AS ok FROM signups WHERE project = 'ignis' AND email = ? AND approved_at IS NOT NULL",
   )
     .bind(email)
     .first<{ ok: number }>();

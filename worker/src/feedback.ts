@@ -136,7 +136,7 @@ export async function sendFeedback(env: Env): Promise<number> {
     }
     // Whether they're on the beta list, to say so in the email (never to them).
     const tester = note.email
-      ? await env.DB.prepare("SELECT name FROM signups WHERE email = ? AND confirmed_at IS NOT NULL")
+      ? await env.DB.prepare("SELECT name FROM signups WHERE email = ? AND approved_at IS NOT NULL")
           .bind(note.email)
           .first<{ name: string }>()
       : null;

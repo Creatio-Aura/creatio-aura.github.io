@@ -99,6 +99,15 @@ interface Note {
   emailed_at: string | null;
 }
 
+// How long notes are kept, as the privacy pages say: older ones are deleted every morning, once emailed.
+export const KEEP_FEEDBACK_YEARS = 2;
+
+export async function forgetOldFeedback(env: Env): Promise<void> {
+  const before = new Date();
+  before.setUTCFullYear(before.getUTCFullYear() - KEEP_FEEDBACK_YEARS);
+  await env.DB.prepare("DELETE FROM feedback WHERE created_at < ? AND emailed_at IS NOT NULL").bind(before.toISOString()).run();
+}
+
 /**
  * Emails the studio every note not yet emailed, as far as the day's allowance goes, and says how
  * many went. Each is claimed before it's sent, so two at once never send one twice; one that

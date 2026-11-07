@@ -34,7 +34,7 @@ import {
   visitorKey,
 } from "./guard";
 import { emailProblem } from "../../site/email-check.js";
-import { feedback, feedbackSince, latestFeedback, sendFeedback } from "./feedback";
+import { feedback, feedbackSince, forgetOldFeedback, latestFeedback, sendFeedback } from "./feedback";
 import { guests } from "./guests";
 import { internal } from "./play";
 import { waitlistConfirm, waitlistLeave, waitlists, waitlistSignup } from "./waitlist";
@@ -127,11 +127,12 @@ const redirect = (env: Env, path: string) =>
   Response.redirect(`${env.SITE_URL.replace(/\/$/, "")}${path}`, 303);
 
 export default {
-  // Every morning (wrangler.toml's cron), the studio's report on the beta list, and any feedback
-  // that couldn't be emailed yet.
+  // Every morning (wrangler.toml's cron), the studio's report on the beta list, any feedback that
+  // couldn't be emailed yet, and notes older than the privacy pages say they're kept deleted.
   async scheduled(_controller: ScheduledController, env: Env, ctx: ExecutionContext) {
     ctx.waitUntil(dailyReport(env, true).then(() => undefined));
     ctx.waitUntil(sendFeedback(env).then(() => undefined));
+    ctx.waitUntil(forgetOldFeedback(env));
   },
 
   async fetch(request: Request, env: Env, ctx: ExecutionContext): Promise<Response> {

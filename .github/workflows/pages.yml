@@ -1,10 +1,11 @@
 name: Publish the website
 
-# Publishes site/ to GitHub Pages (https://creatio-aura.com) whenever main changes.
+# Publishes site/ to GitHub Pages (https://creatio-aura.com) whenever main changes, with the Journal
+# (journal/posts/*.md) built into it by tools/journal/build.mjs.
 on:
   push:
     branches: [main]
-    paths: ["site/**", ".github/workflows/pages.yml"]
+    paths: ["site/**", "journal/**", "tools/journal/**", ".github/workflows/pages.yml"]
   workflow_dispatch:
 
 permissions:
@@ -24,9 +25,20 @@ jobs:
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: lts/*
+          cache: npm
+          cache-dependency-path: tools/journal/package-lock.json
+      - name: Check the Journal's posts
+        working-directory: tools/journal
+        run: npm ci && node check.mjs
+      - name: Build the site with the Journal
+        working-directory: tools/journal
+        run: node build.mjs --out ../../_site
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
         with:
-          path: site
+          path: _site
       - id: deployment
         uses: actions/deploy-pages@v4

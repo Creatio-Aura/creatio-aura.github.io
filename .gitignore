@@ -1,0 +1,3 @@
+# The Journal builder's output and its packages (tools/journal/).
+_site/
+tools/journal/node_modules/

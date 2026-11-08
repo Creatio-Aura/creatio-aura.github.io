@@ -7,14 +7,17 @@ Aura** (no invite code since 7 November 2026: anyone can sign up, and Andrew let
 
 | Folder                      | What it is                                                                                                  |
 | --------------------------- | ----------------------------------------------------------------------------------------------------------- |
-| `site/`                     | The website: plain HTML and CSS, no build step. Published to GitHub Pages whenever `main` changes.        |
+| `site/`                     | The website: plain HTML and CSS. Published to GitHub Pages whenever `main` changes.                         |
+| `journal/`                  | The Journal: one Markdown file per post ([journal/README.md](journal/README.md)).                           |
+| `tools/journal/`            | Builds the Journal into the site when it's published, and checks posts' wording on every pull request.      |
 | `worker/`                   | The beta sign-up service, a Cloudflare Worker with a D1 database (the list).                                |
-| `.github/workflows/ci.yml`  | Every pull request: the sign-up service's type check and tests.                                            |
-| `.github/workflows/pages.yml` | Publishes `site/` on every change to `main`.                                                              |
+| `.github/workflows/ci.yml`  | Every pull request: the sign-up service's type check and tests, and the Journal's check and build.         |
+| `.github/workflows/pages.yml` | Builds the Journal into `site/` and publishes it on every change to `main`.                               |
 | `.github/workflows/security-txt.yml` | Monthly: fails once `site/.well-known/security.txt` is under 60 days from expiring.          |
 
-**Search engines.** `site/robots.txt` points them at `site/sitemap.xml`, which lists the pages to
-index: **add new pages there**. Pages that shouldn't appear in results (the beta's confirmed/left/
+**Search engines and AI assistants.** `site/robots.txt` welcomes both (with `Content-Signal: search=yes,
+ai-input=yes, ai-train=yes`, Andrew 2026-11-07) and points them at `site/sitemap.xml`, which lists the pages to
+index: **add new pages there** (the Journal adds its own posts when it builds). Pages that shouldn't appear in results (the beta's confirmed/left/
 expired pages, 404, `ignis-aura-web/`) say `noindex` themselves. Indexed pages name their canonical
 creatio-aura.com address, and the home page carries the company's details for search engines
 (name, legal name "Creatio Aura Ltd.", logo, contact email and the business phone; no postal

@@ -25,8 +25,9 @@ const project = (p) => config.projects[p.project] || config.projects.studio;
 const kindName = (p) => config.kinds[p.kind] || 'Post';
 const ctName = (slug) => slug.replace(/-/g, '_');
 
-// A call to action: today the project's own page; once the app is in the App Store, the App Store link with a
-// campaign name (ct) for the spot it's in, so App Store Connect shows which post and spot brought a download.
+// A call to action: today the project's own page, with the spot as ?from= for the beta sign-up there; once the app
+// is in the App Store, the App Store link with a campaign name (ct) for the spot it's in, so App Store Connect shows
+// which post and spot brought a download.
 function cta(proj, which, ct, cls) {
   const app = proj.appStore;
   if (which === 'primary' && app && app.id) {
@@ -34,7 +35,15 @@ function cta(proj, which, ct, cls) {
     return `<a class="${cls}" href="${esc(href)}" data-ct="${ct}">${esc(app.label || 'Get it on the App Store')}</a>`;
   }
   const link = proj[which];
-  return link ? `<a class="${cls}" href="${esc(link.href)}" data-ct="${ct}">${esc(link.label)}</a>` : '';
+  if (!link) return '';
+  // On our own pages, the spot goes along as ?from=, so the beta sign-up there records which post and
+  // button brought someone (site/beta.js); no analytics.
+  let href = link.href;
+  if (href.startsWith('/')) {
+    const [path, hash] = href.split('#');
+    href = `${path}${path.includes('?') ? '&' : '?'}from=${ct}${hash ? '#' + hash : ''}`;
+  }
+  return `<a class="${cls}" href="${esc(href)}" data-ct="${ct}">${esc(link.label)}</a>`;
 }
 
 const BRAND = `<a class="brand" href="/">

@@ -1,6 +1,6 @@
 // The Ignis Aura beta sign-up service (a Cloudflare Worker, with a D1 database).
 //
-//   POST /signup      { project, email, platforms, consent, turnstile, website } (betas.ts)
+//   POST /signup      { project, email, platforms, consent, turnstile, website, source } (betas.ts)
 //                                                          → sends a confirmation email
 //   GET  /confirm?t=…                                      → confirms, asks Andrew to let them in, back to the site
 //   GET  /approve?t=…, POST /approve|/decline?t=…          → Andrew lets them in, or turns them away (approve.ts)
@@ -224,6 +224,9 @@ async function signup(env: Env, request: Request, body: Record<string, unknown>,
   if (emailIssue) return json({ ok: false, ...emailIssue }, 400, origin);
   if (platforms.length === 0) return json({ ok: false, error: "pick-platform" }, 400, origin);
   if (body.consent !== true) return json({ ok: false, error: "need-consent" }, 400, origin);
+  // Where they came from: a short code from the form ("web_jb_<post>", "ref_google", "direct"), so the
+  // testers report shows which pages bring sign-ups without any analytics. Anything else is dropped.
+  const source = typeof body.source === "string" && /^[a-z0-9_]{1,80}$/.test(body.source) ? body.source : "";
   // With no invite code, the human check is what stands between the form and bots.
   if (!(await isHuman(env, body.turnstile))) return json({ ok: false, error: "human-check" }, 403, origin);
 
@@ -251,9 +254,10 @@ async function signup(env: Env, request: Request, body: Record<string, unknown>,
   const expires = new Date(now.getTime() + CONFIRM_HOURS * 3_600_000).toISOString();
   const row = await env.DB.prepare(
     `INSERT INTO signups (project, email, platforms, consent_text, consent_at, created_at,
-       confirm_hash, confirm_expires, leave_hash, emails_sent, last_email_at)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 1, ?)
+       confirm_hash, confirm_expires, leave_hash, emails_sent, last_email_at, source)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 1, ?, ?)
      ON CONFLICT (project, email) DO UPDATE SET platforms = excluded.platforms,
+       source = CASE WHEN signups.source = '' THEN excluded.source ELSE signups.source END,
        consent_text = excluded.consent_text, consent_at = excluded.consent_at,
        confirm_hash = excluded.confirm_hash, confirm_expires = excluded.confirm_expires,
        leave_hash = excluded.leave_hash, emails_sent = signups.emails_sent + 1,
@@ -271,6 +275,7 @@ async function signup(env: Env, request: Request, body: Record<string, unknown>,
       expires,
       legacyLeave.hash,
       now.toISOString(),
+      source,
     )
     .first<{ id: number }>();
 
@@ -356,13 +361,14 @@ interface Tester {
   notes: string;
   confirmed_at: string;
   approved_at: string | null;
+  source: string;
 }
 
 /** Everyone let into a beta, oldest first. */
 const testersIn = async (env: Env, project: string) =>
   (
     await env.DB.prepare(
-      "SELECT id, project, name, email, platforms, notes, confirmed_at, approved_at FROM signups WHERE project = ? AND approved_at IS NOT NULL ORDER BY approved_at",
+      "SELECT id, project, name, email, platforms, notes, confirmed_at, approved_at, source FROM signups WHERE project = ? AND approved_at IS NOT NULL ORDER BY approved_at",
     )
       .bind(project)
       .all<Tester>()
@@ -372,7 +378,7 @@ const testersIn = async (env: Env, project: string) =>
 const waitingForOk = async (env: Env) =>
   (
     await env.DB.prepare(
-      "SELECT id, project, name, email, platforms, notes, confirmed_at, approved_at FROM signups WHERE confirmed_at IS NOT NULL AND approved_at IS NULL ORDER BY confirmed_at",
+      "SELECT id, project, name, email, platforms, notes, confirmed_at, approved_at, source FROM signups WHERE confirmed_at IS NOT NULL AND approved_at IS NULL ORDER BY confirmed_at",
     ).all<Tester>()
   ).results;
 
@@ -438,6 +444,7 @@ async function testers(env: Env) {
     notes: t.notes,
     confirmed_at: t.confirmed_at,
     approved_at: t.approved_at,
+    source: t.source,
   });
   const inBetas = [];
   for (const project of Object.keys(BETAS)) inBetas.push(...(await testersIn(env, project)).map(shape));

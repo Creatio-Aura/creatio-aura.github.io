@@ -264,6 +264,23 @@ test("the tester list has everyone let in, with where they play, and who's waiti
   assert.equal(waiting.find((t) => t.email === "kodi@example.com"), undefined);
 });
 
+test("a sign-up keeps where it came from: a short code only, and the first one sticks", async () => {
+  // Signed up from a Journal post's button, then again from Google before confirming: the post counts.
+  await post("/signup", person({ email: "sol@example.com", source: "web_jb_effugium_aura_is_in_testing" }));
+  await post("/signup", person({ email: "sol@example.com", source: "ref_google" }));
+  // Anything that isn't a short code is dropped, never stored.
+  await post("/signup", person({ email: "ivy@example.com", source: "https://evil.example/?q=<x>" }));
+  for (const email of ["sol@example.com", "ivy@example.com"]) {
+    const mail = (await outbox()).find((e) => e.to_addr === email);
+    await fetch(mail.body.match(/(http\S+\/confirm\?t=\S+)/)[1], { redirect: "manual" });
+  }
+  const { waiting } = await (await admin("/admin/testers")).json();
+  assert.equal(waiting.find((t) => t.email === "sol@example.com").source, "web_jb_effugium_aura_is_in_testing");
+  assert.equal(waiting.find((t) => t.email === "ivy@example.com").source, "");
+  // Turn them both away again, so the tests after this one see the list as it was.
+  for (const email of ["sol@example.com", "ivy@example.com"]) await press(await approveLinkFor(email), "decline");
+});
+
 test("an announcement goes only to testers let in who play there, with only their links, and later testers get those links", async () => {
   const links = { Android: "https://play.google.com/apps/internaltest/1234", Web: "https://creatio-aura.com/ignis-aura-web/" };
   const dry = await (await admin("/admin/announce", { title: "Ignis Aura 0.6.0 is ready", message: "The board is in.", links })).json();

@@ -71,3 +71,11 @@ npm run preview
 ## On launch day
 
 In `tools/journal/config.json`, give the project its `appStore` (`id` and `pt`, the provider token). Every call to action for it then links to the App Store with a campaign name for its spot: `web_j_<slug>` beside the quick answer, `web_jb_<slug>` in the closing box. App Store Connect shows which post and which spot brought each download.
+
+## Bing hears about new posts (IndexNow)
+
+After each publish, `tools/journal/indexnow.mjs` sends the addresses of any post the push added or changed
+(plus `/journal/`) to IndexNow, which Bing and a few other search engines share. Google doesn't use it and
+finds posts through the sitemap. The key is `site/<key>.txt`: public on purpose, since IndexNow checks the
+site hosts it. A failure only shows a warning on the publish run; it never stops the site going live.
+Try it without sending anything: `DRY_RUN=1 node tools/journal/indexnow.mjs HEAD~1 HEAD`.

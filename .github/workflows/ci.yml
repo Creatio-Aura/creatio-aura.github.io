@@ -41,6 +41,8 @@ jobs:
         working-directory: tools/journal
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
       - uses: actions/setup-node@v4
         with:
           node-version: lts/*
@@ -51,3 +53,5 @@ jobs:
         run: node check.mjs
       - name: Build the site with the Journal
         run: node build.mjs --out "$RUNNER_TEMP/site"
+      - name: What Bing would hear about (IndexNow, dry run)
+        run: DRY_RUN=1 node indexnow.mjs HEAD~1 HEAD

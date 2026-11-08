@@ -25,6 +25,8 @@ jobs:
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # the whole history, so the IndexNow step can see which posts this push changed
       - uses: actions/setup-node@v4
         with:
           node-version: lts/*
@@ -42,3 +44,11 @@ jobs:
           path: _site
       - id: deployment
         uses: actions/deploy-pages@v4
+      # Bing (IndexNow) hears about new or changed Journal posts as soon as they're live. Never fails the publish.
+      - name: Tell Bing about new Journal posts
+        if: github.event_name == 'push'
+        continue-on-error: true
+        working-directory: tools/journal
+        env:
+          BEFORE: ${{ github.event.before }}
+        run: node indexnow.mjs "$BEFORE" "$GITHUB_SHA"

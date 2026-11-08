@@ -1,0 +1,14 @@
+{
+  "name": "creatio-aura-journal",
+  "private": true,
+  "description": "Builds the Journal (journal/posts/*.md) into the website, and checks posts before they're published.",
+  "type": "module",
+  "scripts": {
+    "build": "node build.mjs --out ../../_site",
+    "check": "node check.mjs",
+    "preview": "node build.mjs --out ../../_site && python3 -m http.server 8080 --bind 127.0.0.1 --directory ../../_site"
+  },
+  "dependencies": {
+    "marked": "14.1.4"
+  }
+}

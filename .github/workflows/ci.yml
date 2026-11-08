@@ -1,7 +1,8 @@
 name: CI
 
 # Every pull request, and every push to main: the sign-up service's type check and tests (it runs
-# locally in Cloudflare's own runtime, with a throwaway database; no account or secrets needed).
+# locally in Cloudflare's own runtime, with a throwaway database; no account or secrets needed), and the
+# Journal's posts: the wording check, then a full build of the site with them.
 on:
   pull_request:
   push:
@@ -30,3 +31,23 @@ jobs:
       - run: npm ci
       - run: npm run typecheck
       - run: npm test
+
+  journal:
+    name: Journal
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    defaults:
+      run:
+        working-directory: tools/journal
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: lts/*
+          cache: npm
+          cache-dependency-path: tools/journal/package-lock.json
+      - run: npm ci
+      - name: Check the posts' wording and details
+        run: node check.mjs
+      - name: Build the site with the Journal
+        run: node build.mjs --out "$RUNNER_TEMP/site"

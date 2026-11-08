@@ -1,0 +1,51 @@
+{
+  "site": "https://creatio-aura.com",
+  "author": {
+    "name": "Andrew Bacon",
+    "jobTitle": "Founder"
+  },
+  "publisher": {
+    "name": "Creatio Aura Ltd.",
+    "logo": "/apple-touch-icon.png"
+  },
+  "shareImage": {
+    "url": "/images/share-creatio-aura.png",
+    "width": 1200,
+    "height": 630,
+    "alt": "The Creatio Aura world logo and the words: For the evening, and the friends you share it with."
+  },
+  "kinds": {
+    "guide": "Guide",
+    "update": "Update"
+  },
+  "projects": {
+    "effugium": {
+      "name": "Effugium Aura",
+      "page": "/effugium/",
+      "about": "We make Effugium Aura, an audio player for your own sounds: place them around you, set a Kicker, and let a sleep timer fade them out. It's in testing now on iPhone and Android, and you can join the beta.",
+      "primary": {
+        "label": "Join the beta",
+        "href": "/effugium/#beta"
+      },
+      "secondary": {
+        "label": "Take the tour",
+        "href": "/effugium/#tour-title"
+      },
+      "appStore": null,
+      "note": "<strong>For information only.</strong> This post shows what you can try and set up. It isn't medical advice and it doesn't promise any result. Effugium Aura is not a medical device and makes no health claims. Apple, iPhone, AirPods and Apple Watch are trademarks of Apple Inc., registered in the U.S. and other countries and regions. Android is a trademark of Google LLC."
+    },
+    "studio": {
+      "name": "Creatio Aura",
+      "page": "/",
+      "about": "Creatio Aura is an independent studio making games for friends around the table, and apps for the hours in between.",
+      "primary": {
+        "label": "See our projects",
+        "href": "/#projects"
+      },
+      "secondary": null,
+      "appStore": null,
+      "note": null
+    }
+  },
+  "appStoreNote": "When an app launches, set its appStore to { \"id\": \"6831839400\", \"pt\": \"<provider token>\", \"label\": \"Get it on the App Store\" }: every call to action for that project then links to the App Store with a campaign name for its spot (ct)."
+}

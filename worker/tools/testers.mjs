@@ -1,4 +1,5 @@
-// Everyone let into each beta, with where they play, and who's waiting for Andrew to let them in.
+// Everyone let into each beta, with where they play, who's waiting for Andrew to let them in, and where
+// sign-ups came from.
 //
 //     npm run testers
 import { admin } from "./admin.mjs";
@@ -26,6 +27,17 @@ for (const [project, name] of Object.entries(NAMES)) {
   table(theirs, (t) => t.approved_at, "In since");
   const count = (p) => theirs.filter((t) => t.platforms.includes(p)).length;
   console.log(["iPhone", "Android", "Web"].map((p) => `${p} ${count(p)}`).join(" · "));
+}
+
+// Where sign-ups came from (everyone in or waiting): the Journal post and button ("web_jb_<post>"), the site
+// they arrived from ("ref_google"), or "direct". Sign-ups from before 7 November 2026 have none.
+for (const [project, name] of Object.entries(NAMES)) {
+  const all = [...testers, ...waiting].filter((t) => t.project === project);
+  if (all.length === 0) continue;
+  const by = {};
+  for (const t of all) by[t.source || "(not recorded)"] = (by[t.source || "(not recorded)"] || 0) + 1;
+  console.log(`\n${name}: where sign-ups came from`);
+  for (const [source, n] of Object.entries(by).sort((a, b) => b[1] - a[1])) console.log(`  ${String(n).padStart(3)}  ${source}`);
 }
 
 console.log(`\nWaiting for your OK: ${waiting.length}${waiting.length ? " (the link is in the email you got, and in the morning report)" : ""}`);

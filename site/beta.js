@@ -10,6 +10,31 @@
   const error = document.getElementById("beta-error");
   let widget = null;
 
+  // Where this visitor came from, as a short code kept with the sign-up (Andrew, 2026-11-07: count it
+  // ourselves, no analytics): the ?from= a link put on this page ("web_jb_<post>" from a Journal post's
+  // button), else the site they arrived from ("ref_google", "ref_journal_<post>"), else "direct". Never
+  // the full address. Worked out once, when the page opens.
+  const source = (() => {
+    const from = new URLSearchParams(location.search).get("from") || "";
+    if (/^[a-z0-9_]{1,80}$/.test(from)) return from;
+    let ref;
+    try {
+      ref = document.referrer ? new URL(document.referrer) : null;
+    } catch (e) {
+      ref = null;
+    }
+    if (!ref) return "direct";
+    const clean = (s) => s.toLowerCase().replace(/[^a-z0-9]+/g, "_").replace(/^_|_$/g, "").slice(0, 60);
+    if (ref.hostname === location.hostname) {
+      const page = clean(ref.pathname);
+      return page && page !== clean(location.pathname) ? `ref_${page}` : "direct";
+    }
+    const host = ref.hostname.replace(/^(www|m|l|lm)\./, "");
+    const known = { "google.": "google", "bing.com": "bing", "duckduckgo.com": "duckduckgo", "facebook.com": "facebook", "linkedin.com": "linkedin", "chatgpt.com": "chatgpt", "perplexity.ai": "perplexity", "claude.ai": "claude" };
+    for (const [match, name] of Object.entries(known)) if (host.startsWith(match) || host === match || host.endsWith("." + match)) return `ref_${name}`;
+    return `ref_${clean(host)}`;
+  })();
+
   const MESSAGES = {
     "human-check": "The \"are you human\" check didn't go through. Try it again.",
     "too-many": "Too many tries for now. Wait a while, then try again.",
@@ -82,6 +107,7 @@
       platforms,
       consent: form.consent.checked,
       website: form.website.value,
+      source,
       turnstile: window.turnstile && widget !== null ? window.turnstile.getResponse(widget) : "",
     };
     const emailIssue = emailProblem(details.email);

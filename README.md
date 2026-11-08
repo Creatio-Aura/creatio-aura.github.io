@@ -70,8 +70,12 @@ one sign-up, `site/beta.js`; the form's `data-project` says which.
    away deletes them, and they hear nothing. Every email has a remove-me link, which deletes them
    at once.
 
-**What's kept:** email, the beta, platforms, what they agreed to and when, and when they were let in
-(testers from before 7 November also gave a name and notes). **No IP addresses**: rate limits use a
+**What's kept:** email, the beta, platforms, what they agreed to and when, when they were let in, and
+**where the sign-up came from** as a short label (testers from before 7 November also gave a name and notes).
+The label is the `?from=` a link put on the page (the Journal's buttons send `web_jb_<post>`), else the
+site they arrived from (`ref_google`, `ref_journal_<post>`), else `direct`; never a full address. Kept from
+the first sign-up. `npm run testers` counts sign-ups by it: our own measure of which pages bring testers,
+instead of analytics (Andrew, 2026-11-07). **No IP addresses**: rate limits use a
 salted, anonymous fingerprint, cleared within two days. The list lives in the D1 database on
 Creatio Aura's Cloudflare account, and only that account can read it. This repo is public, but it
 holds only code, never sign-ups or secrets. See `site/privacy/`.

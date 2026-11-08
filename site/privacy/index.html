@@ -20,9 +20,8 @@
   <meta property="og:image:height" content="630">
   <meta property="og:image:alt" content="The Creatio Aura world logo and the words: For the evening, and the friends you share it with.">
   <meta name="twitter:card" content="summary_large_image">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght,SOFT,WONK@9..144,400..700,100,0&family=Nunito:wght@400;600;700&display=swap">
+  <link rel="preload" href="/fonts/nunito-latin.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="/fonts/fraunces-latin.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="stylesheet" href="/styles.css">
 </head>
 <body>
@@ -68,7 +67,7 @@
     <ul>
       <li><strong>Cloudflare</strong> runs our sign-up service and stores the beta list, the waiting lists, feedback from the apps and Effugium Aura's anonymous counts (only from people who choose to share them) in private databases that only Creatio Aura can access. Cloudflare's <strong>Turnstile</strong> check, on the sign-up form, tells people from bots without puzzles or tracking cookies.</li>
       <li><strong>IONOS</strong> runs our @creatio-aura.com email addresses: it sends our emails, from support@creatio-aura.com, and passes what you send us on to our inbox.</li>
-      <li><strong>Google</strong> (Gmail) holds our inbox. This site's fonts are served by Google Fonts.</li>
+      <li><strong>Google</strong> (Gmail) holds our inbox. This site's fonts are served from this site itself, so loading a page sends nothing to Google.</li>
       <li><strong>GitHub</strong> hosts this website.</li>
     </ul>
     <p>These providers may process data in the United States and elsewhere, under their own privacy policies.</p>

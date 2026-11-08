@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Effugium Aura · Creatio Aura</title>
+  <title>Effugium Aura: 3D Sleep Sounds from Your Own Recordings</title>
   <meta name="description" content="Effugium Aura is an audio player for your own sounds: place them around you, set a Kicker, and let a sleep timer fade them out. Testing now with friends and family on iPhone and Android.">
   <link rel="canonical" href="https://creatio-aura.com/effugium/">
   <meta name="theme-color" content="#120f1f">
@@ -12,7 +12,7 @@
   <link rel="apple-touch-icon" href="/apple-touch-icon.png">
   <meta property="og:type" content="website">
   <meta property="og:site_name" content="Creatio Aura">
-  <meta property="og:title" content="Effugium Aura · Creatio Aura">
+  <meta property="og:title" content="Effugium Aura: 3D Sleep Sounds from Your Own Recordings">
   <meta property="og:description" content="Effugium Aura is an audio player for your own sounds: place them around you, set a Kicker, and let a sleep timer fade them out. Testing now with friends and family on iPhone and Android.">
   <meta property="og:url" content="https://creatio-aura.com/effugium/">
   <meta property="og:image" content="https://creatio-aura.com/images/share-creatio-aura.png">
@@ -20,10 +20,35 @@
   <meta property="og:image:height" content="630">
   <meta property="og:image:alt" content="The Creatio Aura world logo and the words: For the evening, and the friends you share it with.">
   <meta name="twitter:card" content="summary_large_image">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght,SOFT,WONK@9..144,400..700,100,0&family=Nunito:wght@400;600;700&display=swap">
+  <link rel="preload" href="/fonts/nunito-latin.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="/fonts/fraunces-latin.woff2" as="font" type="font/woff2" crossorigin>
+  <!-- The tour's first frame is the largest thing on the page: fetch it first. -->
+  <link rel="preload" href="/effugium/media/tour-poster.jpg" as="image" fetchpriority="high">
   <link rel="stylesheet" href="/styles.css">
+  <!-- What the app is, for search engines and AI answers (2026-11-07). No price or rating until it's in the stores. -->
+  <script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "MobileApplication",
+  "name": "Effugium Aura",
+  "alternateName": "Effugium Aura: 3D Sleep Sounds",
+  "description": "Effugium Aura is an audio player for your own sounds: place them around you, set a Kicker, and let a sleep timer fade them out. Testing now with friends and family on iPhone and Android.",
+  "url": "https://creatio-aura.com/effugium/",
+  "operatingSystem": "iOS, Android",
+  "applicationCategory": "MultimediaApplication",
+  "screenshot": "https://creatio-aura.com/effugium/media/tour-poster.jpg",
+  "publisher": {
+    "@type": "Organization",
+    "name": "Creatio Aura Ltd.",
+    "url": "https://creatio-aura.com/"
+  },
+  "author": {
+    "@type": "Organization",
+    "name": "Creatio Aura Ltd.",
+    "url": "https://creatio-aura.com/"
+  }
+}
+  </script>
   <script src="/stars.js" defer></script>
   <!-- Checks email addresses for typos; the sign-up service uses the same file. Before beta.js. -->
   <script type="module" src="/email-check.js"></script>

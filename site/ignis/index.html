@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Ignis Aura · Creatio Aura</title>
-  <meta name="description" content="Ignis Aura is a fantasy tabletop adventure: hand-crafted pieces that click together with magnets, and a companion app that runs the game. Beta sign-ups are open.">
+  <meta name="description" content="Ignis Aura is a fantasy tabletop adventure with a companion app that runs the game: gather round, face what waits on your square, roll the dice, open rune locks and answer riddles. Plays with no internet. Beta sign-ups are open.">
   <link rel="canonical" href="https://creatio-aura.com/ignis/">
   <meta name="theme-color" content="#120f1f">
   <link rel="icon" href="/ignis/flame.svg" type="image/svg+xml">
@@ -22,8 +22,10 @@
   <meta name="twitter:card" content="summary_large_image">
   <link rel="preload" href="/fonts/nunito-latin.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="preload" href="/fonts/fraunces-latin.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="/ignis/media/tour-poster.jpg" as="image" fetchpriority="high">
   <link rel="stylesheet" href="/styles.css">
   <script src="/stars.js" defer></script>
+  <script src="/video-steps.js" defer></script>
   <!-- Checks email addresses for typos; the sign-up service uses the same file. Before beta.js. -->
   <script type="module" src="/email-check.js"></script>
   <script src="/beta.js" defer></script>
@@ -40,6 +42,7 @@
     </a>
     <nav class="site-nav" aria-label="Main">
       <a href="/">All projects</a>
+      <a href="#tour-title">Take the tour</a>
       <a href="#beta">Join the beta</a>
     </nav>
   </header>
@@ -53,6 +56,30 @@
       </div>
     </section>
 
+    <!-- The tour, recorded from the app on the iPhone simulator (2026-11-08). Only Andrew's own writing is on
+         screen; the steps follow the video (video-steps.js). What may be shown: handbook decisions.md. -->
+    <section class="wrap tour" aria-labelledby="tour-title">
+      <div class="phone">
+        <video id="tour-video" data-steps="tour-steps" src="/ignis/media/tour.mp4" poster="/ignis/media/tour-poster.jpg" muted loop playsinline preload="metadata" aria-label="Ignis Aura recorded on iPhone: setting up a two-player game, a turn with a dice roll, a rune lock, a riddle and nightfall"></video>
+      </div>
+      <div class="tour-side">
+        <h2 id="tour-title">Take the tour</h2>
+        <p class="lede">A game of Ignis Aura, recorded on iPhone. Pick a step to jump to it.</p>
+        <ol id="tour-steps" class="video-steps">
+          <li><button type="button" data-at="0"><span class="n">1</span><span><span class="k">Gather round</span><span class="t">Play solo, on one phone, or on everyone's</span></span></button></li>
+          <li><button type="button" data-at="12"><span class="n">2</span><span><span class="k">Keeper of the Flame</span><span class="t">One of you holds the phone and reads aloud</span></span></button></li>
+          <li><button type="button" data-at="26.9"><span class="n">3</span><span><span class="k">Heroes</span><span class="t">Name your heroes and pick their classes</span></span></button></li>
+          <li><button type="button" data-at="39.5"><span class="n">4</span><span><span class="k">Face what waits</span><span class="t">Each square holds an encounter</span></span></button></li>
+          <li><button type="button" data-at="49"><span class="n">5</span><span><span class="k">Roll the dice</span><span class="t">Your stats decide how many</span></span></button></li>
+          <li><button type="button" data-at="65.2"><span class="n">6</span><span><span class="k">Move on</span><span class="t">Cross the board one square at a time</span></span></button></li>
+          <li><button type="button" data-at="71"><span class="n">7</span><span><span class="k">Rune locks</span><span class="t">Turn the dials and read the clues</span></span></button></li>
+          <li><button type="button" data-at="103.7"><span class="n">8</span><span><span class="k">Riddles</span><span class="t">Answer what's carved in stone</span></span></button></li>
+          <li><button type="button" data-at="116.7"><span class="n">9</span><span><span class="k">Night falls</span><span class="t">Every two rounds, day turns to night</span></span></button></li>
+        </ol>
+        <button class="button ghost video-toggle" type="button" data-toggle="tour-video" data-play="Play the tour" data-pause="Pause the tour">Play the tour</button>
+      </div>
+    </section>
+
     <section class="wrap idea">
       <h2 style="font-size: 36px; margin-bottom: 12px">The idea</h2>
       <p class="lede">Part choose-your-own-adventure, part a night of telling a story together. Ignis Aura is theater of the mind, anchored by pieces you can pick up and a table of friends around them.</p>
@@ -60,6 +87,15 @@
         <div><h3>Made with care</h3><p>Every piece is designed to be handled: beautiful to look at, satisfying to snap together, and made to spark the imagination.</p></div>
         <div><h3>Easy to run</h3><p>The companion app draws the encounters, tells the story and keeps the rules, so nobody has to be the rulebook.</p></div>
         <div><h3>Told together</h3><p>Choices are made around the table, and the story belongs to everyone who tells it.</p></div>
+      </div>
+      <h2 style="font-size: 36px; margin: 40px 0 12px">How it plays</h2>
+      <div class="features">
+        <div><h3>Keeper of the Flame</h3><p>One of you is the Keeper of the Flame: they hold the phone, read aloud and keep the game moving. Sharing one phone? The app tells you when to pass it.</p></div>
+        <div><h3>No signal needed</h3><p>Made for a campfire in the woods. Play solo, pass one phone around, or link everyone's phones over Bluetooth, with no internet at all.</p></div>
+        <div><h3>Day and night</h3><p>The world turns from day to night every two rounds, and some things only happen after dark.</p></div>
+        <div><h3>A turn</h3><p>Face what waits on your square, choose what to do, roll the dice, then move on. Roll your own dice, or let the app roll them.</p></div>
+        <div><h3>Rune locks</h3><p>Turn the dials, try the lock, and read the clues it gives back. Open it before your tries run out.</p></div>
+        <div><h3>Riddles</h3><p>Some doors only open to the right answer.</p></div>
       </div>
       <div class="panel beta-note">
         <h3>Playing the beta</h3>

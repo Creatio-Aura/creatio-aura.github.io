@@ -32,7 +32,13 @@
         "href": "/effugium/#tour-title"
       },
       "appStore": null,
-      "note": "<strong>For information only.</strong> This post shows what you can try and set up. It isn't medical advice and it doesn't promise any result. Effugium Aura is not a medical device and makes no health claims. Apple, iPhone, AirPods and Apple Watch are trademarks of Apple Inc., registered in the U.S. and other countries and regions. Android is a trademark of Google LLC."
+      "note": "<strong>For information only.</strong> This post shows what you can try and set up. It isn't medical advice and it doesn't promise any result. Effugium Aura is not a medical device and makes no health claims. Apple, iPhone, AirPods and Apple Watch are trademarks of Apple Inc., registered in the U.S. and other countries and regions. Android is a trademark of Google LLC.",
+      "shareImage": {
+        "url": "/images/share-effugium-aura.png",
+        "width": 1200,
+        "height": 630,
+        "alt": "Effugium Aura: an audio player for your own sounds, placed all around you. Beta sign-ups open."
+      }
     },
     "studio": {
       "name": "Creatio Aura",

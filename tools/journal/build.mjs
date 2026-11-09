@@ -51,8 +51,9 @@ const BRAND = `<a class="brand" href="/">
       Creatio Aura
     </a>`;
 
-function page({ title, description, canonical, ogType, jsonld, body, current }) {
-  const img = config.shareImage;
+function page({ title, description, canonical, ogType, jsonld, body, current, image }) {
+  // A post's project can have its own link preview image (Effugium Aura's since 2026-11-09).
+  const img = image || config.shareImage;
   return `<!doctype html>
 <html lang="en">
 <head>
@@ -180,7 +181,7 @@ ${p.html}
   };
   const dir = join(OUT, 'journal', p.slug);
   mkdirSync(dir, { recursive: true });
-  writeFileSync(join(dir, 'index.html'), page({ title: `${p.title} · Creatio Aura`, description: p.description, canonical: SITE + p.url, ogType: 'article', jsonld: ld, body, current: 'journal' }));
+  writeFileSync(join(dir, 'index.html'), page({ title: `${p.title} · Creatio Aura`, description: p.description, canonical: SITE + p.url, ogType: 'article', jsonld: ld, body, current: 'journal', image: config.projects[p.project]?.shareImage }));
 }
 
 // ---------- the Journal: a featured post on top, then everything else by month ----------

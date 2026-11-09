@@ -219,6 +219,9 @@ export function welcomeEmail(
   /** The beta's guides on the website, if it has any. */
   guides: { label: string; url: string; about: string }[] = [],
 ) {
+  // A game is played; an app is tried.
+  const play = app === "Ignis Aura" ? "play" : "try";
+  const getIt = app === "Ignis Aura" ? "Here's how to play:" : "Here's how to get it:";
   const text = [
     hi(name),
     "",
@@ -226,12 +229,12 @@ export function welcomeEmail(
     "",
     ...(links.length
       ? [
-          "Here's how to play:",
+          getIt,
           "",
           ...links.flatMap((link) => [`${link.platform}: ${link.url}`, `  ${link.how}`, ""]),
           ...(termsUrl ? [...TERMS_IN_SHORT, `The full terms: ${termsUrl}`] : []),
         ]
-      : ["We'll email you when there's a build for you to play."]),
+      : [`We'll email you when there's a build for you to ${play}.`]),
     "",
     ...(guides.length ? ["Guides:", "", ...guides.flatMap((g) => [`${g.label}: ${g.url}`, `  ${g.about}`, ""])] : []),
     "Questions? Just reply to this email.",
@@ -241,7 +244,9 @@ export function welcomeEmail(
     leaveUrl,
     "",
     "— Creatio Aura",
-  ].join("\n");
+  ]
+    .join("\n")
+    .replace(/\n{3,}/g, "\n\n");
   const buttons = links
     .map(
       (link) => `<div style="margin:0 0 18px">
@@ -265,7 +270,7 @@ ${
 <li>The game is confidential: please don't post or talk about it publicly, social media included, without written permission from its creator and Creatio Aura Ltd.</li>
 </ul></div>` : ""}
 ${buttons}`
-    : `<p style="margin:0 0 14px;font-size:16px;line-height:1.6">We'll email you when there's a build for you to play.</p>`
+    : `<p style="margin:0 0 14px;font-size:16px;line-height:1.6">We'll email you when there's a build for you to ${play}.</p>`
 }
 ${
   guides.length

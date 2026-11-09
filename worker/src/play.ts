@@ -32,12 +32,12 @@ function signInEmail(to: string, link: string) {
     "",
     link,
     "",
-    "It works once, for 15 minutes, and keeps this browser signed in for 30 days.",
+    "Use it within 7 days to sign in. After that, this browser stays signed in: you'll only be asked again if you don't open the game for 30 days.",
     "Didn't ask for it? Ignore this email: nothing happens without the link.",
   ].join("\n");
   const html = `<p>Here's your link to open the Ignis Aura beta in your browser:</p>
 <p><a href="${link}">Open Ignis Aura</a></p>
-<p>It works once, for 15 minutes, and keeps this browser signed in for 30 days.</p>
+<p>Use it within 7 days to sign in. After that, this browser stays signed in: you'll only be asked again if you don't open the game for 30 days.</p>
 <p>Didn't ask for it? Ignore this email: nothing happens without the link.</p>`;
   return { to, subject: "Your link to the Ignis Aura beta", text, html };
 }

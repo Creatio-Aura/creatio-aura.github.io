@@ -292,7 +292,7 @@ test("an announcement goes only to testers let in who play there, with only thei
   assert.equal(sent.sent, 1);
   const mails = (await outbox()).slice(0, (await outbox()).length - before);
   assert.deepEqual(mails.map((m) => m.to_addr), ["mira@example.com"]);
-  assert.match(mails[0].body, /Android: https:\/\/play\.google\.com\/apps\/internaltest\/1234\n  Open the link on your Android phone, signed in to the Google account you signed up with/);
+  assert.match(mails[0].body, /Android: https:\/\/play\.google\.com\/apps\/internaltest\/1234\n  Open the link in Chrome on your Android phone \(other browsers can stop partway through\), signed in to the Google account you signed up with/);
   assert.match(mails[0].body, /Web: https:\/\/creatio-aura.com\/ignis-aura-web\//);
   // Every download email carries the Beta Tester Terms: at your own risk, and confidential.
   assert.match(mails[0].body, /you agree to the Beta Tester Terms/);
@@ -312,6 +312,39 @@ test("an announcement goes only to testers let in who play there, with only thei
   assert.equal((await fetch(leave, { redirect: "manual" })).headers.get("Location"), `${SITE}/beta/left/`);
   const { testers } = await (await admin("/admin/testers")).json();
   assert.equal(testers.find((t) => t.email === "mira@example.com"), undefined);
+});
+
+test("links stored without emailing anyone reach later welcomes, and one tester's welcome can be sent again", async () => {
+  const play = "https://play.google.com/apps/internaltest/5678";
+  const web = "https://creatio-aura.com/ignis-aura-web/";
+  const before = (await outbox()).length;
+  const stored = await (await admin("/admin/builds", { project: "ignis", links: { Android: play, Web: web, Nonsense: "https://x" } })).json();
+  assert.deepEqual(stored.builds, { Android: play, Web: web });
+  assert.equal((await outbox()).length, before); // nobody was emailed
+  // With no links it only shows what's stored; a bad link is ignored.
+  assert.deepEqual((await (await admin("/admin/builds", { project: "ignis", links: { Android: "http://insecure" } })).json()).builds, { Android: play, Web: web });
+
+  // Someone let in now gets both, with the Chrome note for Google Play.
+  await tester("again@example.com", ["Android", "Web"]);
+  const welcome = (await outbox()).find((e) => e.to_addr === "again@example.com" && e.subject.startsWith("You're in"));
+  assert.match(welcome.body, /Android: https:\/\/play\.google\.com\/apps\/internaltest\/5678\n  Open the link in Chrome/);
+  assert.match(welcome.body, /Web: https:\/\/creatio-aura.com\/ignis-aura-web\//);
+
+  // Sending it again: a dry run first, then one more welcome, to them only.
+  const dry = await (await admin("/admin/welcome", { project: "ignis", email: "Again@Example.com" })).json();
+  assert.deepEqual([dry.sent, dry.platforms, dry.links], [false, ["Android", "Web"], ["Android", "Web"]]);
+  const count = () => outbox().then((all) => all.filter((e) => e.to_addr === "again@example.com" && e.subject.startsWith("You're in")).length);
+  assert.equal(await count(), 1);
+  const sent = await (await admin("/admin/welcome", { project: "ignis", email: "again@example.com", send: true })).json();
+  assert.equal(sent.sent, true);
+  assert.equal(await count(), 2);
+  // Only testers let in to that beta.
+  assert.equal((await admin("/admin/welcome", { project: "ignis", email: "nobody@example.com" })).status, 404);
+  assert.equal((await admin("/admin/welcome", { project: "effugium", email: "again@example.com" })).status, 404);
+
+  // Tidy up: they leave, so later tests' counts are unchanged.
+  const leave = welcome.body.match(/(http\S+\/leave\?t=\d+\.[0-9a-f]+)/)[1];
+  await fetch(leave, { redirect: "manual" });
 });
 
 test("Effugium Aura's beta: the same sign-up, its own list, links and emails, no Beta Tester Terms, and no web game", async () => {

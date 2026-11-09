@@ -196,7 +196,7 @@ const escape = (text: string) => text.replace(/[&<>"']/g, (c) => `&#${c.charCode
 export function howTo(platform: string, url: string, app = "Ignis Aura"): string {
   if (platform === "Android") {
     return /^https:\/\/play\.google\.com\//.test(url)
-      ? `Open the link on your Android phone, signed in to the Google account you signed up with, and accept; then install ${app} from Google Play. Updates come through Google Play.`
+      ? `Open the link in Chrome on your Android phone (other browsers can stop partway through), signed in to the Google account you signed up with, and accept; then install ${app} from Google Play. Updates come through Google Play.`
       : "Open the link on your Android phone and download the app. If your phone asks, allow installing apps from your browser, then press Install. A newer build installs over the old one.";
   }
   if (platform === "iPhone") {

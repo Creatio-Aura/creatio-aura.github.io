@@ -62,7 +62,7 @@ button.quiet { background: transparent; color: #f4eadb; border: 2px solid #5b4d7
   );
 }
 
-interface Signup {
+export interface Signup {
   id: number;
   project: string;
   name: string;
@@ -70,6 +70,31 @@ interface Signup {
   platforms: string;
   confirmed_at: string | null;
   approved_at: string | null;
+}
+
+/**
+ * Emails a tester that they're in, with the latest links for where they play (if there are any yet).
+ * Sent when Andrew lets them in, and again on request (npm run welcome).
+ */
+export async function sendWelcome(env: Env, row: Pick<Signup, "id" | "project" | "name" | "email" | "platforms">) {
+  const beta = BETAS[row.project] ?? { name: row.project, terms: false };
+  const builds = await currentBuilds(env, row.project);
+  const links = row.platforms
+    .split(",")
+    .filter((p) => builds[p])
+    .map((platform) => ({ platform, url: builds[platform]!, how: howTo(platform, builds[platform]!, beta.name) }));
+  const leaveUrl = `${service(env)}/leave?t=${await leaveToken(env, row.id)}`;
+  const terms = beta.terms ? `${env.SITE_URL.replace(/\/$/, "")}/beta/terms/` : "";
+  let emailed = false;
+  if (await allowEmail(env, EMAILS_PER_DAY)) {
+    try {
+      await sendEmail(env, { to: row.email, ...welcomeEmail(beta.name, row.name, leaveUrl, links, terms), leaveUrl });
+      emailed = true;
+    } catch (error) {
+      console.error("Emailing a tester they're in failed:", error);
+    }
+  }
+  return { emailed, links };
 }
 
 /** Handles /approve and /decline: the page (GET), and the buttons on it (POST). */
@@ -107,22 +132,7 @@ ${platforms.includes("Android") ? "<p>On Android, Google Play only lets in the G
   if (row.approved_at) return page("Already in", `<p>${who} is already in the ${escape(beta.name)} beta.</p>`);
 
   await env.DB.prepare("UPDATE signups SET approved_at = ? WHERE id = ?").bind(new Date().toISOString(), row.id).run();
-  // Their welcome, with the latest links for where they play, if there are any yet.
-  const builds = await currentBuilds(env, row.project);
-  const links = platforms
-    .filter((p) => builds[p])
-    .map((platform) => ({ platform, url: builds[platform]!, how: howTo(platform, builds[platform]!, beta.name) }));
-  const leaveUrl = `${service(env)}/leave?t=${await leaveToken(env, row.id)}`;
-  const terms = beta.terms ? `${env.SITE_URL.replace(/\/$/, "")}/beta/terms/` : "";
-  let emailed = false;
-  if (await allowEmail(env, EMAILS_PER_DAY)) {
-    try {
-      await sendEmail(env, { to: row.email, ...welcomeEmail(beta.name, row.name, leaveUrl, links, terms), leaveUrl });
-      emailed = true;
-    } catch (error) {
-      console.error("Emailing a tester they're in failed:", error);
-    }
-  }
+  const { emailed, links } = await sendWelcome(env, row);
   const told = emailed
     ? links.length
       ? `We've emailed them the links for ${escape(links.map((l) => l.platform).join(", "))}.`

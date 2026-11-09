@@ -591,6 +591,8 @@ test("the web build's sign-in: a link only for those who may play, and only with
   const friend = await mailsTo("friend@example.com");
   assert.equal(friend.length, 1);
   assert.match(friend[0].body, /play\.example\.com/);
+  // It says the link is for getting in, and that the browser then stays signed in.
+  assert.match(friend[0].body, /Use it within 7 days to sign in\. After that, this browser stays signed in: you'll only be asked again if you don't open the game for 30 days\./);
   assert.equal((await mailsTo("stranger@example.com")).length, 0);
   // Confirmed but not yet let in: no link either; once let in, yes.
   await post("/signup", person({ email: "soon@example.com", platforms: ["Web"] }));

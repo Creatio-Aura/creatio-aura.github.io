@@ -1,6 +1,12 @@
 // Sending email through the studio's own mail server (IONOS): the Worker signs in as the support
 // mailbox, so emails come from support@creatio-aura.com, signed for the domain, and land in inboxes.
 // In test mode (MAIL_MODE=test) nothing is sent: emails are kept in the outbox table instead.
+//
+// At IONOS's pace (2026-11-09): a mailbox only sends so many an hour, and turns the rest away with
+// "450 Mail send limit exceeded". So every hand-off counts toward an hourly budget (MAIL_PER_HOUR);
+// batches always wait in a queue (mail_queue) that a job drains about one a minute within it; one-off
+// emails go at once while there's room, else join the queue; and a "not now" (4xx) goes back in the
+// queue to try again later instead of being lost.
 
 import { connect } from "cloudflare:sockets";
 
@@ -19,27 +25,172 @@ export interface Email {
   urgent?: boolean;
 }
 
-export async function sendEmail(env: Env, email: Email): Promise<void> {
-  const [result] = await sendEmails(env, [email]);
+/** Why the mail server turned an email away: the step, its full answer, and whether to try again later. */
+export class MailError extends Error {
+  constructor(
+    readonly step: string,
+    readonly code: number,
+    readonly reply: string,
+  ) {
+    super(`The mail server turned it away at ${step}: "${reply}"`);
+  }
+  /** 4xx means "not now"; 5xx means "no". */
+  get temporary() {
+    return this.code >= 400 && this.code < 500;
+  }
+}
+
+/** Sent, or waiting in the queue (it goes out later on its own), or an error that won't go away. */
+export type Sent = true | "queued" | Error;
+
+/** Sends one email: true once the mail server took it, "queued" if it goes later. Throws if it never will. */
+export async function sendEmail(env: Env, email: Email, options: { batch?: boolean } = {}): Promise<true | "queued"> {
+  const [result] = await sendEmails(env, [email], options);
   if (result instanceof Error) throw result;
+  return result!;
+}
+
+/** The most hand-offs to the mail server in any hour (MAIL_PER_HOUR; IONOS's own limit is higher). */
+const perHour = (env: Env) => Math.max(1, Number(env.MAIL_PER_HOUR) || 10);
+const minutesFromNow = (minutes: number) => new Date(Date.now() + minutes * 60_000).toISOString();
+
+async function handedOffLastHour(env: Env): Promise<number> {
+  const row = await env.DB.prepare("SELECT COUNT(*) AS n FROM mail_log WHERE at > ?").bind(minutesFromNow(-60)).first<{ n: number }>();
+  return row?.n ?? 0;
+}
+
+async function logHandOff(env: Env, ok: 1 | 0 | -1) {
+  await env.DB.batch([
+    env.DB.prepare("INSERT INTO mail_log (at, ok) VALUES (?, ?)").bind(new Date().toISOString(), ok),
+    env.DB.prepare("DELETE FROM mail_log WHERE at < ?").bind(minutesFromNow(-48 * 60)),
+  ]);
+}
+
+/** Puts an email in the queue, to go after `minutes`. */
+async function enqueue(env: Env, email: Email, minutes = 0, tries = 0, lastError: string | null = null) {
+  await env.DB.prepare(
+    "INSERT INTO mail_queue (email, to_addr, subject, created_at, next_try_at, tries, last_error) VALUES (?, ?, ?, ?, ?, ?, ?)",
+  )
+    .bind(JSON.stringify(email), email.to, email.subject, new Date().toISOString(), minutesFromNow(minutes), tries, lastError)
+    .run();
+}
+
+/** "Not now" from the mail server, or a connection that failed on the way: worth trying again later. */
+const tryLater = (result: true | Error) => result instanceof Error && (!(result instanceof MailError) || result.temporary);
+
+/** After a "not now": 15 minutes, then 30, 60… up to 6 hours. */
+const backoff = (tries: number) => Math.min(15 * 2 ** Math.max(0, tries - 1), 360);
+
+/** Hands emails to the mail server (or, in tests, the outbox) and logs each hand-off. */
+async function deliver(env: Env, emails: Email[]): Promise<(true | Error)[]> {
+  const results =
+    env.MAIL_MODE === "test" ? await deliverToOutbox(env, emails) : await sendSmtp(env.SMTP_HOST, env.SMTP_USER, env.SMTP_PASSWORD, emails);
+  for (const result of results) {
+    await logHandOff(env, result === true ? 1 : tryLater(result) ? 0 : -1);
+  }
+  return results;
 }
 
 /**
  * Sends several emails in one go (one sign-in to the mail server), and says how each went: true, or the
  * error. A failure partway doesn't stop the rest from being tried.
  */
-export async function sendEmails(env: Env, emails: Email[]): Promise<(true | Error)[]> {
-  if (env.MAIL_MODE === "test") {
-    for (const email of emails) {
-      await env.DB.prepare(
-        "INSERT INTO outbox (to_addr, subject, body, created_at, reply_to) VALUES (?, ?, ?, ?, ?)",
-      )
-        .bind(email.to, email.subject, email.text, new Date().toISOString(), email.replyTo ?? null)
-        .run();
-    }
-    return emails.map(() => true);
+export async function sendEmails(env: Env, emails: Email[], options: { batch?: boolean } = {}): Promise<Sent[]> {
+  // A batch always waits its turn in the queue.
+  if (options.batch) {
+    for (const email of emails) await enqueue(env, email);
+    return emails.map(() => "queued" as const);
   }
-  return sendSmtp(env.SMTP_HOST, env.SMTP_USER, env.SMTP_PASSWORD, emails);
+  // One-offs go now while the hour's budget has room; the rest wait in the queue.
+  const room = Math.max(0, perHour(env) - (await handedOffLastHour(env)));
+  const now = emails.slice(0, room);
+  const results: Sent[] = [];
+  const delivered = now.length ? await deliver(env, now) : [];
+  for (const [i, result] of delivered.entries()) {
+    if (tryLater(result)) {
+      await enqueue(env, now[i]!, backoff(1), 1, result instanceof MailError ? result.reply : String(result));
+      results.push("queued");
+    } else results.push(result);
+  }
+  for (const email of emails.slice(room)) {
+    await enqueue(env, email);
+    results.push("queued");
+  }
+  return results;
+}
+
+/**
+ * Sends what's due in the queue, at most `max` and within the hour's budget (the job every minute
+ * sends one). Stops at the first "not now": the mail server wants a rest.
+ */
+export async function drainQueue(env: Env, max = 1) {
+  const take = Math.min(max, Math.max(0, perHour(env) - (await handedOffLastHour(env))));
+  let sent = 0;
+  let later = 0;
+  let failed = 0;
+  if (take === 0) return { sent, later, failed };
+  const due = (
+    await env.DB.prepare(
+      "SELECT id, email, tries FROM mail_queue WHERE failed_at IS NULL AND next_try_at <= ? ORDER BY next_try_at, id LIMIT ?",
+    )
+      .bind(new Date().toISOString(), take)
+      .all<{ id: number; email: string; tries: number }>()
+  ).results;
+  for (const row of due) {
+    const [result] = await deliver(env, [JSON.parse(row.email) as Email]);
+    if (result === true) {
+      await env.DB.prepare("DELETE FROM mail_queue WHERE id = ?").bind(row.id).run();
+      sent++;
+    } else if (tryLater(result!)) {
+      await env.DB.prepare("UPDATE mail_queue SET tries = ?, next_try_at = ?, last_error = ? WHERE id = ?")
+        .bind(row.tries + 1, minutesFromNow(backoff(row.tries + 1)), result instanceof MailError ? result.reply : String(result), row.id)
+        .run();
+      later++;
+      break;
+    } else {
+      await env.DB.prepare("UPDATE mail_queue SET failed_at = ?, last_error = ? WHERE id = ?")
+        .bind(new Date().toISOString(), String(result instanceof MailError ? result.reply : result), row.id)
+        .run();
+      console.error("An email will never go:", result);
+      failed++;
+    }
+  }
+  return { sent, later, failed };
+}
+
+/** What's waiting in the queue, and what the mail server turned away for good (for the report and npm run queue). */
+export async function queueStatus(env: Env) {
+  const rows = (
+    await env.DB.prepare(
+      "SELECT to_addr, subject, created_at, next_try_at, tries, last_error, failed_at FROM mail_queue ORDER BY failed_at IS NOT NULL, next_try_at, id",
+    ).all<{ to_addr: string; subject: string; created_at: string; next_try_at: string; tries: number; last_error: string | null; failed_at: string | null }>()
+  ).results;
+  return {
+    perHour: perHour(env),
+    lastHour: await handedOffLastHour(env),
+    waiting: rows.filter((r) => !r.failed_at),
+    failed: rows.filter((r) => r.failed_at),
+  };
+}
+
+/** Test mode: kept in the outbox table, never sent. An address with "+busy" is turned away for now, "+bad" for good. */
+async function deliverToOutbox(env: Env, emails: Email[]): Promise<(true | Error)[]> {
+  const results: (true | Error)[] = [];
+  for (const email of emails) {
+    if (email.to.includes("+busy")) {
+      results.push(new MailError("RCPT TO", 450, "450-Mail send limit exceeded. / 450 test"));
+      continue;
+    }
+    if (email.to.includes("+bad")) {
+      results.push(new MailError("RCPT TO", 550, "550 Requested action not taken: mailbox unavailable"));
+      continue;
+    }
+    await env.DB.prepare("INSERT INTO outbox (to_addr, subject, body, created_at, reply_to) VALUES (?, ?, ?, ?, ?)")
+      .bind(email.to, email.subject, email.text, new Date().toISOString(), email.replyTo ?? null)
+      .run();
+    results.push(true);
+  }
+  return results;
 }
 
 /** Base64 of UTF-8 text, wrapped at 76 characters as MIME expects. */
@@ -100,15 +251,16 @@ async function sendSmtp(
   const decoder = new TextDecoder();
   let buffer = "";
 
-  let lastLine = "";
-  /** The server's next reply: its code, once the last line of it has arrived. */
+  let lastReply = "";
+  /** The server's next reply: its code, once the last line of it has arrived. The whole reply is kept. */
   const reply = async (): Promise<number> => {
     for (;;) {
       const lines = buffer.split("\r\n");
       for (let i = 0; i < lines.length - 1; i++) {
         const match = /^(\d{3}) /.exec(lines[i]!);
         if (match) {
-          lastLine = lines[i]!;
+          // Every line of it: "450-Requested mail action not taken / 450-Mail send limit exceeded. / 450 <id>".
+          lastReply = lines.slice(0, i + 1).join(" / ");
           buffer = lines.slice(i + 1).join("\r\n");
           return Number(match[1]);
         }
@@ -118,32 +270,33 @@ async function sendSmtp(
       buffer += decoder.decode(value, { stream: true });
     }
   };
-  const say = async (line: string, expect: number) => {
+  /** Sends one line; `step` names it in any error (never the line itself: it could be the password). */
+  const say = async (step: string, line: string, expect: number) => {
     await writer.write(encoder.encode(`${line}\r\n`));
     const code = await reply();
-    // What the server said (never what we sent: that could be the password).
-    if (code !== expect) throw new Error(`The mail server said "${lastLine}" (expected ${expect})`);
+    if (code !== expect) throw new MailError(step, code, lastReply);
   };
 
   const results: (true | Error)[] = [];
   try {
-    if ((await reply()) !== 220) throw new Error(`The mail server didn't greet us: "${lastLine}"`);
-    await say("EHLO creatio-aura.com", 250);
-    await say("AUTH LOGIN", 334);
-    await say(btoa(user), 334);
-    await say(btoa(password), 235);
+    const greeting = await reply();
+    if (greeting !== 220) throw new MailError("the greeting", greeting, lastReply);
+    await say("EHLO", "EHLO creatio-aura.com", 250);
+    await say("AUTH LOGIN", "AUTH LOGIN", 334);
+    await say("the user name", btoa(user), 334);
+    await say("the password", btoa(password), 235);
     for (const email of emails) {
       try {
-        await say(`MAIL FROM:<${user}>`, 250);
-        await say(`RCPT TO:<${email.to}>`, 250);
-        await say("DATA", 354);
+        await say("MAIL FROM", `MAIL FROM:<${user}>`, 250);
+        await say("RCPT TO", `RCPT TO:<${email.to}>`, 250);
+        await say("DATA", "DATA", 354);
         // Every body line is base64, so none starts with a dot: no dot-stuffing needed.
-        await say(`${message(user, email)}\r\n.`, 250);
+        await say("the message", `${message(user, email)}\r\n.`, 250);
         results.push(true);
       } catch (error) {
         results.push(error instanceof Error ? error : new Error(String(error)));
         // Start the next one afresh.
-        await say("RSET", 250).catch(() => {});
+        await say("RSET", "RSET", 250).catch(() => {});
       }
     }
     await writer.write(encoder.encode("QUIT\r\n"));
@@ -534,6 +687,12 @@ export function dailyReportEmail(
   feedback = 0,
   /** Android testers still to add to their app's Google Play test list, each with the link to tick them off. */
   playToAdd: { app: string; email: string; inSince: string; url: string }[] = [],
+  /** The email queue: what's waiting to go, and anything the mail server turned away for good. */
+  queue: { perHour: number; waiting: { to_addr: string; subject: string; tries: number; next_try_at: string; last_error: string | null }[]; failed: { to_addr: string; subject: string; last_error: string | null }[] } = {
+    perHour: 0,
+    waiting: [],
+    failed: [],
+  },
 ) {
   const day = new Date().toLocaleDateString("en-US", {
     weekday: "long",
@@ -565,6 +724,14 @@ export function dailyReportEmail(
     ...waitingForYou.map(
       (w) => `  ? ${w.app}: ${w.email}, ${w.platforms.join(", ")} (confirmed ${w.confirmedAt.slice(0, 10)}). Let in or turn away: ${w.approveUrl}`,
     ),
+    "",
+    `Emails waiting to send: ${queue.waiting.length} (at most ${queue.perHour} an hour)`,
+    ...queue.waiting
+      .filter((q) => q.tries > 0)
+      .map((q) => `  … ${q.to_addr}: "${q.subject}", tried ${q.tries}×, next ${q.next_try_at.slice(11, 16)} UTC. The mail server said: ${q.last_error ?? "?"}`),
+    ...(queue.failed.length
+      ? [`Emails that will never go (the mail server said no for good): ${queue.failed.length}`, ...queue.failed.map((q) => `  ✗ ${q.to_addr}: "${q.subject}". ${q.last_error ?? ""}`)]
+      : []),
     "",
     `To add on Google Play: ${playToAdd.length}`,
     ...playToAdd.map(
@@ -616,6 +783,8 @@ ${waitingForYou.map((w) => `<tr><td>${escape(w.app)}</td><td>${escape(w.email)}<
 </table>`
     : "<p>Nobody right now.</p>"
 }
+<h3 style="margin:0 0 8px">Emails waiting to send: ${queue.waiting.length}</h3>
+<p style="margin:0 0 16px;font-size:14px;color:#6b6157">At most ${queue.perHour} an hour.${queue.waiting.filter((q) => q.tries > 0).length ? ` ${queue.waiting.filter((q) => q.tries > 0).length} were turned away for now and will be tried again.` : ""}${queue.failed.length ? ` <b>${queue.failed.length} will never go:</b> ${escape(queue.failed.map((q) => `${q.to_addr} (${q.last_error ?? ""})`).join("; "))}` : ""}</p>
 <h3 style="margin:0 0 8px">To add on Google Play: ${playToAdd.length}</h3>
 ${
   playToAdd.length

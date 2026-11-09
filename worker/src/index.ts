@@ -70,6 +70,8 @@ export interface Env {
   MAIL_PER_HOUR?: string;
   /** "1": links in emails go through creatio-aura.com's pass-on pages, not workers.dev (mail.ts viaSite). */
   LINKS_VIA_SITE?: string;
+  /** The Ignis Aura web game's own address (its sign-in links go via creatio-aura.com too). */
+  PLAY_URL?: string;
   /** Tries per connection per hour; defaults 6 and 10 (the tests raise them). */
   SIGNUP_LIMIT?: string;
   FEEDBACK_LIMIT?: string;

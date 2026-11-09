@@ -196,7 +196,7 @@ const escape = (text: string) => text.replace(/[&<>"']/g, (c) => `&#${c.charCode
 export function howTo(platform: string, url: string, app = "Ignis Aura"): string {
   if (platform === "Android") {
     return /^https:\/\/play\.google\.com\//.test(url)
-      ? `Open the link on your Android phone, signed in to the Google account you signed up with, and accept; then install ${app} from Google Play. Updates come through Google Play.`
+      ? `Open the link in Chrome on your Android phone (other browsers can stop partway through), signed in to the Google account you signed up with, and accept; then install ${app} from Google Play. Updates come through Google Play.${/\/internaltest\//.test(url) ? " If Google Play says you can't join yet, try again a little later: we add each tester by hand." : ""}`
       : "Open the link on your Android phone and download the app. If your phone asks, allow installing apps from your browser, then press Install. A newer build installs over the old one.";
   }
   if (platform === "iPhone") {
@@ -216,21 +216,30 @@ export function welcomeEmail(
   links: { platform: string; url: string; how: string }[] = [],
   /** The Beta Tester Terms, for a beta they cover; "" for one they don't. */
   termsUrl = "",
+  /** The beta's guides on the website, if it has any. */
+  guides: { label: string; url: string; about: string }[] = [],
+  /** A short note at the top, for a one-off send (say, why they're getting it again). */
+  note = "",
 ) {
+  // A game is played; an app is tried.
+  const play = app === "Ignis Aura" ? "play" : "try";
+  const getIt = app === "Ignis Aura" ? "Here's how to play:" : "Here's how to get it:";
   const text = [
     hi(name),
     "",
+    ...(note ? [note, ""] : []),
     `You're in: you're an ${app} beta tester now.`,
     "",
     ...(links.length
       ? [
-          "Here's how to play:",
+          getIt,
           "",
           ...links.flatMap((link) => [`${link.platform}: ${link.url}`, `  ${link.how}`, ""]),
           ...(termsUrl ? [...TERMS_IN_SHORT, `The full terms: ${termsUrl}`] : []),
         ]
-      : ["We'll email you when there's a build for you to play."]),
+      : [`We'll email you when there's a build for you to ${play}.`]),
     "",
+    ...(guides.length ? ["Guides:", "", ...guides.flatMap((g) => [`${g.label}: ${g.url}`, `  ${g.about}`, ""])] : []),
     "Questions? Just reply to this email.",
     "",
     "Changed your mind? Remove yourself from the beta (this deletes your details straight away):",
@@ -238,7 +247,9 @@ export function welcomeEmail(
     leaveUrl,
     "",
     "— Creatio Aura",
-  ].join("\n");
+  ]
+    .join("\n")
+    .replace(/\n{3,}/g, "\n\n");
   const buttons = links
     .map(
       (link) => `<div style="margin:0 0 18px">
@@ -251,6 +262,7 @@ export function welcomeEmail(
 <p style="margin:0 0 6px;font-size:13px;letter-spacing:2px;text-transform:uppercase;color:#b9a8d6">Creatio Aura</p>
 <h1 style="margin:0 0 18px;font-family:Georgia,serif;font-weight:600;font-size:26px;color:#ffb35c">You're in the ${escape(app)} beta</h1>
 <p style="margin:0 0 14px;font-size:16px;line-height:1.6">${escape(hi(name))}</p>
+${note ? `<p style="margin:0 0 16px;padding:12px 14px;border-radius:12px;background:#171327;border:1px solid #4a3f66;font-size:15px;line-height:1.55;color:#d8cbb6">${escape(note)}</p>` : ""}
 <p style="margin:0 0 14px;font-size:16px;line-height:1.6">You're in: you're an ${escape(app)} beta tester now.</p>
 ${
   links.length
@@ -262,7 +274,17 @@ ${
 <li>The game is confidential: please don't post or talk about it publicly, social media included, without written permission from its creator and Creatio Aura Ltd.</li>
 </ul></div>` : ""}
 ${buttons}`
-    : `<p style="margin:0 0 14px;font-size:16px;line-height:1.6">We'll email you when there's a build for you to play.</p>`
+    : `<p style="margin:0 0 14px;font-size:16px;line-height:1.6">We'll email you when there's a build for you to ${play}.</p>`
+}
+${
+  guides.length
+    ? `<p style="margin:8px 0 8px;font-size:13px;letter-spacing:1px;text-transform:uppercase;color:#b9a8d6">Guides</p>
+${guides
+  .map(
+    (g) => `<p style="margin:0 0 12px;font-size:15px;line-height:1.5"><a href="${g.url}" style="color:#ffb35c;font-weight:bold">${escape(g.label)}</a><br><span style="font-size:13px;color:#d8cbb6">${escape(g.about)}</span></p>`,
+  )
+  .join("")}`
+    : ""
 }
 <p style="margin:0 0 28px;font-size:16px;line-height:1.6">Questions? Just reply to this email.</p>
 <p style="margin:0 0 12px;font-size:14px;line-height:1.6;color:#d8cbb6">Changed your mind? Leaving deletes your details straight away.</p>
@@ -510,6 +532,8 @@ export function dailyReportEmail(
   lists: { name: string; total: number; fresh: number }[] = [],
   /** Notes sent from the app in the same time (each one is emailed on its own as it comes). */
   feedback = 0,
+  /** Android testers still to add to their app's Google Play test list, each with the link to tick them off. */
+  playToAdd: { app: string; email: string; inSince: string; url: string }[] = [],
 ) {
   const day = new Date().toLocaleDateString("en-US", {
     weekday: "long",
@@ -540,6 +564,11 @@ export function dailyReportEmail(
     `Waiting for your OK: ${waitingForYou.length}`,
     ...waitingForYou.map(
       (w) => `  ? ${w.app}: ${w.email}, ${w.platforms.join(", ")} (confirmed ${w.confirmedAt.slice(0, 10)}). Let in or turn away: ${w.approveUrl}`,
+    ),
+    "",
+    `To add on Google Play: ${playToAdd.length}`,
+    ...playToAdd.map(
+      (p) => `  [ ] ${p.app}: ${p.email} (in since ${p.inSince.slice(0, 10)}). Add to Play Console › ${p.app} › Testing › Internal testing › Testers, then tick it off: ${p.url}`,
     ),
     ...betas.flatMap((beta) => {
       const isNew = beta.testers.filter((t) => t.isNew);
@@ -587,6 +616,15 @@ ${waitingForYou.map((w) => `<tr><td>${escape(w.app)}</td><td>${escape(w.email)}<
 </table>`
     : "<p>Nobody right now.</p>"
 }
+<h3 style="margin:0 0 8px">To add on Google Play: ${playToAdd.length}</h3>
+${
+  playToAdd.length
+    ? `<p style="margin:0 0 8px;font-size:14px;color:#6b6157">In Play Console: the app › Testing › Internal testing › Testers, add the address to the email list, then tick it off.</p>
+<table cellpadding="6" style="font-size:14px;border-collapse:collapse;margin-bottom:16px">
+${playToAdd.map((p) => `<tr><td>☐ ${escape(p.app)}</td><td>${escape(p.email)}</td><td>in since ${escape(p.inSince.slice(0, 10))}</td><td><a href="${p.url}">Tick it off</a></td></tr>`).join("\n")}
+</table>`
+    : "<p>Nobody right now.</p>"
+}
 ${betas.map(section).join("\n")}
 <p style="margin:24px 0 0;font-size:15px"><b>Feedback from the apps ${escape(sinceWhen)}:</b> ${feedback}</p>
 ${
@@ -598,6 +636,6 @@ ${lists.map((l) => `<tr><td><b>${escape(l.name)}</b></td><td>${l.total}${l.fresh
     : ""
 }
 </body></html>`;
-  const subject = `Creatio Aura betas: ${fresh.length} new, ${waitingForYou.length} waiting for your OK`;
+  const subject = `Creatio Aura betas: ${fresh.length} new, ${waitingForYou.length} waiting for your OK${playToAdd.length ? `, ${playToAdd.length} to add on Google Play` : ""}`;
   return { subject, text, html };
 }

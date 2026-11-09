@@ -12,6 +12,11 @@
 //   GET  /admin/testers                                    → every tester, with platforms, and who's waiting
 //   POST /admin/announce { title, message, links, send }   → emails testers their builds
 //   POST /admin/report { send }                            → the daily report (also sent every morning)
+//   POST /admin/builds { project, links }                  → stores a beta's latest links (no emails); shows them
+//   POST /admin/welcome { project, email, send }           → one tester's "You're in" email again, with the links
+//   POST /admin/add { project, emails, platforms, onPlayList, send } → people Andrew invited himself, let in and welcomed
+//   GET  /admin/todo                                       → Android testers still to add to a Google Play test list
+//   POST /admin/todo { project, email }                    → ticks one off
 //   GET  /admin/waitlist                                   → everyone confirmed on each waiting list
 //   GET  /admin/feedback                                   → the latest notes from the app
 //
@@ -21,7 +26,7 @@
 // database, readable only from Andrew's Cloudflare account.
 
 import { allow, allowEmail, isAdmin, isHuman, leaveToken, leaveTokenId, newToken, sha256, visitorKey } from "./guard";
-import { approval, approveUrl, saveBuilds } from "./approve";
+import { approval, approveUrl, composeWelcome, currentBuilds, markPlayAdded, playToAdd, saveBuilds, sendWelcome } from "./approve";
 import { BETAS, betaOf } from "./betas";
 import { emailProblem } from "../../site/email-check.js";
 import { feedback, feedbackSince, forgetOldFeedback, latestFeedback, sendFeedback } from "./feedback";
@@ -135,6 +140,9 @@ export default {
       return approval(env, url, request.method, url.pathname);
     }
     if (url.pathname === "/decline" && request.method === "POST") return approval(env, url, "POST", url.pathname);
+    if (url.pathname === "/play-added" && (request.method === "GET" || request.method === "POST")) {
+      return approval(env, url, request.method, url.pathname);
+    }
     if (url.pathname === "/__outbox" && env.MAIL_MODE === "test") return outbox(env);
     // The web build's Worker, over a service binding: sign-in links and guest codes.
     if (url.pathname.startsWith("/internal/")) {
@@ -158,6 +166,31 @@ export default {
         }
         if (url.pathname === "/admin/announce" && request.method === "POST") {
           return await announce(env, (await request.json()) as Record<string, unknown>);
+        }
+        if (url.pathname === "/admin/builds" && request.method === "POST") {
+          return await builds(env, (await request.json()) as Record<string, unknown>);
+        }
+        if (url.pathname === "/admin/welcome" && request.method === "POST") {
+          return await welcomeAgain(env, (await request.json()) as Record<string, unknown>);
+        }
+        if (url.pathname === "/admin/add" && request.method === "POST") {
+          return await addTesters(env, (await request.json()) as Record<string, unknown>);
+        }
+        if (url.pathname === "/admin/todo" && request.method === "GET") {
+          return json({ ok: true, play: await playToAdd(env) }, 200, null);
+        }
+        if (url.pathname === "/admin/todo" && request.method === "POST") {
+          const body = (await request.json()) as Record<string, unknown>;
+          const project = betaOf(body.project);
+          const email = typeof body.email === "string" ? body.email.trim().toLowerCase() : "";
+          const row = project
+            ? await env.DB.prepare("SELECT id FROM signups WHERE project = ? AND lower(email) = ? AND approved_at IS NOT NULL")
+                .bind(project, email)
+                .first<{ id: number }>()
+            : null;
+          if (!row) return json({ ok: false, error: "not-a-tester" }, 404, null);
+          await markPlayAdded(env, row.id);
+          return json({ ok: true, play: await playToAdd(env) }, 200, null);
         }
         if (url.pathname === "/admin/report" && request.method === "POST") {
           const { send } = (await request.json()) as { send?: boolean };
@@ -425,7 +458,7 @@ async function dailyReport(env: Env, send: boolean) {
     total: l.people.length,
     fresh: l.people.filter((p) => p.confirmed_at > since).length,
   }));
-  const report = dailyReportEmail(betas, waitingForYou, last ? since : null, lists, await feedbackSince(env, since));
+  const report = dailyReportEmail(betas, waitingForYou, last ? since : null, lists, await feedbackSince(env, since), await playToAdd(env));
   const to = env.REPORT_EMAIL || env.OWNER_EMAIL;
   if (send) {
     await sendEmail(env, { to, ...report });
@@ -451,18 +484,114 @@ async function testers(env: Env) {
   return json({ ok: true, testers: inBetas, waiting: (await waitingForOk(env)).map(shape) }, 200, null);
 }
 
+/** A beta's links for its platforms from a request: https only, and only platforms the beta has. */
+function linksFor(project: string, given: unknown): Record<string, string> {
+  const links: Record<string, string> = {};
+  const from = (given ?? {}) as Record<string, unknown>;
+  for (const platform of BETAS[project]!.platforms) {
+    const url = from[platform];
+    if (typeof url === "string" && /^https:\/\/\S+$/.test(url)) links[platform] = url;
+  }
+  return links;
+}
+
+/**
+ * Stores a beta's latest build links without emailing anyone, so everyone let in from now on gets
+ * them in their welcome. With no links, it only shows what's stored.
+ */
+async function builds(env: Env, body: Record<string, unknown>) {
+  const project = betaOf(body.project);
+  if (!project) return json({ ok: false, error: "project" }, 400, null);
+  const links = linksFor(project, body.links);
+  if (Object.keys(links).length) await saveBuilds(env, project, links);
+  return json({ ok: true, project, builds: await currentBuilds(env, project) }, 200, null);
+}
+
+/**
+ * People Andrew invited himself (for example, already on a Google Play tester list): let in straight
+ * away and sent the "You're in" email. They never used the form, so their record says so instead of
+ * a consent they didn't give; every email still has their remove-me link. A dry run without send.
+ */
+async function addTesters(env: Env, body: Record<string, unknown>) {
+  const project = betaOf(body.project);
+  if (!project) return json({ ok: false, error: "project" }, 400, null);
+  const beta = BETAS[project]!;
+  const platforms = (Array.isArray(body.platforms) ? body.platforms : []).filter(
+    (p): p is string => typeof p === "string" && beta.platforms.includes(p),
+  );
+  if (platforms.length === 0) return json({ ok: false, error: "platforms" }, 400, null);
+  const emails = [
+    ...new Set(
+      (Array.isArray(body.emails) ? body.emails : [])
+        .filter((e): e is string => typeof e === "string")
+        .map((e) => e.trim().toLowerCase())
+        .filter((e) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e)),
+    ),
+  ];
+  if (emails.length === 0 || emails.length > 100) return json({ ok: false, error: "emails" }, 400, null);
+  const already = new Set(
+    (
+      await env.DB.prepare(`SELECT email FROM signups WHERE project = ? AND email IN (${emails.map(() => "?").join(",")})`)
+        .bind(project, ...emails)
+        .all<{ email: string }>()
+    ).results.map((r) => r.email),
+  );
+  const add = emails.filter((e) => !already.has(e));
+  const onPlay = body.onPlayList === true && platforms.includes("Android");
+  const note = typeof body.note === "string" ? body.note.trim().slice(0, 600) : "";
+  if (body.send !== true) {
+    const sample = add[0] ?? emails[0]!;
+    const preview = (await composeWelcome(env, { id: 0, project, name: "", email: sample, platforms: platforms.join(",") }, note)).content.text;
+    return json({ ok: true, sent: 0, add, already: [...already], platforms, onPlayList: onPlay, preview }, 200, null);
+  }
+  const now = new Date().toISOString();
+  const consent = `Added by Andrew, not through the form: he invited them to test${onPlay ? " and put them on the Google Play tester list" : ""} (${now.slice(0, 10)}).`;
+  const sent: string[] = [];
+  const notSent: string[] = [];
+  for (const email of add) {
+    const row = await env.DB.prepare(
+      `INSERT INTO signups (project, email, platforms, notes, consent_text, consent_at, created_at, confirmed_at,
+         leave_hash, approved_at, play_added_at, source)
+       VALUES (?, ?, ?, '', ?, ?, ?, ?, ?, ?, ?, 'added_by_andrew') RETURNING id, project, name, email, platforms`,
+    )
+      .bind(project, email, platforms.join(","), consent, now, now, now, (await newToken()).hash, now, onPlay ? now : null)
+      .first<{ id: number; project: string; name: string; email: string; platforms: string }>();
+    const { emailed } = await sendWelcome(env, row!, note);
+    (emailed ? sent : notSent).push(email);
+  }
+  return json({ ok: true, sent: sent.length, added: add, notSent, already: [...already] }, 200, null);
+}
+
+/** One tester's "You're in" email again, with the links stored now. Shows what it would send without send. */
+async function welcomeAgain(env: Env, body: Record<string, unknown>) {
+  const project = betaOf(body.project);
+  if (!project) return json({ ok: false, error: "project" }, 400, null);
+  const email = typeof body.email === "string" ? body.email.trim().toLowerCase() : "";
+  const row = await env.DB.prepare(
+    "SELECT id, project, name, email, platforms FROM signups WHERE project = ? AND lower(email) = ? AND approved_at IS NOT NULL",
+  )
+    .bind(project, email)
+    .first<{ id: number; project: string; name: string; email: string; platforms: string }>();
+  if (!row) return json({ ok: false, error: "not-a-tester" }, 404, null);
+  const stored = await currentBuilds(env, project);
+  const platforms = row.platforms.split(",");
+  const links = platforms.filter((p) => stored[p]);
+  const note = typeof body.note === "string" ? body.note.trim().slice(0, 600) : "";
+  if (body.send !== true) {
+    const preview = (await composeWelcome(env, row, note)).content.text;
+    return json({ ok: true, sent: false, email: row.email, platforms, links, preview }, 200, null);
+  }
+  const { emailed } = await sendWelcome(env, row, note);
+  return json({ ok: true, sent: emailed, email: row.email, platforms, links }, 200, null);
+}
+
 async function announce(env: Env, body: Record<string, unknown>) {
   const project = betaOf(body.project);
   if (!project) return json({ ok: false, error: "project" }, 400, null);
   const beta = BETAS[project]!;
   const title = typeof body.title === "string" ? body.title.trim() : "";
   const message = typeof body.message === "string" ? body.message.trim() : "";
-  const given = (body.links ?? {}) as Record<string, unknown>;
-  const links: Record<string, string> = {};
-  for (const platform of beta.platforms) {
-    const url = given[platform];
-    if (typeof url === "string" && /^https:\/\/\S+$/.test(url)) links[platform] = url;
-  }
+  const links = linksFor(project, body.links);
   if (!title || title.length > 120) return json({ ok: false, error: "title" }, 400, null);
   if (!message || message.length > 5000) return json({ ok: false, error: "message" }, 400, null);
   if (Object.keys(links).length === 0) return json({ ok: false, error: "links" }, 400, null);

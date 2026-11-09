@@ -17,12 +17,13 @@ description: One or two sentences for search results and link previews, about 12
 summary: A shorter line for the Journal list (defaults to the description).
 date: 2026-11-08
 kind: guide            # guide or update
-project: effugium      # effugium, or studio for the whole company
+project: effugium      # effugium, ignis, or studio for the whole company
 quick_answer: The answer in two or three sentences, for people who only want that. Guides should have one.
 image: /effugium/media/tour-poster.jpg    # optional, a picture from the site
 image_alt: What the picture shows
 image_link: /effugium/#tour-title          # optional
-featured: true         # optional: pins it to the top of the Journal
+image_position: center 45%                 # optional: which part of the picture a featured card shows
+featured: true         # optional: pins it to the top of the Journal (two at most; the newest two win)
 cta_title: Your fan, anywhere              # optional: the closing box's heading, tied to the topic
 cta_text: One line on how the app helps with exactly this.
 updated: 2026-11-20    # optional, when it's changed later
@@ -42,7 +43,7 @@ The answer.
 - [Apple Support: …](https://support.apple.com/…)
 ```
 
-The page adds, by itself: the byline and reading time, the quick-answer box, a closing "About the app" box with its buttons, the information-only note for Effugium posts, "More from the Journal", the feed and sitemap entries, structured data for search (Article, breadcrumbs, and the questions as FAQ), and the latest three posts on the project's own page.
+The page adds, by itself: the byline and reading time, the quick-answer box, a closing "About the app" box with its buttons, the project's note (information-only for Effugium, trademarks for Ignis), "More from the Journal", the feed and sitemap entries, structured data for search (Article, breadcrumbs, and the questions as FAQ), and the latest three posts on the project's own page.
 
 ## A guide's shape (what works for Vaultaire, in our words)
 

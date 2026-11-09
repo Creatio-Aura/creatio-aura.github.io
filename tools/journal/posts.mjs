@@ -8,7 +8,7 @@ export const ROOT = new URL('../../', import.meta.url).pathname;
 export const POSTS = join(ROOT, 'journal/posts');
 export const config = JSON.parse(readFileSync(new URL('./config.json', import.meta.url), 'utf8'));
 
-const FIELDS = ['title', 'description', 'summary', 'date', 'updated', 'kind', 'project', 'featured', 'draft', 'quick_answer', 'image', 'image_alt', 'image_link', 'cta_title', 'cta_text'];
+const FIELDS = ['title', 'description', 'summary', 'date', 'updated', 'kind', 'project', 'featured', 'draft', 'quick_answer', 'image', 'image_alt', 'image_link', 'image_position', 'cta_title', 'cta_text'];
 
 export const esc = (s) => String(s ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 export const slugify = (s) =>
@@ -78,6 +78,9 @@ export function readPost(file) {
   const { data, body } = frontMatter(text, file);
   const unknown = Object.keys(data).filter((k) => !FIELDS.includes(k));
   if (unknown.length) throw new Error(`${file}: unknown front matter field(s): ${unknown.join(', ')}`);
+  // Which part of the picture a featured card shows when it's cropped, e.g. "center 45%" (CSS object-position).
+  const POS = /^(top|center|bottom|left|right|\d{1,3}%)( (top|center|bottom|left|right|\d{1,3}%))?$/;
+  if (data.image_position !== undefined && !POS.test(String(data.image_position))) throw new Error(`${file}: image_position must look like "center 45%" or "top"`);
   const tokens = marked.lexer(body, { gfm: true });
   const words = body.replace(/[#*_>`\[\]()-]/g, ' ').split(/\s+/).filter(Boolean).length + String(data.quick_answer || '').split(/\s+/).length;
   return {

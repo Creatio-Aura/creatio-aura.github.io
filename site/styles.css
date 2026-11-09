@@ -196,7 +196,7 @@ fieldset legend { margin-bottom: 10px; }
 .video-steps button.done .n { background: rgba(127, 212, 198, 0.18); color: var(--effugium); }
 .video-toggle { align-self: flex-start; min-height: 44px; padding: 0 20px; font-size: 15px; }
 
-/* The Journal (tools/journal/build.mjs): a featured post, then a dated list; posts in a reading column */
+/* The Journal (tools/journal/build.mjs): up to two featured posts, then a dated list; posts in a reading column */
 .journal { max-width: 860px; padding-top: 24px; padding-bottom: 88px; display: flex; flex-direction: column; gap: 28px; }
 .journal-head { display: flex; flex-direction: column; gap: 14px; }
 .journal-head h1 { font-size: clamp(48px, 7vw, 76px); line-height: 1; }
@@ -204,6 +204,7 @@ fieldset legend { margin-bottom: 10px; }
 .journal-head .lede a { font-weight: 700; }
 .journal-tag { display: block; font-size: 12px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; color: var(--text-muted); }
 .journal-tag.update { color: var(--effugium); }
+.journal-tag.update.project-ignis { color: var(--amber); }
 .journal-title { display: block; font-family: var(--serif); font-variation-settings: "SOFT" 100; font-weight: 600; font-size: 22px; line-height: 1.25; color: var(--text); }
 .journal-summary { display: block; font-size: 16px; color: var(--text-soft); }
 .journal-date { display: block; font-size: 14px; color: var(--text-muted); }
@@ -233,6 +234,7 @@ fieldset legend { margin-bottom: 10px; }
 .post .crumbs a { color: var(--text-soft); text-decoration: none; }
 .post .crumbs a:hover { color: var(--amber); }
 .post .eyebrow { color: var(--effugium); }
+.post .eyebrow.project-ignis { color: var(--amber); }
 .post h1 { font-size: clamp(34px, 5vw, 50px); text-wrap: balance; }
 .post .lede { font-size: 20px; color: var(--text-soft); }
 .post .byline { font-size: 14px; color: var(--text-muted); }

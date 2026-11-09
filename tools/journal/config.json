@@ -40,6 +40,27 @@
         "alt": "Effugium Aura: an audio player for your own sounds, placed all around you. Beta sign-ups open."
       }
     },
+    "ignis": {
+      "name": "Ignis Aura",
+      "page": "/ignis/",
+      "about": "We make Ignis Aura, a fantasy tabletop adventure with a companion app that runs the game. It's in testing now on iPhone, Android and the web, and you can join the beta.",
+      "primary": {
+        "label": "Join the beta",
+        "href": "/ignis/#beta"
+      },
+      "secondary": {
+        "label": "Take the tour",
+        "href": "/ignis/#tour-title"
+      },
+      "appStore": null,
+      "note": "Apple, iPhone and iPad are trademarks of Apple Inc., registered in the U.S. and other countries and regions. Android and Google Play are trademarks of Google LLC.",
+      "shareImage": {
+        "url": "/images/share-ignis-aura.png",
+        "width": 1200,
+        "height": 630,
+        "alt": "Ignis Aura: a fantasy tabletop adventure, with a companion app for the whole table."
+      }
+    },
     "studio": {
       "name": "Creatio Aura",
       "page": "/",

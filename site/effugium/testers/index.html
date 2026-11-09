@@ -221,7 +221,7 @@ fieldset legend { margin-bottom: 10px; }
 .video-steps button.done .n { background: rgba(127, 212, 198, 0.18); color: var(--effugium); }
 .video-toggle { align-self: flex-start; min-height: 44px; padding: 0 20px; font-size: 15px; }
 
-/* The Journal (tools/journal/build.mjs): a featured post, then a dated list; posts in a reading column */
+/* The Journal (tools/journal/build.mjs): up to two featured posts, then a dated list; posts in a reading column */
 .journal { max-width: 860px; padding-top: 24px; padding-bottom: 88px; display: flex; flex-direction: column; gap: 28px; }
 .journal-head { display: flex; flex-direction: column; gap: 14px; }
 .journal-head h1 { font-size: clamp(48px, 7vw, 76px); line-height: 1; }
@@ -229,6 +229,7 @@ fieldset legend { margin-bottom: 10px; }
 .journal-head .lede a { font-weight: 700; }
 .journal-tag { display: block; font-size: 12px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; color: var(--text-muted); }
 .journal-tag.update { color: var(--effugium); }
+.journal-tag.update.project-ignis { color: var(--amber); }
 .journal-title { display: block; font-family: var(--serif); font-variation-settings: "SOFT" 100; font-weight: 600; font-size: 22px; line-height: 1.25; color: var(--text); }
 .journal-summary { display: block; font-size: 16px; color: var(--text-soft); }
 .journal-date { display: block; font-size: 14px; color: var(--text-muted); }
@@ -258,6 +259,7 @@ fieldset legend { margin-bottom: 10px; }
 .post .crumbs a { color: var(--text-soft); text-decoration: none; }
 .post .crumbs a:hover { color: var(--amber); }
 .post .eyebrow { color: var(--effugium); }
+.post .eyebrow.project-ignis { color: var(--amber); }
 .post h1 { font-size: clamp(34px, 5vw, 50px); text-wrap: balance; }
 .post .lede { font-size: 20px; color: var(--text-soft); }
 .post .byline { font-size: 14px; color: var(--text-muted); }
@@ -381,6 +383,8 @@ fieldset legend { margin-bottom: 10px; }
 .top nav a { color: var(--text); text-decoration: none; padding: 6px 12px; border-radius: 99px; border: 1px solid var(--card-line); font-weight: 700; font-size: 14px; }
 .top nav a[aria-current="page"] { background: var(--effugium); color: #0d1f1c; border-color: var(--effugium); }
 .guide { padding-top: 28px; }
+.callout { margin-top: 18px; padding: 18px 22px; border-radius: 18px; background: var(--card); border: 2px solid var(--effugium); }
+.callout p { margin: 0; }
 .tell { margin-top: 36px; padding: 22px 24px; border-radius: 20px; background: var(--card); border: 2px solid var(--card-line); }
 .tell h3 { font-size: 22px; color: var(--effugium); margin-bottom: 8px; }
 .tell ul { padding-left: 22px; margin: 0 0 10px; display: flex; flex-direction: column; gap: 6px; }
@@ -514,8 +518,11 @@ fieldset legend { margin-bottom: 10px; }
   </ol>
   <h2>On iPhone with AirPods</h2>
   <p>On iPhone, Effugium uses Apple's spatial audio on headphones, with your Personalized Spatial Audio profile if you've made one. With AirPods that support it, head tracking keeps sounds in place as you turn your head. Turn it off in ☰ &gt; <strong>Head tracking</strong> if you prefer sounds that turn with you.</p>
+  <h2>On Android</h2>
+  <p>On Android, Effugium uses its own 3D sound: with headphones on, your sounds are placed around you, and in Gravity they move around you. Head tracking isn't on Android yet, so the sounds turn with your head.</p>
+  <aside class="callout" aria-label="What we'd most like to hear from Android testers"><p><strong>The big question on Android:</strong> with headphones on, do the sounds really seem to come from around you, or does it need more to feel immersive? Tell us which phone and headphones you used.</p></aside>
 </div>
-<div class="tell"><h3>Tell us</h3><ul><li>Which headphones did you use, and did the sounds seem to come from around you?</li><li>With AirPods, did head tracking feel right, or would you rather it was off?</li><li>Did anything moving get in the way?</li></ul><p>In the app: ☰ menu &gt; <strong>Send feedback</strong>. It's anonymous, so add your name if you'd like a reply, or just message Andrew.</p></div>
+<div class="tell"><h3>Tell us</h3><ul><li>Which headphones did you use, and did the sounds seem to come from around you?</li><li>With AirPods, did head tracking feel right, or would you rather it was off?</li><li>On Android: does it feel like the sounds are around you, or does it need more?</li><li>Did anything moving get in the way?</li></ul><p>In the app: ☰ menu &gt; <strong>Send feedback</strong>. It's anonymous, so add your name if you'd like a reply, or just message Andrew.</p></div>
 <aside class="note" aria-label="About this guide"><p><strong>For information only.</strong> This guide shows what you can try and set up in a test version of Effugium Aura. It isn't medical advice and it doesn't promise any result. Effugium Aura is not a medical device and makes no health claims. Apple, iPhone, AirPods, Apple Watch and Beats are trademarks of Apple Inc., registered in the U.S. and other countries and regions. Android is a trademark of Google LLC.</p></aside></div></section><section class="view" id="view-bell" data-view="bell"><div class="wrap guide">
 <header class="guide-head">
   <p class="eyebrow">Try it · Meditation</p>

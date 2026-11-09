@@ -77,7 +77,10 @@ export interface Signup {
  * Sent when Andrew lets them in, and again on request (npm run welcome).
  */
 export async function sendWelcome(env: Env, row: Pick<Signup, "id" | "project" | "name" | "email" | "platforms">) {
-  const beta = BETAS[row.project] ?? { name: row.project, terms: false };
+  const beta: { name: string; terms: boolean; guides?: { label: string; url: string; about: string }[] } = BETAS[row.project] ?? {
+    name: row.project,
+    terms: false,
+  };
   const builds = await currentBuilds(env, row.project);
   const links = row.platforms
     .split(",")
@@ -88,7 +91,7 @@ export async function sendWelcome(env: Env, row: Pick<Signup, "id" | "project" |
   let emailed = false;
   if (await allowEmail(env, EMAILS_PER_DAY)) {
     try {
-      await sendEmail(env, { to: row.email, ...welcomeEmail(beta.name, row.name, leaveUrl, links, terms), leaveUrl });
+      await sendEmail(env, { to: row.email, ...welcomeEmail(beta.name, row.name, leaveUrl, links, terms, beta.guides ?? []), leaveUrl });
       emailed = true;
     } catch (error) {
       console.error("Emailing a tester they're in failed:", error);

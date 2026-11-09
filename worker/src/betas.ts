@@ -9,6 +9,8 @@ export interface Beta {
   consent: string;
   /** Whether the Beta Tester Terms (/beta/terms/, written for Ignis Aura) cover it. */
   terms: boolean;
+  /** Guides on the website, linked from the "You're in" email (Andrew, 2026-11-09). Add one when it exists. */
+  guides?: { label: string; url: string; about: string }[];
 }
 
 export const BETAS: Record<string, Beta> = {
@@ -25,6 +27,10 @@ export const BETAS: Record<string, Beta> = {
     platforms: ["iPhone", "Android"],
     consent: "Email me about the Effugium Aura beta. I've read the privacy policy.",
     terms: false,
+    guides: [
+      { label: "Tester guide", url: "https://creatio-aura.com/effugium/testers/", about: "What to try first, and how to send us feedback." },
+      { label: "User guide", url: "https://creatio-aura.com/effugium/guide/", about: "Every feature, explained." },
+    ],
   },
 };
 

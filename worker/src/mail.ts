@@ -216,6 +216,8 @@ export function welcomeEmail(
   links: { platform: string; url: string; how: string }[] = [],
   /** The Beta Tester Terms, for a beta they cover; "" for one they don't. */
   termsUrl = "",
+  /** The beta's guides on the website, if it has any. */
+  guides: { label: string; url: string; about: string }[] = [],
 ) {
   const text = [
     hi(name),
@@ -231,6 +233,7 @@ export function welcomeEmail(
         ]
       : ["We'll email you when there's a build for you to play."]),
     "",
+    ...(guides.length ? ["Guides:", "", ...guides.flatMap((g) => [`${g.label}: ${g.url}`, `  ${g.about}`, ""])] : []),
     "Questions? Just reply to this email.",
     "",
     "Changed your mind? Remove yourself from the beta (this deletes your details straight away):",
@@ -263,6 +266,16 @@ ${
 </ul></div>` : ""}
 ${buttons}`
     : `<p style="margin:0 0 14px;font-size:16px;line-height:1.6">We'll email you when there's a build for you to play.</p>`
+}
+${
+  guides.length
+    ? `<p style="margin:8px 0 8px;font-size:13px;letter-spacing:1px;text-transform:uppercase;color:#b9a8d6">Guides</p>
+${guides
+  .map(
+    (g) => `<p style="margin:0 0 12px;font-size:15px;line-height:1.5"><a href="${g.url}" style="color:#ffb35c;font-weight:bold">${escape(g.label)}</a><br><span style="font-size:13px;color:#d8cbb6">${escape(g.about)}</span></p>`,
+  )
+  .join("")}`
+    : ""
 }
 <p style="margin:0 0 28px;font-size:16px;line-height:1.6">Questions? Just reply to this email.</p>
 <p style="margin:0 0 12px;font-size:14px;line-height:1.6;color:#d8cbb6">Changed your mind? Leaving deletes your details straight away.</p>

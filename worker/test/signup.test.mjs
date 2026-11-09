@@ -226,6 +226,7 @@ test("signing up: a confirmation email; confirming asks Andrew; he lets them in 
   const welcome = (await outbox()).find((e) => e.to_addr === "kodi@example.com");
   assert.equal(welcome.subject, "You're in the Ignis Aura beta");
   assert.match(welcome.body, /We'll email you when there's a build for you to play\./);
+  assert.doesNotMatch(welcome.body, /Guides:/);
   const leaveLink = welcome.body.match(/(http\S+\/leave\?t=\S+)/)[1];
   assert.match(await (await fetch(approveLink)).text(), /already in the Ignis Aura beta/);
 
@@ -359,6 +360,8 @@ test("Effugium Aura's beta: the same sign-up, its own list, links and emails, no
   assert.ok(note);
   const welcome = (await outbox()).find((e) => e.to_addr === "rook@example.com" && e.subject === "You're in the Effugium Aura beta");
   assert.match(welcome.body, /You're in: you're an Effugium Aura beta tester now\./);
+  // Its guides, in every welcome; Ignis Aura has none yet.
+  assert.match(welcome.body, /Guides:\n\nTester guide: https:\/\/creatio-aura\.com\/effugium\/testers\/\n  What to try first, and how to send us feedback\.\n\nUser guide: https:\/\/creatio-aura\.com\/effugium\/guide\//);
   const { testers } = await (await admin("/admin/testers")).json();
   assert.deepEqual(
     testers.filter((t) => t.email === "rook@example.com").map((t) => [t.project, t.platforms]),

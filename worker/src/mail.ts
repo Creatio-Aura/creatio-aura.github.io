@@ -81,8 +81,30 @@ const tryLater = (result: true | Error) => result instanceof Error && (!(result 
 /** After a "not now": 15 minutes, then 30, 60… up to 6 hours. */
 const backoff = (tries: number) => Math.min(15 * 2 ** Math.max(0, tries - 1), 360);
 
+/**
+ * The links in an email's body, pointed at creatio-aura.com instead of this service's workers.dev
+ * address: a shared domain spam filters distrust (2026-11-09). Each site page (site/beta/pass.js) passes
+ * the visitor straight on. On with LINKS_VIA_SITE=1; the List-Unsubscribe header keeps this service's
+ * address, since mail apps post to it directly.
+ */
+const SITE_PATHS: [string, string][] = [
+  ["/waitlist/confirm", "/waitlist/confirm/"],
+  ["/waitlist/leave", "/waitlist/leave/"],
+  ["/confirm", "/beta/confirm/"],
+  ["/leave", "/beta/leave/"],
+  ["/approve", "/beta/approve/"],
+  ["/play-added", "/beta/play-added/"],
+];
+export function viaSite(env: Env, body: string): string {
+  if (env.LINKS_VIA_SITE !== "1") return body;
+  const service = env.SERVICE_URL.replace(/\/$/, "");
+  const site = env.SITE_URL.replace(/\/$/, "");
+  return SITE_PATHS.reduce((out, [from, to]) => out.split(`${service}${from}?t=`).join(`${site}${to}?t=`), body);
+}
+
 /** Hands emails to the mail server (or, in tests, the outbox) and logs each hand-off. */
-async function deliver(env: Env, emails: Email[]): Promise<(true | Error)[]> {
+async function deliver(env: Env, given: Email[]): Promise<(true | Error)[]> {
+  const emails = given.map((e) => ({ ...e, text: viaSite(env, e.text), html: viaSite(env, e.html) }));
   const results =
     env.MAIL_MODE === "test" ? await deliverToOutbox(env, emails) : await sendSmtp(env.SMTP_HOST, env.SMTP_USER, env.SMTP_PASSWORD, emails);
   for (const result of results) {

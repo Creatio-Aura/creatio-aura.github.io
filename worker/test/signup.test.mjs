@@ -35,6 +35,8 @@ const vars = {
   FEEDBACK_LIMIT: "30",
   // Room for every test's emails in the hour; the queue test fills it on purpose.
   MAIL_PER_HOUR: "1000",
+  // Links stay on this test service, so the tests can follow them (production sends them via the site).
+  LINKS_VIA_SITE: "0",
 };
 
 before(async () => {

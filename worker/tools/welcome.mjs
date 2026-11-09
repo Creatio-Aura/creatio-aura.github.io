@@ -34,4 +34,12 @@ console.log(`${result.email} plays on ${result.platforms.join(", ")}.`);
 console.log(result.links.length ? `Their welcome has the links for ${result.links.join(", ")}.` : "No links stored for their platforms yet (npm run builds).");
 if (missing.length) console.log(`No link yet for: ${missing.join(", ")}.`);
 if (!values.send && result.preview) console.log("\nThe email:\n\n" + result.preview.replace(/^/gm, "  | "));
-console.log(values.send ? (result.sent ? "Sent." : "Not sent: the email service didn't take it, or the day's limit is reached.") : "Dry run: add --send to send it.");
+console.log(
+  values.send
+    ? result.sent
+      ? "Sent."
+      : result.queued
+        ? "Queued: it goes out at the mail server's pace (npm run queue shows it)."
+        : "Not sent: the mail server said no for good, or the day's limit is reached."
+    : "Dry run: add --send to send it.",
+);

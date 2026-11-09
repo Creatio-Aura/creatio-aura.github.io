@@ -153,7 +153,7 @@ export async function sendFeedback(env: Env): Promise<number> {
   const results = await sendEmails(env, emails);
   let sent = 0;
   for (const [i, result] of results.entries()) {
-    if (result === true) sent++;
+    if (result === true || result === "queued") sent++;
     else {
       console.error("A feedback email wasn't sent:", result);
       await letGo(env, claimed[i]!.id);

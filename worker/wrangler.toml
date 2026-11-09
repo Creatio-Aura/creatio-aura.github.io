@@ -20,10 +20,13 @@ SMTP_USER = "support@creatio-aura.com"
 OWNER_EMAIL = "creatio.aura@gmail.com"
 FEEDBACK_EMAIL = "feedback@creatio-aura.com"
 MAIL_MODE = "smtp"
+# At most this many emails handed to IONOS in any hour; the rest wait in the queue (mail.ts).
+# IONOS turned mail away after about 8 in an hour on 2026-11-09: raise this once IONOS says the real limit.
+MAIL_PER_HOUR = "6"
 
 # The daily beta report, every morning: 14:00 UTC is 8 am in Colorado in summer, 7 am in winter.
 [triggers]
-crons = ["0 14 * * *"]
+crons = ["0 14 * * *", "* * * * *"]   # the morning report; the email queue, every minute
 
 [[d1_databases]]
 binding = "DB"

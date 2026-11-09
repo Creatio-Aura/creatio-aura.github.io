@@ -15,6 +15,8 @@
 //   POST /admin/builds { project, links }                  → stores a beta's latest links (no emails); shows them
 //   POST /admin/welcome { project, email, send }           → one tester's "You're in" email again, with the links
 //   POST /admin/add { project, emails, platforms, onPlayList, send } → people Andrew invited himself, let in and welcomed
+//   GET  /admin/queue                                      → emails waiting to go (and any that never will)
+//   POST /admin/queue { drain }                            → sends up to that many now, within the hour's budget
 //   GET  /admin/todo                                       → Android testers still to add to a Google Play test list
 //   POST /admin/todo { project, email }                    → ticks one off
 //   GET  /admin/waitlist                                   → everyone confirmed on each waiting list
@@ -27,6 +29,7 @@
 
 import { allow, allowEmail, isAdmin, isHuman, leaveToken, leaveTokenId, newToken, sha256, visitorKey } from "./guard";
 import { approval, approveUrl, composeWelcome, currentBuilds, markPlayAdded, playToAdd, saveBuilds, sendWelcome } from "./approve";
+import { drainQueue, queueStatus } from "./mail";
 import { BETAS, betaOf } from "./betas";
 import { emailProblem } from "../../site/email-check.js";
 import { feedback, feedbackSince, forgetOldFeedback, latestFeedback, sendFeedback } from "./feedback";
@@ -63,6 +66,8 @@ export interface Env {
   FEEDBACK_EMAIL?: string;
   /** "smtp" to send through the mail server, "test" to keep emails in the outbox table. */
   MAIL_MODE: string;
+  /** The most emails handed to the mail server in any hour (mail.ts); "10" if unset. */
+  MAIL_PER_HOUR?: string;
   /** Tries per connection per hour; defaults 6 and 10 (the tests raise them). */
   SIGNUP_LIMIT?: string;
   FEEDBACK_LIMIT?: string;
@@ -114,7 +119,12 @@ const redirect = (env: Env, path: string) =>
 export default {
   // Every morning (wrangler.toml's cron), the studio's report on the beta list, any feedback that
   // couldn't be emailed yet, and notes older than the privacy pages say they're kept deleted.
-  async scheduled(_controller: ScheduledController, env: Env, ctx: ExecutionContext) {
+  async scheduled(controller: ScheduledController, env: Env, ctx: ExecutionContext) {
+    // Every minute: the next email in the queue, within the hour's budget (mail.ts).
+    if (controller.cron === "* * * * *") {
+      ctx.waitUntil(drainQueue(env, 1).then(() => undefined));
+      return;
+    }
     ctx.waitUntil(dailyReport(env, true).then(() => undefined));
     ctx.waitUntil(sendFeedback(env).then(() => undefined));
     ctx.waitUntil(forgetOldFeedback(env));
@@ -175,6 +185,14 @@ export default {
         }
         if (url.pathname === "/admin/add" && request.method === "POST") {
           return await addTesters(env, (await request.json()) as Record<string, unknown>);
+        }
+        if (url.pathname === "/admin/queue" && request.method === "GET") {
+          return json({ ok: true, ...(await queueStatus(env)) }, 200, null);
+        }
+        if (url.pathname === "/admin/queue" && request.method === "POST") {
+          const { drain } = (await request.json()) as { drain?: number };
+          const done = await drainQueue(env, Math.min(Math.max(Number(drain) || 0, 0), 100));
+          return json({ ok: true, done, ...(await queueStatus(env)) }, 200, null);
         }
         if (url.pathname === "/admin/todo" && request.method === "GET") {
           return json({ ok: true, play: await playToAdd(env) }, 200, null);
@@ -458,7 +476,7 @@ async function dailyReport(env: Env, send: boolean) {
     total: l.people.length,
     fresh: l.people.filter((p) => p.confirmed_at > since).length,
   }));
-  const report = dailyReportEmail(betas, waitingForYou, last ? since : null, lists, await feedbackSince(env, since), await playToAdd(env));
+  const report = dailyReportEmail(betas, waitingForYou, last ? since : null, lists, await feedbackSince(env, since), await playToAdd(env), await queueStatus(env));
   const to = env.REPORT_EMAIL || env.OWNER_EMAIL;
   if (send) {
     await sendEmail(env, { to, ...report });
@@ -547,6 +565,7 @@ async function addTesters(env: Env, body: Record<string, unknown>) {
   const now = new Date().toISOString();
   const consent = `Added by Andrew, not through the form: he invited them to test${onPlay ? " and put them on the Google Play tester list" : ""} (${now.slice(0, 10)}).`;
   const sent: string[] = [];
+  const queued: string[] = [];
   const notSent: string[] = [];
   for (const email of add) {
     const row = await env.DB.prepare(
@@ -556,10 +575,11 @@ async function addTesters(env: Env, body: Record<string, unknown>) {
     )
       .bind(project, email, platforms.join(","), consent, now, now, now, (await newToken()).hash, now, onPlay ? now : null)
       .first<{ id: number; project: string; name: string; email: string; platforms: string }>();
-    const { emailed } = await sendWelcome(env, row!, note);
-    (emailed ? sent : notSent).push(email);
+    // A batch: every welcome waits its turn in the queue and goes at the mail server's pace.
+    const result = await sendWelcome(env, row!, note, { batch: true });
+    (result.emailed ? sent : result.queued ? queued : notSent).push(email);
   }
-  return json({ ok: true, sent: sent.length, added: add, notSent, already: [...already] }, 200, null);
+  return json({ ok: true, sent: sent.length, queued: queued.length, added: add, notSent, already: [...already] }, 200, null);
 }
 
 /** One tester's "You're in" email again, with the links stored now. Shows what it would send without send. */
@@ -581,8 +601,8 @@ async function welcomeAgain(env: Env, body: Record<string, unknown>) {
     const preview = (await composeWelcome(env, row, note)).content.text;
     return json({ ok: true, sent: false, email: row.email, platforms, links, preview }, 200, null);
   }
-  const { emailed } = await sendWelcome(env, row, note);
-  return json({ ok: true, sent: emailed, email: row.email, platforms, links }, 200, null);
+  const { emailed, queued } = await sendWelcome(env, row, note);
+  return json({ ok: true, sent: emailed, queued, email: row.email, platforms, links }, 200, null);
 }
 
 async function announce(env: Env, body: Record<string, unknown>) {
@@ -630,15 +650,17 @@ async function announce(env: Env, body: Record<string, unknown>) {
     if (!(await allowEmail(env, limits(env).emailsPerDay))) break;
     allowed.push(entry);
   }
-  const results = await sendEmails(env, allowed.map((entry) => entry.email));
+  // A batch: it waits in the queue and goes at the mail server's pace.
+  const results = await sendEmails(env, allowed.map((entry) => entry.email), { batch: true });
   const failed = allowed.flatMap((entry, i) =>
-    results[i] === true ? [] : [{ email: entry.tester.email, error: String(results[i]) }],
+    results[i] === true || results[i] === "queued" ? [] : [{ email: entry.tester.email, error: String(results[i]) }],
   );
   for (const failure of failed) console.error("Announcement not sent:", failure);
   return json(
     {
       ok: true,
       sent: results.filter((r) => r === true).length,
+      queued: results.filter((r) => r === "queued").length,
       failed,
       notSentToday: plan.slice(allowed.length).map((entry) => entry.tester.email),
       recipients,

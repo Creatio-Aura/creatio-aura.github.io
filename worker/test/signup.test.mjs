@@ -33,6 +33,8 @@ const vars = {
   // Every test comes from one machine: room for them all, while still testing the limit.
   SIGNUP_LIMIT: "40",
   FEEDBACK_LIMIT: "30",
+  // Room for every test's emails in the hour; the queue test fills it on purpose.
+  MAIL_PER_HOUR: "1000",
 };
 
 before(async () => {
@@ -95,6 +97,9 @@ const admin = (path, body, key = "test-admin-key") =>
     headers: { Authorization: `Bearer ${key}`, "Content-Type": "application/json" },
     body: body ? JSON.stringify(body) : undefined,
   });
+
+/** Sends everything waiting in the email queue now (the service does it a minute at a time). */
+const drain = () => admin("/admin/queue", { drain: 100 }).then((r) => r.json());
 
 /** The link in the studio's "wants in" email for this address. */
 async function approveLinkFor(email) {
@@ -295,7 +300,9 @@ test("an announcement goes only to testers let in who play there, with only thei
 
   const before = (await outbox()).length;
   const sent = await (await admin("/admin/announce", { title: "Ignis Aura 0.6.0 is ready", message: "The board is in.", links, send: true })).json();
-  assert.equal(sent.sent, 1);
+  // A batch waits in the queue, then goes at the mail server's pace.
+  assert.deepEqual([sent.sent, sent.queued], [0, 1]);
+  assert.equal((await drain()).done.sent, 1);
   const mails = (await outbox()).slice(0, (await outbox()).length - before);
   assert.deepEqual(mails.map((m) => m.to_addr), ["mira@example.com"]);
   assert.match(mails[0].body, /Android: https:\/\/play\.google\.com\/apps\/internaltest\/1234\n  Open the link in Chrome on your Android phone \(other browsers can stop partway through\), signed in to the Google account you signed up with/);
@@ -403,7 +410,8 @@ test("people Andrew invited himself: a dry run first, then let in and welcomed, 
   const note = "Sorry for sending you another email about joining the beta. We wanted to add clearer instructions on how to install it.";
   assert.match((await (await admin("/admin/add", { project: "effugium", platforms: ["Android"], emails, note })).json()).preview, /^Hi,\n\nSorry for sending you another email/);
   const sent = await (await admin("/admin/add", { project: "effugium", platforms: ["Android"], emails, onPlayList: true, note, send: true })).json();
-  assert.equal(sent.sent, 2);
+  assert.deepEqual([sent.sent, sent.queued], [0, 2]);
+  await drain();
   const { testers } = await (await admin("/admin/testers")).json();
   assert.deepEqual(testers.filter((t) => t.email.startsWith("guest")).map((t) => [t.email, t.project, t.platforms]).sort(), [
     ["guest-two@example.com", "effugium", ["Android"]],
@@ -444,6 +452,7 @@ test("Effugium Aura's beta: the same sign-up, its own list, links and emails, no
   const links = { iPhone: "https://testflight.apple.com/join/EFFUG", Web: "https://example.com/not-for-effugium" };
   const sent = await (await admin("/admin/announce", { project: "effugium", title: "Effugium Aura 0.2 is ready", message: "Try it.", links, send: true })).json();
   assert.deepEqual(sent.recipients.map((r) => [r.email, r.platforms]), [["rook@example.com", ["iPhone"]]]);
+  await drain();
   const [mail] = (await outbox()).filter((e) => e.subject === "Effugium Aura 0.2 is ready");
   assert.match(mail.body, /iPhone: https:\/\/testflight\.apple\.com\/join\/EFFUG/);
   assert.doesNotMatch(mail.body, /Beta Tester Terms|confidential|not-for-effugium/);
@@ -800,4 +809,36 @@ test("a flood of sign-ups from one connection is cut off after a few an hour", a
   for (let i = 0; i < 45; i++) last = await post("/signup", person({ email: `flood${i}@example.com`, turnstile: "" }));
   assert.equal(last.status, 429);
   assert.equal((await last.json()).error, "too-many");
+});
+
+test("the email queue: a \"not now\" waits and is tried again later, a \"no\" is reported, and the mail server's whole answer is kept", async () => {
+  // A batch waits in the queue; when the mail server says "not now", it waits a while and keeps the answer.
+  const added = await (await admin("/admin/add", { project: "effugium", platforms: ["Android"], emails: ["slow+busy@example.com"], send: true })).json();
+  assert.deepEqual([added.sent, added.queued], [0, 1]);
+  const first = await drain();
+  assert.equal(first.done.later, 1);
+  const waiting = first.waiting.find((q) => q.to_addr === "slow+busy@example.com");
+  assert.equal(waiting.subject, "You're in the Effugium Aura beta");
+  assert.equal(waiting.tries, 1);
+  assert.match(waiting.last_error, /450-Mail send limit exceeded\. \/ 450 test/);
+  assert.ok(waiting.next_try_at > new Date(Date.now() + 10 * 60_000).toISOString()); // not for a while
+  // Not due yet: draining again sends nothing to them.
+  assert.equal((await drain()).done.sent, 0);
+  assert.equal((await outbox()).filter((e) => e.to_addr === "slow+busy@example.com").length, 0);
+
+  // A one-off that gets "not now" joins the queue instead of being lost.
+  const again = await (await admin("/admin/welcome", { project: "effugium", email: "slow+busy@example.com", send: true })).json();
+  assert.deepEqual([again.sent, again.queued], [false, true]);
+
+  // An address the mail server refuses for good: tried once, then listed as never going.
+  await admin("/admin/add", { project: "effugium", platforms: ["Android"], emails: ["gone+bad@example.com"], send: true });
+  await drain();
+  const after = await (await admin("/admin/queue")).json();
+  const failed = after.failed.find((q) => q.to_addr === "gone+bad@example.com");
+  assert.match(failed.last_error, /550 Requested action not taken/);
+  assert.ok(!after.waiting.some((q) => q.to_addr === "gone+bad@example.com"));
+  // The morning report shows both.
+  const report = await (await admin("/admin/report", {})).json();
+  assert.match(report.preview, /Emails waiting to send: \d+ \(at most 1000 an hour\)\n  … slow\+busy@example\.com: "You're in the Effugium Aura beta", tried 1×/);
+  assert.match(report.preview, /Emails that will never go \(the mail server said no for good\): 1\n  ✗ gone\+bad@example\.com/);
 });

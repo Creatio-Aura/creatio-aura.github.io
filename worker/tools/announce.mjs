@@ -57,7 +57,7 @@ if (!values.send) {
   console.log(result.recipients[0].preview);
   console.log("\nNothing was sent. Add --send to send it.");
 } else {
-  console.log(`\nSent: ${result.sent}.`);
+  console.log(`\nQueued: ${result.queued}. They go out at the mail server's pace, about one a minute within the hour's budget (npm run queue shows them).`);
   if (result.failed.length) console.log(`Failed: ${result.failed.map((f) => `${f.email} (${f.error})`).join("; ")}`);
   if (result.notSentToday.length) console.log(`Over today's email allowance, send tomorrow: ${result.notSentToday.join(", ")}`);
 }

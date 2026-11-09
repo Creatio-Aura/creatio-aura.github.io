@@ -52,7 +52,7 @@ if (!values.send) {
   console.log(result.preview.replace(/^/gm, "  | "));
   console.log("\nDry run: add --send to let them in and send it.");
 } else {
-  console.log(`Let in ${result.added.length}; emailed ${result.sent}.`);
-  if (result.notSent.length) console.log(`Not emailed (the day's limit, or the mail service said no): ${result.notSent.join(", ")}. Resend later with npm run welcome.`);
+  console.log(`Let in ${result.added.length}; ${result.queued} welcome email(s) queued: they go out at the mail server's pace (npm run queue shows them).`);
+  if (result.notSent.length) console.log(`Not queued (the day's limit): ${result.notSent.join(", ")}. Resend later with npm run welcome.`);
   if (result.already.length) console.log(`Already in, left alone: ${result.already.join(", ")}`);
 }

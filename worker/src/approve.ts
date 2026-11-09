@@ -108,18 +108,25 @@ export interface Signup {
  * Emails a tester that they're in, with the latest links for where they play (if there are any yet).
  * Sent when Andrew lets them in, and again on request (npm run welcome).
  */
-export async function sendWelcome(env: Env, row: Pick<Signup, "id" | "project" | "name" | "email" | "platforms">, note = "") {
+export async function sendWelcome(
+  env: Env,
+  row: Pick<Signup, "id" | "project" | "name" | "email" | "platforms">,
+  note = "",
+  options: { batch?: boolean } = {},
+) {
   const { content, links, leaveUrl } = await composeWelcome(env, row, note);
   let emailed = false;
+  let queued = false;
   if (await allowEmail(env, EMAILS_PER_DAY)) {
     try {
-      await sendEmail(env, { to: row.email, ...content, leaveUrl });
-      emailed = true;
+      const result = await sendEmail(env, { to: row.email, ...content, leaveUrl }, options);
+      emailed = result === true;
+      queued = result === "queued";
     } catch (error) {
       console.error("Emailing a tester they're in failed:", error);
     }
   }
-  return { emailed, links };
+  return { emailed, queued, links };
 }
 
 /** The "You're in" email for a tester, with the latest links for where they play, unsent. */
@@ -186,8 +193,10 @@ ${platforms.includes("Android") ? "<p>On Android, Google Play only lets in the G
   if (row.approved_at) return page("Already in", `<p>${who} is already in the ${escape(beta.name)} beta.</p>`);
 
   await env.DB.prepare("UPDATE signups SET approved_at = ? WHERE id = ?").bind(new Date().toISOString(), row.id).run();
-  const { emailed, links } = await sendWelcome(env, row);
-  const told = emailed
+  const { emailed, queued, links } = await sendWelcome(env, row);
+  const told = queued
+    ? "Their welcome email is in the queue: it goes out within the hour, at the mail server's pace."
+    : emailed
     ? links.length
       ? `We've emailed them the links for ${escape(links.map((l) => l.platform).join(", "))}.`
       : "We've emailed them that they're in; the next build email will reach them."

@@ -3,11 +3,12 @@ title: Can't sleep without your fan when traveling? Record it and loop it
 description: Record the fan you're used to at home, loop it without a click, and play it in a hotel room, at a friend's or on a trip. Steps for iPhone and Android.
 summary: Record your own fan at home, loop it without a click, and play it wherever you stay.
 date: 2026-11-08
+updated: 2026-11-09
 kind: guide
 project: effugium
-quick_answer: Record two or three minutes of your fan at home, with your phone set down an arm's length away and Do Not Disturb on. Trim the ends and blend the end into the start so the join doesn't click, then play it in an app that repeats it and keeps going with the screen off. Effugium Aura, which we make, does all of that in one app.
+quick_answer: Record two or three minutes of your fan at home, with your phone set down an arm's length away and Do Not Disturb on. Trim the ends and blend the end into the start so the join doesn't click, then play it in an app that repeats it and keeps going with the screen off. Effugium Aura, the app we're testing now, does all of that in one place, and you can try it in the beta.
 cta_title: Your fan, anywhere
-cta_text: Record your fan in Effugium Aura, smooth the join, put it where it sits at home, and choose when it fades out.
+cta_text: Try recording your fan in the Effugium Aura beta, then tell us how the loop sounds on a night away.
 ---
 
 If you're used to the sound of a fan, an air conditioner or the rain on your own window at night, a hotel room can sound all wrong. You can take that exact sound with you: record it once at home, loop it so the join doesn't click, and play it wherever you stay, as loud as you like.
@@ -56,17 +57,22 @@ Then play it in an app that repeats one sound and keeps going with the screen of
 - **Sharing the room?** Use headphones or earbuds so it plays only for you. On a small speaker, keep it low and away from your head.
 - **Decide how the night ends:** all night, or a sleep timer that fades it out.
 
-## How Effugium Aura does it
+## Try it in the Effugium Aura beta
 
-We built Effugium Aura around your own sounds, so it's one way to do all of the above in one app. Here's the fan, start to finish:
+Effugium Aura is in testing, and recording your own fan is one of the things we most want testers to try. If you're testing it, here's how:
 
-1. **Record it in the app.** Tap Record, set the phone down near the fan, and tap the red button. A meter tells you whether it's a good level, very quiet or too loud. Or tap Import to bring in a recording from your files.
-2. **Smooth the join.** Make it seamless finds where the end can flow back into the start. In Loop Studio you can choose the join yourself: the smoothest, the longest, or one that leaves out a sudden sound. Play Before, then After, to hear the difference. Seamless loops and Loop Studio are part of Pro.
-3. **Put it where your fan is.** Place each sound in front, behind, to your left or to your right. With headphones, each one seems to come from its own place; on the phone's speaker, everything plays in front of you.
-4. **Add the rest of your room, if you like.** Mix your recording with others or with the sounds that come with the app, tap each one to set its volume, and save the mix as a soundscape.
-5. **Choose how it ends.** Let it play all night, or set the sleep timer for 15 or 30 minutes, an hour or two hours, and the mix fades out over its last 5 to 10 minutes. It keeps playing with the screen off.
+1. **Record your fan.** Tap Record, set the phone down near the fan, and record two or three minutes. Or tap Import to use a recording you already have.
+2. **Smooth the join.** Let the app blend the end into the start, then listen to it go round a few times.
+3. **Put it where your fan is.** Place the sound in front of you, behind, or to one side. With headphones, it seems to come from there.
+4. **Play it.** Let it run all night, or set the sleep timer so it fades out.
 
-Your recordings stay on your phone, and nothing is uploaded. Effugium Aura is in testing on iPhone and Android now: you can [join the beta](/effugium/#beta).
+Then tell us how it went:
+
+- Can you hear the join, or does the loop sound like the real fan?
+- Did it keep playing with the screen off, all the way through?
+- Did the fade-out at the end of the timer feel right?
+
+Your recordings stay on your phone. Testing already? In the app, open the ☰ menu and tap **Send feedback**. Not yet? You can [join the beta](/effugium/#beta).
 
 ## Questions people ask
 
@@ -80,7 +86,7 @@ Two or three minutes is plenty for a steady fan, as long as the join is smooth. 
 The end of the recording doesn't line up with the start. Trim the ends, and blend the end into the start over a second or two.
 
 ### Will it keep playing with the screen locked?
-That depends on the app, so check before your trip. Effugium Aura plays with the screen off, all night or until its sleep timer fades it out, with its controls on the lock screen.
+That depends on the app, so check before your trip. Effugium Aura is made to keep playing with the screen off. If you're testing it and it ever stops, please tell us with Send feedback.
 
 ### Can I record an air conditioner or rain the same way?
 Yes. Anything steady works the same way: an air conditioner, a humidifier, a fish tank, rain on the window.

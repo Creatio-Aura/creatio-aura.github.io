@@ -223,6 +223,7 @@ test("signing up: a confirmation email; confirming asks Andrew; he lets them in 
   // Android: a reminder to add them to the Play test's email list, with their address to copy.
   assert.match(done, /Now add them on Google Play:<\/b> in Play Console, Ignis Aura › Testing › Internal testing › Testers/);
   assert.match(done, /user-select: all[^>]*>kodi@example\.com</);
+  assert.match(done, /<button type="submit">I've added them<\/button>/);
   const welcome = (await outbox()).find((e) => e.to_addr === "kodi@example.com");
   assert.equal(welcome.subject, "You're in the Ignis Aura beta");
   assert.match(welcome.body, /We'll email you when there's a build for you to play\./);
@@ -353,6 +354,78 @@ test("links stored without emailing anyone reach later welcomes, and one tester'
   await fetch(leave, { redirect: "manual" });
 });
 
+test("Android testers wait on a list to be added on Google Play until Andrew ticks them off", async () => {
+  await tester("droid@example.com", ["Android"]);
+  await tester("browser@example.com", ["Web"]);
+  await tester("pixel@example.com", ["iPhone", "Android"], "effugium");
+  const todo = async () => (await (await admin("/admin/todo")).json()).play;
+  const listed = (await todo()).map((p) => [p.app, p.email]);
+  assert.ok(listed.some(([app, email]) => app === "Ignis Aura" && email === "droid@example.com"));
+  assert.ok(listed.some(([app, email]) => app === "Effugium Aura" && email === "pixel@example.com"));
+  assert.ok(!listed.some(([, email]) => email === "browser@example.com")); // Web needs nothing
+
+  // The morning report lists them, each with a link to tick it off.
+  const report = await (await admin("/admin/report", {})).json();
+  assert.match(report.subject, /to add on Google Play/);
+  assert.match(report.preview, /To add on Google Play: \d+\n(.*\n)*  \[ \] Ignis Aura: droid@example\.com \(in since \d{4}-\d\d-\d\d\)\. Add to Play Console › Ignis Aura › Testing › Internal testing › Testers, then tick it off: http\S+\/play-added\?t=/);
+
+  // The link opens a page (a mail app checking links ticks nothing off); its button does.
+  const link = (await todo()).find((p) => p.email === "droid@example.com").url;
+  const shown = await (await fetch(link)).text();
+  assert.match(shown, /Added on Google Play\?/);
+  assert.match(shown, /user-select: all[^>]*>droid@example\.com</);
+  assert.ok((await todo()).some((p) => p.email === "droid@example.com"));
+  assert.match(await (await fetch(link, { method: "POST" })).text(), /ticked off as added to the Ignis Aura Google Play test/);
+  assert.ok(!(await todo()).some((p) => p.email === "droid@example.com"));
+  assert.match(await (await fetch(link)).text(), /Ticked off/);
+
+  // Or from the computer, when Andrew says it's done.
+  await admin("/admin/todo", { project: "effugium", email: "Pixel@Example.com" });
+  assert.ok(!(await todo()).some((p) => p.email === "pixel@example.com"));
+  assert.equal((await admin("/admin/todo", { project: "ignis", email: "nobody@example.com" })).status, 404);
+
+  // Tidy up: they leave, so later tests' counts are unchanged.
+  for (const email of ["droid@example.com", "browser@example.com", "pixel@example.com"]) {
+    const welcome = (await outbox()).find((e) => e.to_addr === email && e.subject.startsWith("You're in"));
+    await fetch(welcome.body.match(/(http\S+\/leave\?t=\d+\.[0-9a-f]+)/)[1], { redirect: "manual" });
+  }
+});
+
+test("people Andrew invited himself: a dry run first, then let in and welcomed, with no sign-up consent made up", async () => {
+  await admin("/admin/builds", { project: "effugium", links: { Android: "https://play.google.com/apps/internaltest/4700" } });
+  const emails = ["Guest.One@Example.com", "guest-two@example.com", "not an email", "guest-two@example.com"];
+  const dry = await (await admin("/admin/add", { project: "effugium", platforms: ["Android", "Web"], emails, onPlayList: true })).json();
+  assert.deepEqual([dry.add, dry.platforms, dry.onPlayList, dry.sent], [["guest.one@example.com", "guest-two@example.com"], ["Android"], true, 0]);
+  assert.match(dry.preview, /Here's how to get it:\n\nAndroid: https:\/\/play\.google\.com\/apps\/internaltest\/4700\n  Open the link in Chrome/);
+  assert.match(dry.preview, /Tester guide: https:\/\/creatio-aura\.com\/effugium\/testers\//);
+  assert.equal((await (await admin("/admin/testers")).json()).testers.filter((t) => t.email.startsWith("guest")).length, 0); // nothing yet
+
+  const note = "Sorry for sending you another email about joining the beta. We wanted to add clearer instructions on how to install it.";
+  assert.match((await (await admin("/admin/add", { project: "effugium", platforms: ["Android"], emails, note })).json()).preview, /^Hi,\n\nSorry for sending you another email/);
+  const sent = await (await admin("/admin/add", { project: "effugium", platforms: ["Android"], emails, onPlayList: true, note, send: true })).json();
+  assert.equal(sent.sent, 2);
+  const { testers } = await (await admin("/admin/testers")).json();
+  assert.deepEqual(testers.filter((t) => t.email.startsWith("guest")).map((t) => [t.email, t.project, t.platforms]).sort(), [
+    ["guest-two@example.com", "effugium", ["Android"]],
+    ["guest.one@example.com", "effugium", ["Android"]],
+  ]);
+  const welcome = (await outbox()).find((e) => e.to_addr === "guest.one@example.com");
+  assert.equal(welcome.subject, "You're in the Effugium Aura beta");
+  assert.match(welcome.body, /^Hi,\n\nSorry for sending you another email about joining the beta\./);
+  // Already on the Play list: nothing to tick off.
+  assert.ok(!(await (await admin("/admin/todo")).json()).play.some((p) => p.email.startsWith("guest")));
+  // Running it again leaves them alone.
+  const again = await (await admin("/admin/add", { project: "effugium", platforms: ["Android"], emails, send: true })).json();
+  assert.deepEqual([again.sent, again.already.sort()], [0, ["guest-two@example.com", "guest.one@example.com"]]);
+
+  // Their remove-me link works; tidy up.
+  for (const email of ["guest.one@example.com", "guest-two@example.com"]) {
+    const mail = (await outbox()).find((e) => e.to_addr === email);
+    await fetch(mail.body.match(/(http\S+\/leave\?t=\d+\.[0-9a-f]+)/)[1], { redirect: "manual" });
+  }
+  assert.equal((await (await admin("/admin/testers")).json()).testers.filter((t) => t.email.startsWith("guest")).length, 0);
+});
+
 test("Effugium Aura's beta: the same sign-up, its own list, links and emails, no Beta Tester Terms, and no web game", async () => {
   // One address can be in both betas.
   await tester("rook@example.com", ["iPhone", "Android"], "effugium");
@@ -407,7 +480,7 @@ test("the daily report: who's waiting for Andrew (with the links), and for each 
   assert.equal(sent.sent, true);
   const [latest] = await outbox();
   assert.equal(latest.to_addr, "studio@example.com");
-  assert.match(latest.subject, /^Creatio Aura betas: \d+ new, 1 waiting for your OK$/);
+  assert.match(latest.subject, /^Creatio Aura betas: \d+ new, 1 waiting for your OK, \d+ to add on Google Play$/);
 
   // The next report counts only who's let in since that one: nobody, here.
   const after = await (await admin("/admin/report", {})).json();

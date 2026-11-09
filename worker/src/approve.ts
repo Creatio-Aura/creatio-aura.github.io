@@ -5,6 +5,8 @@
 //   GET  /approve?t=…   → a page: who it is, where they'd play, and two buttons
 //   POST /approve?t=…   → lets them in, and emails them (with the latest links for where they play)
 //   POST /decline?t=…   → removes them; they hear nothing more
+//   GET  /play-added?t=… → a page to tick off adding an Android tester to the app's Google Play test list
+//   POST /play-added?t=… → ticks it off
 //
 // The link only opens a page: mail apps that check links by opening them can't let anyone in.
 
@@ -21,6 +23,35 @@ const escape = (text: string) => text.replace(/[&<>"']/g, (c) => `&#${c.charCode
 
 /** The link in the studio's email that opens the page for one sign-up. */
 export const approveUrl = async (env: Env, id: number) => `${service(env)}/approve?t=${await leaveToken(env, id, LIST)}`;
+
+/** The link that opens the page to tick off adding an Android tester to the Google Play test list. */
+export const playAddedUrl = async (env: Env, id: number) => `${service(env)}/play-added?t=${await leaveToken(env, id, LIST)}`;
+
+/** Android testers let in but not yet ticked off as added to their app's Google Play test list. */
+export async function playToAdd(env: Env) {
+  const rows = (
+    await env.DB.prepare(
+      "SELECT id, project, email, approved_at FROM signups WHERE approved_at IS NOT NULL AND play_added_at IS NULL AND (',' || platforms || ',') LIKE '%,Android,%' ORDER BY approved_at",
+    ).all<{ id: number; project: string; email: string; approved_at: string }>()
+  ).results;
+  return Promise.all(
+    rows.map(async (r) => ({
+      project: r.project,
+      app: BETAS[r.project]?.name ?? r.project,
+      email: r.email,
+      inSince: r.approved_at,
+      url: await playAddedUrl(env, r.id),
+    })),
+  );
+}
+
+/** Ticks an Android tester off as added to their app's Google Play test list. */
+export async function markPlayAdded(env: Env, id: number) {
+  await env.DB.prepare("UPDATE signups SET play_added_at = ? WHERE id = ? AND play_added_at IS NULL").bind(new Date().toISOString(), id).run();
+}
+
+/** Where Andrew adds them, said the same everywhere. */
+const PLAY_WHERE = (app: string) => `in Play Console, ${escape(app)} › Testing › Internal testing › Testers, add this address to the email list`;
 
 /** A beta's latest build link for each platform (kept by each announcement that's sent). */
 export async function currentBuilds(env: Env, project: string): Promise<Record<string, string>> {
@@ -70,13 +101,29 @@ export interface Signup {
   platforms: string;
   confirmed_at: string | null;
   approved_at: string | null;
+  play_added_at?: string | null;
 }
 
 /**
  * Emails a tester that they're in, with the latest links for where they play (if there are any yet).
  * Sent when Andrew lets them in, and again on request (npm run welcome).
  */
-export async function sendWelcome(env: Env, row: Pick<Signup, "id" | "project" | "name" | "email" | "platforms">) {
+export async function sendWelcome(env: Env, row: Pick<Signup, "id" | "project" | "name" | "email" | "platforms">, note = "") {
+  const { content, links, leaveUrl } = await composeWelcome(env, row, note);
+  let emailed = false;
+  if (await allowEmail(env, EMAILS_PER_DAY)) {
+    try {
+      await sendEmail(env, { to: row.email, ...content, leaveUrl });
+      emailed = true;
+    } catch (error) {
+      console.error("Emailing a tester they're in failed:", error);
+    }
+  }
+  return { emailed, links };
+}
+
+/** The "You're in" email for a tester, with the latest links for where they play, unsent. */
+export async function composeWelcome(env: Env, row: Pick<Signup, "id" | "project" | "name" | "email" | "platforms">, note = "") {
   const beta: { name: string; terms: boolean; guides?: { label: string; url: string; about: string }[] } = BETAS[row.project] ?? {
     name: row.project,
     terms: false,
@@ -88,16 +135,7 @@ export async function sendWelcome(env: Env, row: Pick<Signup, "id" | "project" |
     .map((platform) => ({ platform, url: builds[platform]!, how: howTo(platform, builds[platform]!, beta.name) }));
   const leaveUrl = `${service(env)}/leave?t=${await leaveToken(env, row.id)}`;
   const terms = beta.terms ? `${env.SITE_URL.replace(/\/$/, "")}/beta/terms/` : "";
-  let emailed = false;
-  if (await allowEmail(env, EMAILS_PER_DAY)) {
-    try {
-      await sendEmail(env, { to: row.email, ...welcomeEmail(beta.name, row.name, leaveUrl, links, terms, beta.guides ?? []), leaveUrl });
-      emailed = true;
-    } catch (error) {
-      console.error("Emailing a tester they're in failed:", error);
-    }
-  }
-  return { emailed, links };
+  return { content: welcomeEmail(beta.name, row.name, leaveUrl, links, terms, beta.guides ?? [], note), links, leaveUrl };
 }
 
 /** Handles /approve and /decline: the page (GET), and the buttons on it (POST). */
@@ -107,13 +145,26 @@ export async function approval(env: Env, url: URL, method: string, path: string)
   const row =
     id === null
       ? null
-      : await env.DB.prepare("SELECT id, project, name, email, platforms, confirmed_at, approved_at FROM signups WHERE id = ?")
+      : await env.DB.prepare("SELECT id, project, name, email, platforms, confirmed_at, approved_at, play_added_at FROM signups WHERE id = ?")
           .bind(id)
           .first<Signup>();
   if (!row) return page("Not here any more", "<p>That sign-up has gone: they left, or were turned away.</p>", 404);
   const who = `<b>${escape(row.email)}</b>`;
   const platforms = row.platforms.split(",");
   const beta = BETAS[row.project] ?? { name: row.project, terms: false };
+
+  // Ticking off adding an Android tester to the Google Play test list.
+  if (path === "/play-added") {
+    if (!row.approved_at || !platforms.includes("Android")) return page("Nothing to add", `<p>${who} isn't an Android tester in the ${escape(beta.name)} beta.</p>`, 409);
+    if (method === "POST") await markPlayAdded(env, row.id);
+    if (method === "POST" || row.play_added_at) return page("Ticked off", `<p>${who} is ticked off as added to the ${escape(beta.name)} Google Play test.</p>`);
+    return page(
+      "Added on Google Play?",
+      `<p>${PLAY_WHERE(beta.name)}:</p>
+<p style="user-select: all; padding: 10px 14px; border-radius: 10px; background: #221c33; color: #f4eadb">${escape(row.email)}</p>
+<form method="post" action="/play-added?t=${encodeURIComponent(token)}"><button type="submit">I've added them</button></form>`,
+    );
+  }
 
   if (method === "GET") {
     if (row.approved_at) return page("Already in", `<p>${who} is already in the ${escape(beta.name)} beta.</p>`);
@@ -142,8 +193,10 @@ ${platforms.includes("Android") ? "<p>On Android, Google Play only lets in the G
       : "We've emailed them that they're in; the next build email will reach them."
     : "We couldn't email them just now, but they're in: the next build email will reach them.";
   const android = platforms.includes("Android")
-    ? `<p><b>Now add them on Google Play:</b> in Play Console, ${escape(beta.name)} › Testing › Internal testing › Testers, add this address to the email list. Their Google Play link won't let them in until you do.</p>
-<p style="user-select: all; padding: 10px 14px; border-radius: 10px; background: #221c33; color: #f4eadb">${escape(row.email)}</p>`
+    ? `<p><b>Now add them on Google Play:</b> ${PLAY_WHERE(beta.name)}. Their Google Play link won't let them in until you do.</p>
+<p style="user-select: all; padding: 10px 14px; border-radius: 10px; background: #221c33; color: #f4eadb">${escape(row.email)}</p>
+<form method="post" action="/play-added?t=${encodeURIComponent(token)}"><button type="submit">I've added them</button></form>
+<p>Not yet? It stays on your list in the morning report, and in <b>npm run todo</b>, until you tick it off.</p>`
     : "";
   return page("They're in", `<p>${who} is in the ${escape(beta.name)} beta. ${told}</p>${android}`);
 }

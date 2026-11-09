@@ -218,6 +218,8 @@ export function welcomeEmail(
   termsUrl = "",
   /** The beta's guides on the website, if it has any. */
   guides: { label: string; url: string; about: string }[] = [],
+  /** A short note at the top, for a one-off send (say, why they're getting it again). */
+  note = "",
 ) {
   // A game is played; an app is tried.
   const play = app === "Ignis Aura" ? "play" : "try";
@@ -225,6 +227,7 @@ export function welcomeEmail(
   const text = [
     hi(name),
     "",
+    ...(note ? [note, ""] : []),
     `You're in: you're an ${app} beta tester now.`,
     "",
     ...(links.length
@@ -259,6 +262,7 @@ export function welcomeEmail(
 <p style="margin:0 0 6px;font-size:13px;letter-spacing:2px;text-transform:uppercase;color:#b9a8d6">Creatio Aura</p>
 <h1 style="margin:0 0 18px;font-family:Georgia,serif;font-weight:600;font-size:26px;color:#ffb35c">You're in the ${escape(app)} beta</h1>
 <p style="margin:0 0 14px;font-size:16px;line-height:1.6">${escape(hi(name))}</p>
+${note ? `<p style="margin:0 0 16px;padding:12px 14px;border-radius:12px;background:#171327;border:1px solid #4a3f66;font-size:15px;line-height:1.55;color:#d8cbb6">${escape(note)}</p>` : ""}
 <p style="margin:0 0 14px;font-size:16px;line-height:1.6">You're in: you're an ${escape(app)} beta tester now.</p>
 ${
   links.length
@@ -528,6 +532,8 @@ export function dailyReportEmail(
   lists: { name: string; total: number; fresh: number }[] = [],
   /** Notes sent from the app in the same time (each one is emailed on its own as it comes). */
   feedback = 0,
+  /** Android testers still to add to their app's Google Play test list, each with the link to tick them off. */
+  playToAdd: { app: string; email: string; inSince: string; url: string }[] = [],
 ) {
   const day = new Date().toLocaleDateString("en-US", {
     weekday: "long",
@@ -558,6 +564,11 @@ export function dailyReportEmail(
     `Waiting for your OK: ${waitingForYou.length}`,
     ...waitingForYou.map(
       (w) => `  ? ${w.app}: ${w.email}, ${w.platforms.join(", ")} (confirmed ${w.confirmedAt.slice(0, 10)}). Let in or turn away: ${w.approveUrl}`,
+    ),
+    "",
+    `To add on Google Play: ${playToAdd.length}`,
+    ...playToAdd.map(
+      (p) => `  [ ] ${p.app}: ${p.email} (in since ${p.inSince.slice(0, 10)}). Add to Play Console › ${p.app} › Testing › Internal testing › Testers, then tick it off: ${p.url}`,
     ),
     ...betas.flatMap((beta) => {
       const isNew = beta.testers.filter((t) => t.isNew);
@@ -605,6 +616,15 @@ ${waitingForYou.map((w) => `<tr><td>${escape(w.app)}</td><td>${escape(w.email)}<
 </table>`
     : "<p>Nobody right now.</p>"
 }
+<h3 style="margin:0 0 8px">To add on Google Play: ${playToAdd.length}</h3>
+${
+  playToAdd.length
+    ? `<p style="margin:0 0 8px;font-size:14px;color:#6b6157">In Play Console: the app › Testing › Internal testing › Testers, add the address to the email list, then tick it off.</p>
+<table cellpadding="6" style="font-size:14px;border-collapse:collapse;margin-bottom:16px">
+${playToAdd.map((p) => `<tr><td>☐ ${escape(p.app)}</td><td>${escape(p.email)}</td><td>in since ${escape(p.inSince.slice(0, 10))}</td><td><a href="${p.url}">Tick it off</a></td></tr>`).join("\n")}
+</table>`
+    : "<p>Nobody right now.</p>"
+}
 ${betas.map(section).join("\n")}
 <p style="margin:24px 0 0;font-size:15px"><b>Feedback from the apps ${escape(sinceWhen)}:</b> ${feedback}</p>
 ${
@@ -616,6 +636,6 @@ ${lists.map((l) => `<tr><td><b>${escape(l.name)}</b></td><td>${l.total}${l.fresh
     : ""
 }
 </body></html>`;
-  const subject = `Creatio Aura betas: ${fresh.length} new, ${waitingForYou.length} waiting for your OK`;
+  const subject = `Creatio Aura betas: ${fresh.length} new, ${waitingForYou.length} waiting for your OK${playToAdd.length ? `, ${playToAdd.length} to add on Google Play` : ""}`;
   return { subject, text, html };
 }

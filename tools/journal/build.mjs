@@ -128,7 +128,7 @@ function figure(p) {
 }
 
 function card(p, cls = 'journal-card') {
-  return `<a class="${cls}" href="${p.url}"><span class="journal-tag ${p.kind}">${meta(p)} · ${p.minutes} min</span><span class="journal-title">${esc(p.title)}</span><span class="journal-summary">${esc(p.summary)}</span></a>`;
+  return `<a class="${cls}" href="${p.url}"><span class="journal-tag ${p.kind} project-${p.project}">${meta(p)} · ${p.minutes} min</span><span class="journal-title">${esc(p.title)}</span><span class="journal-summary">${esc(p.summary)}</span></a>`;
 }
 
 // ---------- one page per post ----------
@@ -142,7 +142,7 @@ for (const p of posts) {
   const ctaBlock = `<aside class="post-cta" aria-labelledby="post-cta-title"><h2 id="post-cta-title">${esc(p.cta_title || 'About ' + proj.name)}</h2><p>${esc(p.cta_text || proj.about)}</p><div class="actions-left">${cta(proj, 'primary', `web_jb_${ct}`, 'button')}${cta(proj, 'secondary', `web_jb2_${ct}`, 'button ghost')}</div></aside>`;
   const body = `    <article class="wrap post">
       <nav class="crumbs" aria-label="Breadcrumb"><a href="/journal/">Journal</a> <span aria-hidden="true">/</span> <a href="${esc(proj.page)}">${esc(proj.name)}</a> <span aria-hidden="true">/</span> ${kindName(p)}</nav>
-      <p class="eyebrow">${meta(p)}</p>
+      <p class="eyebrow project-${p.project}">${meta(p)}</p>
       <h1>${esc(p.title)}</h1>
       ${p.description ? `<p class="lede">${esc(p.description)}</p>` : ''}
       <p class="byline">${byline(p)}</p>
@@ -184,9 +184,11 @@ ${p.html}
   writeFileSync(join(dir, 'index.html'), page({ title: `${p.title} · Creatio Aura`, description: p.description, canonical: SITE + p.url, ogType: 'article', jsonld: ld, body, current: 'journal', image: config.projects[p.project]?.shareImage }));
 }
 
-// ---------- the Journal: a featured post on top, then everything else by month ----------
-const featured = posts.find((p) => p.featured) || null;
-const rest = posts.filter((p) => p !== featured);
+// ---------- the Journal: up to two featured posts on top (newest first), then everything else by month ----------
+// Two since 2026-11-09 (Andrew), so both "in testing" posts, Effugium Aura's and Ignis Aura's, stay on top for now.
+const FEATURED_MAX = 2;
+const featured = posts.filter((p) => p.featured).slice(0, FEATURED_MAX);
+const rest = posts.filter((p) => !featured.includes(p));
 const months = [];
 for (const p of rest) {
   const m = monthOf(p.date);
@@ -198,15 +200,15 @@ const indexBody = `    <div class="wrap journal">
         <h1>Journal</h1>
         <p class="lede">Guides and news from Creatio Aura, newest first. <a href="/journal/feed.xml">Follow by RSS</a></p>
       </div>
-${
-  featured
-    ? `      <a class="journal-featured" href="${featured.url}">${featured.image ? `<img src="${esc(featured.image)}" alt="${esc(featured.image_alt || '')}">` : ''}<span class="journal-featured-text"><span class="journal-tag ${featured.kind}">Featured · ${meta(featured)}</span><span class="journal-title">${esc(featured.title)}</span><span class="journal-summary">${esc(featured.summary)}</span><span class="journal-date">${longDate(featured.date)} · ${featured.minutes} min read · By ${esc(config.author.name)}</span></span></a>`
-    : ''
-}
+${featured
+  .map(
+    (f) => `      <a class="journal-featured" href="${f.url}">${f.image ? `<img src="${esc(f.image)}" alt="${esc(f.image_alt || '')}"${f.image_position ? ` style="object-position: ${esc(f.image_position)}"` : ''}>` : ''}<span class="journal-featured-text"><span class="journal-tag ${f.kind} project-${f.project}">Featured · ${meta(f)}</span><span class="journal-title">${esc(f.title)}</span><span class="journal-summary">${esc(f.summary)}</span><span class="journal-date">${longDate(f.date)} · ${f.minutes} min read · By ${esc(config.author.name)}</span></span></a>`
+  )
+  .join('\n')}
 ${months
   .map(
     (m, i) => `      <section class="journal-month" aria-labelledby="m${i}"><h2 id="m${i}">${m.name}</h2>
-${m.posts.map((p) => `        <a class="journal-row" href="${p.url}"><time datetime="${p.date}">${shortDate(p.date)}</time><span><span class="journal-tag ${p.kind}">${meta(p)} · ${p.minutes} min</span><span class="journal-title">${esc(p.title)}</span><span class="journal-summary">${esc(p.summary)}</span></span></a>`).join('\n')}
+${m.posts.map((p) => `        <a class="journal-row" href="${p.url}"><time datetime="${p.date}">${shortDate(p.date)}</time><span><span class="journal-tag ${p.kind} project-${p.project}">${meta(p)} · ${p.minutes} min</span><span class="journal-title">${esc(p.title)}</span><span class="journal-summary">${esc(p.summary)}</span></span></a>`).join('\n')}
       </section>`
   )
   .join('\n')}

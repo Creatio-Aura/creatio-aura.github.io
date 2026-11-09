@@ -29,7 +29,7 @@
 
 import { allow, allowEmail, isAdmin, isHuman, leaveToken, leaveTokenId, newToken, sha256, visitorKey } from "./guard";
 import { approval, approveUrl, composeWelcome, currentBuilds, markPlayAdded, playToAdd, saveBuilds, sendWelcome } from "./approve";
-import { drainQueue, queueStatus } from "./mail";
+import { drainQueue, queueStatus, viaSite } from "./mail";
 import { BETAS, betaOf } from "./betas";
 import { emailProblem } from "../../site/email-check.js";
 import { feedback, feedbackSince, forgetOldFeedback, latestFeedback, sendFeedback } from "./feedback";
@@ -68,6 +68,8 @@ export interface Env {
   MAIL_MODE: string;
   /** The most emails handed to the mail server in any hour (mail.ts); "10" if unset. */
   MAIL_PER_HOUR?: string;
+  /** "1": links in emails go through creatio-aura.com's pass-on pages, not workers.dev (mail.ts viaSite). */
+  LINKS_VIA_SITE?: string;
   /** Tries per connection per hour; defaults 6 and 10 (the tests raise them). */
   SIGNUP_LIMIT?: string;
   FEEDBACK_LIMIT?: string;
@@ -559,7 +561,7 @@ async function addTesters(env: Env, body: Record<string, unknown>) {
   const note = typeof body.note === "string" ? body.note.trim().slice(0, 600) : "";
   if (body.send !== true) {
     const sample = add[0] ?? emails[0]!;
-    const preview = (await composeWelcome(env, { id: 0, project, name: "", email: sample, platforms: platforms.join(",") }, note)).content.text;
+    const preview = viaSite(env, (await composeWelcome(env, { id: 0, project, name: "", email: sample, platforms: platforms.join(",") }, note)).content.text);
     return json({ ok: true, sent: 0, add, already: [...already], platforms, onPlayList: onPlay, preview }, 200, null);
   }
   const now = new Date().toISOString();
@@ -598,7 +600,7 @@ async function welcomeAgain(env: Env, body: Record<string, unknown>) {
   const links = platforms.filter((p) => stored[p]);
   const note = typeof body.note === "string" ? body.note.trim().slice(0, 600) : "";
   if (body.send !== true) {
-    const preview = (await composeWelcome(env, row, note)).content.text;
+    const preview = viaSite(env, (await composeWelcome(env, row, note)).content.text);
     return json({ ok: true, sent: false, email: row.email, platforms, links, preview }, 200, null);
   }
   const { emailed, queued } = await sendWelcome(env, row, note);
@@ -638,7 +640,7 @@ async function announce(env: Env, body: Record<string, unknown>) {
     name: tester.name,
     email: tester.email,
     platforms: tester.platforms.split(",").filter((p) => links[p]),
-    preview: email.text,
+    preview: viaSite(env, email.text),
   }));
   if (body.send !== true) return json({ ok: true, sent: 0, recipients }, 200, null);
   // These are the latest builds now: whoever's let in later gets them straight away.

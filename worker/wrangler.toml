@@ -25,6 +25,9 @@ MAIL_MODE = "smtp"
 # On 2026-11-09 IONOS refused at about 10 an hour (their fault, fixed the same day), so this was 6 for
 # a while; Andrew: "disregard the hourly budget for now… keep the idea". Lower it again if it recurs.
 MAIL_PER_HOUR = "100"
+# Links in emails go through creatio-aura.com pages (site/beta/pass.js), not this workers.dev address,
+# which spam filters distrust (2026-11-09). The List-Unsubscribe header keeps this address.
+LINKS_VIA_SITE = "1"
 
 # The daily beta report, every morning: 14:00 UTC is 8 am in Colorado in summer, 7 am in winter.
 [triggers]

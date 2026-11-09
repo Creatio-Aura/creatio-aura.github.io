@@ -218,7 +218,11 @@ test("signing up: a confirmation email; confirming asks Andrew; he lets them in 
 
   // Let in: they're told, with the way off it (no build links have gone out yet).
   const letIn = await press(approveLink);
-  assert.match(await letIn.text(), /is in the Ignis Aura beta/);
+  const done = await letIn.text();
+  assert.match(done, /is in the Ignis Aura beta/);
+  // Android: a reminder to add them to the Play test's email list, with their address to copy.
+  assert.match(done, /Now add them on Google Play:<\/b> in Play Console, Ignis Aura › Testing › Internal testing › Testers/);
+  assert.match(done, /user-select: all[^>]*>kodi@example\.com</);
   const welcome = (await outbox()).find((e) => e.to_addr === "kodi@example.com");
   assert.equal(welcome.subject, "You're in the Ignis Aura beta");
   assert.match(welcome.body, /We'll email you when there's a build for you to play\./);
@@ -328,6 +332,7 @@ test("links stored without emailing anyone reach later welcomes, and one tester'
   await tester("again@example.com", ["Android", "Web"]);
   const welcome = (await outbox()).find((e) => e.to_addr === "again@example.com" && e.subject.startsWith("You're in"));
   assert.match(welcome.body, /Android: https:\/\/play\.google\.com\/apps\/internaltest\/5678\n  Open the link in Chrome/);
+  assert.match(welcome.body, /If Google Play says you can't join yet, try again a little later: we add each tester by hand\./);
   assert.match(welcome.body, /Web: https:\/\/creatio-aura.com\/ignis-aura-web\//);
 
   // Sending it again: a dry run first, then one more welcome, to them only.

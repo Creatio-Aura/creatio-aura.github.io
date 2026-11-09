@@ -138,5 +138,9 @@ ${platforms.includes("Android") ? "<p>On Android, Google Play only lets in the G
       ? `We've emailed them the links for ${escape(links.map((l) => l.platform).join(", "))}.`
       : "We've emailed them that they're in; the next build email will reach them."
     : "We couldn't email them just now, but they're in: the next build email will reach them.";
-  return page("They're in", `<p>${who} is in the ${escape(beta.name)} beta. ${told}</p>`);
+  const android = platforms.includes("Android")
+    ? `<p><b>Now add them on Google Play:</b> in Play Console, ${escape(beta.name)} › Testing › Internal testing › Testers, add this address to the email list. Their Google Play link won't let them in until you do.</p>
+<p style="user-select: all; padding: 10px 14px; border-radius: 10px; background: #221c33; color: #f4eadb">${escape(row.email)}</p>`
+    : "";
+  return page("They're in", `<p>${who} is in the ${escape(beta.name)} beta. ${told}</p>${android}`);
 }

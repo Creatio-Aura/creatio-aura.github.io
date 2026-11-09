@@ -28,6 +28,8 @@ MAIL_PER_HOUR = "100"
 # Links in emails go through creatio-aura.com pages (site/beta/pass.js), not this workers.dev address,
 # which spam filters distrust (2026-11-09). The List-Unsubscribe header keeps this address.
 LINKS_VIA_SITE = "1"
+# The Ignis Aura web game: its sign-in links go via creatio-aura.com/ignis-aura-web/sign-in/ as well.
+PLAY_URL = "https://ignis-aura-play.creatio-aura.workers.dev"
 
 # The daily beta report, every morning: 14:00 UTC is 8 am in Colorado in summer, 7 am in winter.
 [triggers]

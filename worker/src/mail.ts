@@ -99,7 +99,10 @@ export function viaSite(env: Env, body: string): string {
   if (env.LINKS_VIA_SITE !== "1") return body;
   const service = env.SERVICE_URL.replace(/\/$/, "");
   const site = env.SITE_URL.replace(/\/$/, "");
-  return SITE_PATHS.reduce((out, [from, to]) => out.split(`${service}${from}?t=`).join(`${site}${to}?t=`), body);
+  const ours = SITE_PATHS.reduce((out, [from, to]) => out.split(`${service}${from}?t=`).join(`${site}${to}?t=`), body);
+  // The Ignis Aura web game's sign-in link (the game makes it; this service emails it).
+  const game = (env.PLAY_URL ?? "").replace(/\/$/, "");
+  return game ? ours.split(`${game}/ignis-aura-web/__login/link?t=`).join(`${site}/ignis-aura-web/sign-in/?t=`) : ours;
 }
 
 /** Hands emails to the mail server (or, in tests, the outbox) and logs each hand-off. */

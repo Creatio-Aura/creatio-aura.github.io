@@ -4,7 +4,7 @@
 //
 // At IONOS's pace (2026-11-09): a mailbox only sends so many an hour, and turns the rest away with
 // "450 Mail send limit exceeded". So every hand-off counts toward an hourly budget (MAIL_PER_HOUR);
-// batches always wait in a queue (mail_queue) that a job drains about one a minute within it; one-off
+// batches always wait in a queue (mail_queue) that a job drains, up to five a minute, within it; one-off
 // emails go at once while there's room, else join the queue; and a "not now" (4xx) goes back in the
 // queue to try again later instead of being lost.
 

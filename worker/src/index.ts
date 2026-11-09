@@ -120,9 +120,9 @@ export default {
   // Every morning (wrangler.toml's cron), the studio's report on the beta list, any feedback that
   // couldn't be emailed yet, and notes older than the privacy pages say they're kept deleted.
   async scheduled(controller: ScheduledController, env: Env, ctx: ExecutionContext) {
-    // Every minute: the next email in the queue, within the hour's budget (mail.ts).
+    // Every minute: up to five emails from the queue, within the hour's budget (mail.ts).
     if (controller.cron === "* * * * *") {
-      ctx.waitUntil(drainQueue(env, 1).then(() => undefined));
+      ctx.waitUntil(drainQueue(env, 5).then(() => undefined));
       return;
     }
     ctx.waitUntil(dailyReport(env, true).then(() => undefined));

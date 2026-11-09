@@ -21,8 +21,10 @@ OWNER_EMAIL = "creatio.aura@gmail.com"
 FEEDBACK_EMAIL = "feedback@creatio-aura.com"
 MAIL_MODE = "smtp"
 # At most this many emails handed to IONOS in any hour; the rest wait in the queue (mail.ts).
-# IONOS turned mail away after about 8 in an hour on 2026-11-09: raise this once IONOS says the real limit.
-MAIL_PER_HOUR = "6"
+# IONOS's own limit by mailbox age: 50/h (0–7 days), 100/h (8–14), 400/h (15–30), 500/h after.
+# On 2026-11-09 IONOS refused at about 10 an hour (their fault, fixed the same day), so this was 6 for
+# a while; Andrew: "disregard the hourly budget for now… keep the idea". Lower it again if it recurs.
+MAIL_PER_HOUR = "100"
 
 # The daily beta report, every morning: 14:00 UTC is 8 am in Colorado in summer, 7 am in winter.
 [triggers]

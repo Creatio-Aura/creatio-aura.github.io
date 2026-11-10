@@ -242,8 +242,17 @@ test("signing up: a confirmation email; confirming asks Andrew; he lets them in 
   assert.equal((await post("/signup", person())).status, 200);
   assert.equal((await outbox()).filter((e) => e.to_addr === "kodi@example.com").length, 2);
 
+  const leftBefore = (await (await admin("/admin/testers")).json()).departures.length;
   const left = await fetch(leaveLink, { redirect: "manual" });
   assert.equal(left.headers.get("Location"), `${SITE}/beta/left/`);
+  // Their leaving is counted, without who they were.
+  const { departures } = await (await admin("/admin/testers")).json();
+  assert.equal(departures.length, leftBefore + 1);
+  const gone = departures.at(-1);
+  assert.equal(gone.project, "ignis");
+  assert.equal(gone.was_in, true);
+  assert.ok(gone.joined_at && gone.left_at);
+  assert.doesNotMatch(JSON.stringify(gone), /kodi|example\.com/);
   // Gone: signing up again starts over with a new email.
   await post("/signup", person());
   assert.equal((await outbox()).filter((e) => e.to_addr === "kodi@example.com").length, 3);

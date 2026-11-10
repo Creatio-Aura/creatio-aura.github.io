@@ -183,6 +183,7 @@ fieldset legend { margin-bottom: 10px; }
 .phone { flex: 0 0 auto; width: min(360px, 100%); margin: 0 auto; padding: 10px; border-radius: 54px; background: #0b0910; box-shadow: 0 30px 80px rgba(0, 0, 0, 0.5), inset 0 0 0 1px rgba(237, 231, 246, 0.14); }
 .phone video { display: block; width: 100%; height: auto; aspect-ratio: 720 / 1566; object-fit: cover; border-radius: 44px; background: #15121f; }
 .tour-side { flex: 1 1 380px; min-width: 0; display: flex; flex-direction: column; gap: 20px; }
+.tour.flip { flex-direction: row-reverse; } /* the second recording on a page: phone on the right (above, on a phone) */
 .tour-side h2 { font-size: 36px; }
 .tour-side .lede { font-size: 19px; color: var(--text-soft); }
 .video-steps { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 6px; }

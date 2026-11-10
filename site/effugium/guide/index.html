@@ -221,7 +221,7 @@ fieldset legend { margin-bottom: 10px; }
 .video-steps button.done .n { background: rgba(127, 212, 198, 0.18); color: var(--effugium); }
 .video-toggle { align-self: flex-start; min-height: 44px; padding: 0 20px; font-size: 15px; }
 
-/* The Journal (tools/journal/build.mjs): a featured post, then a dated list; posts in a reading column */
+/* The Journal (tools/journal/build.mjs): up to two featured posts, then a dated list; posts in a reading column */
 .journal { max-width: 860px; padding-top: 24px; padding-bottom: 88px; display: flex; flex-direction: column; gap: 28px; }
 .journal-head { display: flex; flex-direction: column; gap: 14px; }
 .journal-head h1 { font-size: clamp(48px, 7vw, 76px); line-height: 1; }
@@ -229,6 +229,7 @@ fieldset legend { margin-bottom: 10px; }
 .journal-head .lede a { font-weight: 700; }
 .journal-tag { display: block; font-size: 12px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; color: var(--text-muted); }
 .journal-tag.update { color: var(--effugium); }
+.journal-tag.update.project-ignis { color: var(--amber); }
 .journal-title { display: block; font-family: var(--serif); font-variation-settings: "SOFT" 100; font-weight: 600; font-size: 22px; line-height: 1.25; color: var(--text); }
 .journal-summary { display: block; font-size: 16px; color: var(--text-soft); }
 .journal-date { display: block; font-size: 14px; color: var(--text-muted); }
@@ -258,6 +259,7 @@ fieldset legend { margin-bottom: 10px; }
 .post .crumbs a { color: var(--text-soft); text-decoration: none; }
 .post .crumbs a:hover { color: var(--amber); }
 .post .eyebrow { color: var(--effugium); }
+.post .eyebrow.project-ignis { color: var(--amber); }
 .post h1 { font-size: clamp(34px, 5vw, 50px); text-wrap: balance; }
 .post .lede { font-size: 20px; color: var(--text-soft); }
 .post .byline { font-size: 14px; color: var(--text-muted); }
@@ -437,18 +439,22 @@ h1 .pro, h2 .pro, h2 .tag { font-size: 13px; vertical-align: 6px; }
 <div class="topic-groups">
 <section class="topic-group"><h2>The basics</h2><ul class="guide-list"><li><a href="#flat"><strong>Flat</strong><span>Place each sound around you.</span></a></li><li><a href="#gravity"><strong>Gravity</strong><span>Turn your mix into a sphere.</span></a></li><li><a href="#orbits"><strong>Orbits and turning</strong><span>Set sounds circling you, and turn the view.</span></a></li></ul></section><section class="topic-group"><h2>Your sounds</h2><ul class="guide-list"><li><a href="#sounds"><strong>Sounds</strong><span>The built-in library, and bringing your own.</span></a></li><li><a href="#folders"><strong>Folders</strong><span>Sort your sounds your way.</span></a></li><li><a href="#recorder"><strong>Field recorder</strong><span>Record a sound, trim it, loop it.</span></a></li><li><a href="#loops"><strong>Loop Studio</strong><span>Make any sound loop without a bump.</span></a></li></ul></section><section class="topic-group"><h2>Extras</h2><ul class="guide-list"><li><a href="#stars"><strong>Shooting stars</strong><span>Sounds that pass by now and then.</span></a></li><li><a href="#kicker"><strong>Kicker</strong><span>A sound or a vibration on a timer.</span></a></li><li><a href="#beats"><strong>Binaural beats</strong><span>Two tones, one in each ear.</span></a></li></ul></section><section class="topic-group"><h2>At night</h2><ul class="guide-list"><li><a href="#sleep"><strong>Sleep timer</strong><span>Fade the mix out when you choose.</span></a></li><li><a href="#lock"><strong>Lock screen</strong><span>Control it without unlocking.</span></a></li><li><a href="#watch"><strong>Apple Watch</strong><span>Play, pause and volume on your wrist.</span></a></li></ul></section><section class="topic-group"><h2>More</h2><ul class="guide-list"><li><a href="#scapes"><strong>Soundscapes</strong><span>Keep your mixes, and your favourites.</span></a></li><li><a href="#menu"><strong>Menu and settings</strong><span>Everything in the ☰ menu.</span></a></li><li><a href="#pro"><strong>Free and Pro</strong><span>What each one includes.</span></a></li></ul></section></div><nav class="pager" aria-label="Previous and next topic"><span></span><a class="next" href="#flat"><span>Next</span>Flat</a></nav><aside class="note" aria-label="About this guide"><p><strong>For information only.</strong> This guide shows what you can do and set up in Effugium Aura. It isn't medical advice and it doesn't promise any result. Effugium Aura is not a medical device and makes no health claims. Apple, iPhone, AirPods, Apple Watch and StandBy are trademarks of Apple Inc., registered in the U.S. and other countries and regions. Android is a trademark of Google LLC.</p></aside></div></section><section class="view" id="view-flat" data-view="flat" aria-label="Flat"><div class="wrap guide"><header class="guide-head"><p class="eyebrow">The basics</p><h1>Flat</h1></header>
 <p class="lede">Flat is where you build a mix. The circle is the space around you, with you in the middle, and each sound sits in its own place on it.</p>
-<aside class="quick-answer"><h2>In short</h2><p>Open a folder below the circle, then drag a sound onto a place, or tap the sound and then the place. Press Play.</p></aside>
+<aside class="quick-answer"><h2>In short</h2><p>Tap Your sounds under the circle, open a folder, then drag a sound onto a place, or tap the sound and then the place. Press Play.</p></aside>
 <div class="guide-body">
   <h2>Place a sound</h2>
   <ol>
-    <li>Below the circle, tap a folder to show its sounds.</li>
+    <li>Under the circle, tap <strong>Your sounds</strong>, then a folder to show its sounds.</li>
     <li>Hold a sound and drag it onto a place. Or tap the sound, then tap a place.</li>
     <li>Press <strong>Play</strong>. Each place holds one sound.</li>
   </ol>
   <h2>The places around you</h2>
   <p>Twelve places ring the circle: <strong>Front</strong>, Front right, Right ahead, <strong>Right</strong>, Right behind, Back right, <strong>Behind</strong>, Back left, Left behind, <strong>Left</strong>, Left ahead and Front left. Two more sit <strong>Above</strong> and <strong>Below</strong> you, and <strong>Low tones</strong> is for deep sounds, like a rumble or brown noise.</p>
-  <p>The names of the empty places show while you're placing a sound; the rest of the time, only your sounds' names do.</p>
+  <p>The names of the empty places show while you're placing a sound. Your sounds are listed by name in the strip under the circle, in order round you: tap one to choose it. On the circle, only the sound you chose shows its name; <strong>Aa Names</strong>, at the start of the strip, shows them all.</p>
   <p>Free uses Front, Behind, Left, Right and Low tones. <span class="pro">Pro</span> adds the eight in between, Above and Below.</p>
+  <h2>The top stays put</h2>
+  <p>The top bar, the volume, Flat and Gravity, and the circle stay where they are. Everything under them folds to one line each that says what it's set to: the sound you chose, Your sounds, the Sleep timer, and with <span class="pro">Pro</span> Shooting stars and the Kicker. Tap a line to open it; the one that was open folds away.</p>
+  <h2>Random</h2>
+  <p>Tap <strong>Random</strong>, in Flat or Gravity, to shuffle your mix your way. Choose what changes (sounds, places, volumes; in Gravity the movement too; with <span class="pro">Pro</span> shooting stars and the Kicker), how many sounds and which folders new ones come from, whether the sound you chose stays as it is, and how much changes, from a sound or two to a whole new mix. Then tap <strong>Shuffle</strong>. Tap Random again to <strong>Undo</strong> or <strong>Shuffle again</strong>. Your choices are kept for next time.</p>
   <h2>Change a sound</h2>
   <ul>
     <li><strong>Tap a placed sound</strong> for its volume and Mute. <strong>More</strong> holds Loop and Remove.</li>
@@ -457,7 +463,7 @@ h1 .pro, h2 .pro, h2 .tag { font-size: 13px; vertical-align: 6px; }
   </ul>
   <h2>Headphones or speakers</h2>
   <p>In the top bar, beside ☰, the switch says <strong>3D</strong> for headphones or <strong>Speaker</strong>: tap it to change. With headphones, each sound seems to come from its own place around you. On the speaker, everything plays in front of you, and Above and Below need headphones to be heard as height.</p>
-  <p><span class="tag">iPhone</span> With headphones on iPhone, Effugium uses Apple's spatial audio, and AirPods that support it can keep your sounds in place as you turn your head (see <a href="#menu">Menu and settings</a>).</p>
+  <p><span class="tag">iPhone</span> With headphones on iPhone, Effugium uses Apple's spatial audio, and AirPods that support it can keep your sounds in place as you turn your head (see <a href="#menu">Head tracking</a>).</p>
   <p>Effugium always opens in Flat. To set sounds moving, switch to <a href="#gravity">Gravity</a>.</p>
 </div><nav class="pager" aria-label="Previous and next topic"><a class="prev" href="#start"><span>Back</span>Start</a><a class="next" href="#gravity"><span>Next</span>Gravity</a></nav><aside class="note" aria-label="About this guide"><p><strong>For information only.</strong> This guide shows what you can do and set up in Effugium Aura. It isn't medical advice and it doesn't promise any result. Effugium Aura is not a medical device and makes no health claims. Apple, iPhone, AirPods, Apple Watch and StandBy are trademarks of Apple Inc., registered in the U.S. and other countries and regions. Android is a trademark of Google LLC.</p></aside></div></section><section class="view" id="view-gravity" data-view="gravity" aria-label="Gravity"><div class="wrap guide"><header class="guide-head"><p class="eyebrow">The basics</p><h1>Gravity</h1></header>
 <p class="lede">Gravity turns your mix into a sphere around you. Each sound becomes a planet on its own ring, and can circle you.</p>
@@ -468,7 +474,13 @@ h1 .pro, h2 .pro, h2 .tag { font-size: 13px; vertical-align: 6px; }
     <li>Place your sounds in <a href="#flat">Flat</a>.</li>
     <li>Tap <strong>Gravity</strong> at the top. Tap <strong>Flat</strong> to go back.</li>
   </ol>
-  <p>You add sounds in Flat. In Gravity, <strong>To add sounds, switch back to Flat ›</strong> takes you there.</p>
+  <h2>Add a sound in Gravity</h2>
+  <ol>
+    <li>Under the picture, tap <strong>+ Add a sound</strong>.</li>
+    <li>Tap an empty place on the little map. Its ring and spot light up in the picture.</li>
+    <li>Pick a sound, by folder. It floats up into its place.</li>
+    <li>Drag it along its ring, or switch on <strong>Orbit</strong> and pick a speed. Then tap <strong>Add to mix</strong>. <strong>Back</strong> lets you pick another sound.</li>
+  </ol>
   <h2>What you see</h2>
   <p>You're in the middle. Each sound is a planet on its own ring around you. Faint rings drawn in towards you show the pull; you can change them, or turn them off, under <a href="#menu">Rings around you</a>.</p>
   <h2>What lives in Gravity</h2>
@@ -477,7 +489,7 @@ h1 .pro, h2 .pro, h2 .tag { font-size: 13px; vertical-align: 6px; }
     <li><a href="#stars">Shooting stars</a>: sounds that pass by now and then.</li>
     <li><a href="#kicker">The Kicker</a>: a sound or a vibration on a timer.</li>
   </ul>
-  <p>Shooting stars and the Kicker play while you're in Gravity and the mix is playing. Tap <strong>ⓘ</strong> beside either for a short explanation.</p>
+  <p>With <span class="pro">Pro</span>, shooting stars and the Kicker play whenever the mix is playing, in Flat as well as Gravity. Open either's line for a short explanation.</p>
   <h2>Free and Pro</h2>
   <p>In Free, two sounds orbit at a time, at ear level. With <span class="pro">Pro</span>, every sound can orbit, on rings tilted over and under you.</p>
   <p>Height needs headphones. On speakers, sounds still sweep left and right.</p>
@@ -500,7 +512,7 @@ h1 .pro, h2 .pro, h2 .tag { font-size: 13px; vertical-align: 6px; }
   <p>Drag sideways on the sky to turn the view round.</p>
   <h2>Random and Reset</h2>
   <ul>
-    <li><strong>Random</strong> sends every sound orbiting on its own random tilt, direction and speed.</li>
+    <li><strong>Random</strong> shuffles your mix your way; in Gravity it can also set sounds orbiting at random tilts, directions and speeds (see <a href="#flat">Random</a>).</li>
     <li><strong>Reset</strong> puts every sound back in its own place and ring. It asks first.</li>
   </ul>
   <p>In Free, two sounds orbit at a time, at ear level. <span class="pro">Pro</span> lets every sound orbit, at any tilt.</p>
@@ -513,9 +525,9 @@ h1 .pro, h2 .pro, h2 .tag { font-size: 13px; vertical-align: 6px; }
     <thead><tr><th scope="col">Folder</th><th scope="col">Sounds</th></tr></thead>
     <tbody>
       <tr><td>Water</td><td>Rain, Waterfall, Ocean, Rain on a roof, Rain on leaves, Babbling brook, Underwater, Sea cave, Wave on the rocks</td></tr>
-      <tr><td>Weather</td><td>Wind, Distant storm</td></tr>
-      <tr><td>Nature</td><td>Forest, Night, Dawn chorus, Frogs at night, Summer meadow, Raven passing</td></tr>
-      <tr><td>Fire</td><td>Campfire</td></tr>
+      <tr><td>Weather</td><td>Wind, Distant storm, Snowstorm, Walking in snow, Quiet snow steps</td></tr>
+      <tr><td>Nature</td><td>Forest, Night, Dawn chorus, Frogs at night, Summer meadow, Leaves underfoot</td></tr>
+      <tr><td>Fire</td><td>Campfire, Fireplace, Low fire</td></tr>
       <tr><td>Home</td><td>Air conditioner, Washing machine, Shower, Clock ticking, Cat purring</td></tr>
       <tr><td>Civilization</td><td>Car ride, Ship horn</td></tr>
       <tr><td>Noise</td><td>Brown, Pink, White</td></tr>
@@ -627,15 +639,15 @@ h1 .pro, h2 .pro, h2 .tag { font-size: 13px; vertical-align: 6px; }
   <p><strong>Use this loop · Next sound</strong> keeps it and moves on. You can skip a sound for now, or go <strong>Back to the automatic loop</strong>. Tap ⓘ for <strong>How the loop helper works</strong>.</p>
 </div><nav class="pager" aria-label="Previous and next topic"><a class="prev" href="#recorder"><span>Back</span>Field recorder</a><a class="next" href="#stars"><span>Next</span>Shooting stars</a></nav><aside class="note" aria-label="About this guide"><p><strong>For information only.</strong> This guide shows what you can do and set up in Effugium Aura. It isn't medical advice and it doesn't promise any result. Effugium Aura is not a medical device and makes no health claims. Apple, iPhone, AirPods, Apple Watch and StandBy are trademarks of Apple Inc., registered in the U.S. and other countries and regions. Android is a trademark of Google LLC.</p></aside></div></section><section class="view" id="view-stars" data-view="stars" aria-label="Shooting stars"><div class="wrap guide"><header class="guide-head"><p class="eyebrow">Extras</p><h1>Shooting stars</h1></header>
 <p class="lede">A shooting star is a sound that passes by now and then in a straight line, like a far-off train in the night. It plays once, then waits for its next pass. <span class="pro">Pro</span></p>
-<aside class="quick-answer"><h2>In short</h2><p>In Gravity, under Shooting stars, tap Add. Pick a sound, which way it passes and how often.</p></aside>
+<aside class="quick-answer"><h2>In short</h2><p>Under the picture, open Shooting stars and tap Add, in Flat or Gravity. Pick a sound, which way it passes and how often.</p></aside>
 <div class="guide-body">
   <h2>Add a shooting star</h2>
   <ol>
-    <li>Switch to <a href="#gravity">Gravity</a>.</li>
-    <li>Under <strong>Shooting stars</strong>, tap <strong>Add</strong>.</li>
-    <li><strong>Sound</strong>: Raven passing, Ship horn or Wave on the rocks, or <strong>All sounds ›</strong> for any other.</li>
+    <li>Under the picture, tap <strong>Shooting stars</strong>, in Flat or <a href="#gravity">Gravity</a>.</li>
+    <li>Tap <strong>Add</strong>.</li>
+    <li><strong>Sound</strong>: Ship horn or Wave on the rocks, or <strong>All sounds ›</strong> for any other.</li>
     <li><strong>Which way</strong>: <strong>Side to side</strong>, <strong>Front to back</strong> or <strong>Up and down</strong>, and <strong>Turn it round</strong> sends it the other way. Front to back passes by on your right; up and down passes in front of you.</li>
-    <li><strong>How often</strong>: a pause of 10, 20 or 30 seconds or a minute after each pass, or <strong>Now and then</strong> for a random pause of 10 seconds to 2 minutes.</li>
+    <li><strong>How often</strong>: a pause of 30 seconds, or 1, 2, 5 or 10 minutes, after each pass, or <strong>Now and then</strong> for a random pause of 30 seconds to 5 minutes.</li>
     <li>Set its <strong>Volume</strong>. Tap the sound to hear one pass now (it starts the mix if it's paused).</li>
     <li>Tap <strong>Add shooting star</strong>.</li>
   </ol>
@@ -643,12 +655,12 @@ h1 .pro, h2 .pro, h2 .tag { font-size: 13px; vertical-align: 6px; }
   <p>Up and down needs headphones.</p>
 </div><nav class="pager" aria-label="Previous and next topic"><a class="prev" href="#loops"><span>Back</span>Loop Studio</a><a class="next" href="#kicker"><span>Next</span>Kicker</a></nav><aside class="note" aria-label="About this guide"><p><strong>For information only.</strong> This guide shows what you can do and set up in Effugium Aura. It isn't medical advice and it doesn't promise any result. Effugium Aura is not a medical device and makes no health claims. Apple, iPhone, AirPods, Apple Watch and StandBy are trademarks of Apple Inc., registered in the U.S. and other countries and regions. Android is a trademark of Google LLC.</p></aside></div></section><section class="view" id="view-kicker" data-view="kicker" aria-label="Kicker"><div class="wrap guide"><header class="guide-head"><p class="eyebrow">Extras</p><h1>Kicker</h1></header>
 <p class="lede">The Kicker is a cue on a timer, above everything else: a sound, a vibration, or both. Use it as a bell to come back to while you meditate, or as a cue for lucid dream practice. <span class="pro">Pro</span></p>
-<aside class="quick-answer"><h2>In short</h2><p>In Gravity, under Kicker, tap Add. Choose what it does and how often, then tap Add the Kicker.</p></aside>
+<aside class="quick-answer"><h2>In short</h2><p>Under the picture, open Kicker and tap Add, in Flat or Gravity. Choose what it does and how often, then tap Add the Kicker.</p></aside>
 <div class="guide-body">
   <h2>Add the Kicker</h2>
   <ol>
-    <li>Switch to <a href="#gravity">Gravity</a>.</li>
-    <li>Under <strong>Kicker</strong>, tap <strong>Add</strong>.</li>
+    <li>Under the picture, tap <strong>Kicker</strong>, in Flat or <a href="#gravity">Gravity</a>.</li>
+    <li>Tap <strong>Add</strong>.</li>
     <li><strong>Kick with</strong>: <strong>Sound</strong>, <strong>Vibrate</strong> or <strong>Both</strong>. Vibrate is a silent kick: only you feel it, and nothing plays, so nobody beside you is woken.</li>
     <li><strong>How often</strong>: every minute up to every two hours. <em>A minute less</em> and <em>A minute more</em> change it.</li>
     <li>Tap <strong>Add the Kicker</strong>.</li>
@@ -776,7 +788,10 @@ h1 .pro, h2 .pro, h2 .tag { font-size: 13px; vertical-align: 6px; }
   <h2>Rings around you</h2>
   <p>How the rings look in Gravity: <strong>Lying flat</strong> (faint rings lie flat around you and are drawn in), <strong>Dotted</strong> (rings of dots crowd together as they're drawn in) or <strong>Off</strong> (a still pool: just you and your sounds).</p>
   <h2>Head tracking <span class="tag">iPhone</span></h2>
-  <p>With AirPods that support it. On: sounds stay put when you turn your head. Off: sounds turn with your head. It's in Free and Pro.</p>
+  <p>With AirPods that support it, your sounds can stay in place in the room as you turn your head. Turn it on or off in ☰ › <strong>Head tracking</strong>. The first time, iPhone asks to use Motion &amp; Fitness; allow it for head tracking.</p>
+  <p>While it's following your AirPods, <strong>Recenter audio</strong> shows at the top: tap it to make the way you're facing now the front.</p>
+  <p><strong>Works with:</strong> AirPods (3rd generation) and newer, every AirPods Pro, and AirPods Max.</p>
+  <p><strong>You don't need it.</strong> Your sounds are placed around you in 3D on any headphones. Head tracking just adds another fun layer of immersion. It's in Free and Pro.</p>
   <h2>Sharing</h2>
   <p>Off unless you turn it on. When it's on, Effugium sends anonymous counts about once a day, and only these: how long you played and at what time of day, Flat or Gravity and headphones or speakers, how many sounds are in your mixes, the sleep timer and the lock screen buttons, recordings you've made, how many nights you used it this week, Free or Pro, and the app's version.</p>
   <p>Never your sounds or recordings, their names, or your mixes' names. No account, no ID that links one day to the next, no ads, nothing sold. <strong>Show the last one sent</strong> shows exactly what went.</p>
@@ -807,7 +822,7 @@ h1 .pro, h2 .pro, h2 .tag { font-size: 13px; vertical-align: 6px; }
       <tr><td>Shooting stars, the Kicker</td><td>—</td><td>Yes</td></tr>
       <tr><td>Seamless loops, Loop Studio</td><td>—</td><td>Yes</td></tr>
       <tr><td>Field recorder</td><td>1 min a clip</td><td>10 min, seamless</td></tr>
-      <tr><td>Binaural beats</td><td>Alpha</td><td>All five, journeys</td></tr>
+      <tr><td>Binaural beats</td><td>All five, journeys</td><td>All five, journeys</td></tr>
       <tr><td>Your own folders</td><td>—</td><td>Yes</td></tr>
     </tbody>
   </table></div>

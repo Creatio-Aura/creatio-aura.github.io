@@ -347,7 +347,10 @@ export function confirmationEmail(app: string, name: string, confirmUrl: string,
     "",
     confirmUrl,
     "",
-    "It works for 48 hours. If you didn't sign up, ignore this email: without confirming, your",
+    "It works for 48 hours. When you're in, your invite comes from this same address. If this",
+    "email was in your spam or junk folder, marking it \"not spam\" helps the invite reach your inbox.",
+    "",
+    "If you didn't sign up, ignore this email: without confirming, your",
     "details are deleted within 7 days.",
     "",
     "— Creatio Aura",
@@ -361,7 +364,8 @@ export function confirmationEmail(app: string, name: string, confirmUrl: string,
 <p style="margin:0 0 14px;font-size:16px;line-height:1.6">${escape(hi(name))}</p>
 <p style="margin:0 0 24px;font-size:16px;line-height:1.6">Thanks for signing up. Press the button to confirm it was you.</p>
 <p style="margin:0 0 24px"><a href="${confirmUrl}" style="display:inline-block;background:#ff8a3d;color:#1d0f05;font-weight:bold;text-decoration:none;padding:14px 26px;border-radius:99px">Confirm my place</a></p>
-<p style="margin:0 0 8px;font-size:14px;line-height:1.6;color:#d8cbb6">The link works for 48 hours. If you didn't sign up, ignore this email: without confirming, your details are deleted within 7 days.</p>
+<p style="margin:0 0 8px;font-size:14px;line-height:1.6;color:#d8cbb6">The link works for 48 hours. When you're in, your invite comes from this same address. If this email was in your spam or junk folder, marking it "not spam" helps the invite reach your inbox.</p>
+<p style="margin:0 0 8px;font-size:14px;line-height:1.6;color:#d8cbb6">If you didn't sign up, ignore this email: without confirming, your details are deleted within 7 days.</p>
 </div>
 <p style="max-width:520px;margin:16px auto 0;font-size:12px;color:#b9a8d6;text-align:center">Don't want these emails? <a href="${leaveUrl}" style="color:#ffb35c">Remove yourself</a>.</p>
 </body></html>`;

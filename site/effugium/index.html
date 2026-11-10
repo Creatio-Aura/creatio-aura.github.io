@@ -105,6 +105,28 @@
       </div>
     </section>
 
+    <!-- The mixer itself (2026-11-09: Andrew picked "both" for 0.2.0: the welcome tour above, re-recorded, then
+         this). Recorded in the simulator from Effugium Dev, the waits between taps cut out; the times are where
+         each step starts in mixer.mp4. Head tracking can't be recorded without AirPods, so it's in words. -->
+    <section class="wrap tour flip" aria-labelledby="mixer-title">
+      <div class="phone">
+        <video id="mixer-video" data-steps="mixer-steps" src="/effugium/media/mixer.mp4" poster="/effugium/media/mixer-poster.jpg" muted loop playsinline preload="metadata" aria-label="Effugium Aura's mixer, recorded from the app: the mixer, names on the picture, Random, Gravity, and adding a sound in Gravity"></video>
+      </div>
+      <div class="tour-side">
+        <h2 id="mixer-title">Inside the mixer</h2>
+        <p class="lede">The mixer itself, recorded on iPhone. The top stays put while everything under it folds away. Pick a step to jump to it.</p>
+        <ol id="mixer-steps" class="video-steps">
+          <li><button type="button" data-at="0"><span class="n">1</span><span><span class="k">The mixer</span><span class="t">The top stays put</span></span></button></li>
+          <li><button type="button" data-at="3.6"><span class="n">2</span><span><span class="k">Names</span><span class="t">Every name, when you want it</span></span></button></li>
+          <li><button type="button" data-at="8.4"><span class="n">3</span><span><span class="k">Random</span><span class="t">Shuffle it your way</span></span></button></li>
+          <li><button type="button" data-at="15.4"><span class="n">4</span><span><span class="k">Gravity</span><span class="t">Lift the whole mix</span></span></button></li>
+          <li><button type="button" data-at="20.7"><span class="n">5</span><span><span class="k">Add a sound</span><span class="t">Pick a place, then a sound</span></span></button></li>
+        </ol>
+        <p>On iPhone with AirPods, your sounds can also stay in place as you turn your head. <strong>Recenter audio</strong>, at the top, makes the way you're facing the front.</p>
+        <button class="button ghost video-toggle" type="button" data-toggle="mixer-video" data-play="Play the mixer" data-pause="Pause the mixer">Play the mixer</button>
+      </div>
+    </section>
+
     <section class="wrap idea">
       <h2 style="font-size: 36px; margin-bottom: 12px">What you can do</h2>
       <p class="lede">Effugium Aura is all about control: your sounds, where they sit, how they move, and when they stop.</p>

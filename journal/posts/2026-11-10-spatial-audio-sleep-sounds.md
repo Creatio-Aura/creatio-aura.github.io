@@ -5,9 +5,9 @@ summary: Rain behind you, the fan to your left: how spatial audio and head track
 date: 2026-11-10
 kind: guide
 project: effugium
-quick_answer: Spatial audio makes headphones sound as if sounds come from places around you, not from inside your head. On iPhone, put in your AirPods, open Control Center, touch and hold the volume control, tap Spatial Audio and choose Fixed or Head Tracked. On a Pixel, it's in Settings > Sound & vibration > Spatial audio. These settings work with apps and content that support them, so to put each sound exactly where you want it, use an app that places sounds one by one. We're testing that in Effugium Aura, which we make.
+quick_answer: Spatial audio makes headphones sound as if sounds come from places around you, not from inside your head. On iPhone, put in your AirPods, open Control Center, touch and hold the volume control, tap Spatial Audio and choose Fixed or Head Tracked. On a Pixel, it's in Settings > Sound & vibration > Spatial audio. These settings work with apps and content that support them, so to put each sound exactly where you want it, use an app that places sounds one by one. We're testing that in Effugium Aura, which we make: it places your sounds around you by itself, on any headphones, with no setting to turn on.
 cta_title: Every sound in its place
-cta_text: In the Effugium Aura beta, put each sound in front, behind or to either side of you (above and below open up in Pro), then tell us whether it sounds like it's really there.
+cta_text: In the Effugium Aura beta, where everything is unlocked, put each sound in front, behind, to either side, above or below you, then tell us whether it sounds like it's really there.
 ---
 
 Most sleep sounds play inside your head: one track, left and right. With spatial audio, each sound can seem to sit in its own place around you: the rain behind you, the fan to your left, a stream ahead. Here's how it works, how to turn it on with AirPods or on a Pixel phone, and how to arrange your sounds the way you want them.
@@ -72,19 +72,19 @@ Sleeping in earbuds isn't for everyone. If they press on your ears when you lie 
 ## How to choose
 
 - **Want sounds outside your head, on content made for it?** Turn on Spatial Audio: Fixed or Head Tracked on iPhone, or Spatial audio on a Pixel.
-- **Want to choose where every sound sits?** Use an app that places sounds one by one.
+- **Want to choose where every sound sits?** Use an app that places sounds one by one. An app like that doesn't need your phone's Spatial Audio setting.
 - **Listening in bed?** With Head Tracked, Apple says the sound seems to come from your iPhone, so where the phone sits matters. If you'd rather the sounds turn with you when you roll over, try Fixed.
 - **Sharing a room?** Headphones keep the sound to you.
 - **Only have a speaker?** You'll hear everything from the speaker. Places around you need headphones.
 
 ## Try it in the Effugium Aura beta
 
-Effugium Aura, which we make, is in testing on iPhone and Android, and putting sounds around you is at the heart of what we're testing. Here's how to try it today:
+Effugium Aura, which we make, is in testing on iPhone and Android, and putting sounds around you is at the heart of what we're testing. It places your sounds around you by itself, on any headphones, so you don't need to turn on Spatial Audio in Control Center or in your phone's settings. On iPhone with AirPods, head tracking in the app adds one more layer: your sounds stay put in the room as you turn your head. Here's how to try it today:
 
 1. **Put on headphones**, and check the switch in the top bar says **3D**, not Speaker.
-2. **Tap Your sounds** under the circle, open a folder, and drag a sound onto a place around you: in front, behind or to either side. Above and below positions open up in Pro.
+2. **Tap Your sounds** under the circle, open a folder, and drag a sound onto a place around you: in front, behind, to either side, above or below. Everything is unlocked in the beta; after launch, above, below and the places in between are part of Pro.
 3. **Add a few more**, and tap each one to set its volume. Then press **Play**.
-4. **On iPhone with AirPods**, turn on ☰ > **Head tracking** if you'd like your sounds to stay put in the room as you turn your head.
+4. **On iPhone with AirPods** (AirPods 3 or newer, any AirPods Pro, or AirPods Max), head tracking is on from the start: your sounds stay put in the room as you turn your head. If you'd rather they turn with you, switch it off in ☰ > **Head tracking**.
 5. **Settled in a new direction?** While head tracking is following your AirPods, **⟲ Recenter audio** shows at the top. Tap it to make the way you're facing now the front, so the sounds you put ahead of you are ahead of you again.
 6. **To set a sound moving**, tap **Gravity** at the top, tap the sound, then **Orbit**.
 
@@ -102,6 +102,9 @@ Testing already? In the app, open the ☰ menu and tap **Send feedback**. Not ye
 ### Do I need AirPods for spatial audio sleep sounds?
 You need headphones or earbuds, but not always AirPods. Apple's head tracking needs AirPods that support it. Apps that place sounds themselves can work on other headphones: in the Effugium Aura beta, your sounds are placed around you on any headphones, so tell us how yours sound.
 
+### Do I need to turn on Spatial Audio for Effugium Aura?
+No. Effugium Aura places your sounds around you by itself, on any headphones, so there's no phone setting to turn on first. On iPhone, the Spatial Audio choice in Control Center doesn't change it either: with AirPods, the app's own ☰ > **Head tracking** is what keeps your sounds in place as you turn your head.
+
 ### How do I turn on spatial audio for AirPods on iPhone?
 With your AirPods in, open Control Center, touch and hold the volume control, tap Spatial Audio at the lower right, then choose Fixed or Head Tracked.
 
@@ -115,7 +118,7 @@ Usually a stereo recording of rain panned in circles around your head, made for 
 Not in the same way. Placing a sound behind or above you needs headphones; on a speaker, the sound comes from the speaker.
 
 ### Can I put a sound above or below me?
-In the Effugium Aura beta, you can: above and below positions open up in Pro, on top of the places all around you. Height needs headphones. Try it and tell us whether you can hear where it is.
+In the Effugium Aura beta, yes: everything is unlocked while we test, so you can put sounds above and below you as well as all around. After launch, above and below are part of Pro. Height needs headphones. Try it and tell us whether you can hear where it is.
 
 ### Will my sounds move when I roll over in bed?
 With Fixed, they turn with your head. With Head Tracked on iPhone, Apple says the sound seems to come from your iPhone, so it depends where the phone is. In the Effugium Aura beta on iPhone, head tracking keeps your sounds in place in the room, and after you roll over you can tap **Recenter audio** to make the way you're facing the front again. Try a night with head tracking on and one with it off, and tell us which you'd keep.

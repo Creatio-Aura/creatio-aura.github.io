@@ -9,7 +9,7 @@
 //   POST /feedback                                         → a tester's note from the app (feedback.ts)
 //
 // And for Creatio Aura only, with the admin key (worker/tools/):
-//   GET  /admin/testers                                    → every tester, with platforms, and who's waiting
+//   GET  /admin/testers                                    → every tester, with platforms, who's waiting, and who left (counts, no one named)
 //   POST /admin/announce { title, message, links, send }   → emails testers their builds
 //   POST /admin/report { send }                            → the daily report (also sent every morning)
 //   POST /admin/builds { project, links }                  → stores a beta's latest links (no emails); shows them
@@ -388,14 +388,24 @@ async function confirm(env: Env, url: URL) {
   return redirect(env, "/beta/confirmed/");
 }
 
+/** Leaving keeps a count, never who (Andrew, 2026-11-10; migrations/0011_departures.sql): the sign-up's beta,
+ *  platforms, how they came, whether they'd been let in, and when they joined. Run with the delete, in one batch. */
+function departure(env: Env, where: "id = ?" | "leave_hash = ?", value: number | string) {
+  return env.DB.prepare(
+    `INSERT INTO departures (project, platforms, source, was_in, joined_at, left_at)
+     SELECT project, platforms, source, approved_at IS NOT NULL, created_at, ? FROM signups WHERE ${where}`,
+  ).bind(new Date().toISOString(), value);
+}
+
 async function leave(env: Env, url: URL, method: string) {
   const token = url.searchParams.get("t") ?? "";
   const id = token ? await leaveTokenId(env, token) : null;
   if (id !== null) {
-    await env.DB.prepare("DELETE FROM signups WHERE id = ?").bind(id).run();
+    await env.DB.batch([departure(env, "id = ?", id), env.DB.prepare("DELETE FROM signups WHERE id = ?").bind(id)]);
   } else if (token) {
     // Links from before they were signed.
-    await env.DB.prepare("DELETE FROM signups WHERE leave_hash = ?").bind(await sha256(token)).run();
+    const hash = await sha256(token);
+    await env.DB.batch([departure(env, "leave_hash = ?", hash), env.DB.prepare("DELETE FROM signups WHERE leave_hash = ?").bind(hash)]);
   }
   // Mail apps' one-click unsubscribe (POST) just needs a 200.
   if (method === "POST") return new Response("Removed.", { status: 200 });
@@ -503,7 +513,18 @@ async function testers(env: Env) {
   });
   const inBetas = [];
   for (const project of Object.keys(BETAS)) inBetas.push(...(await testersIn(env, project)).map(shape));
-  return json({ ok: true, testers: inBetas, waiting: (await waitingForOk(env)).map(shape) }, 200, null);
+  // Who left, without who they were: for HQ's counts.
+  const left = (
+    await env.DB.prepare("SELECT project, platforms, source, was_in, joined_at, left_at FROM departures ORDER BY left_at").all<{
+      project: string;
+      platforms: string;
+      source: string;
+      was_in: number;
+      joined_at: string;
+      left_at: string;
+    }>()
+  ).results.map((d) => ({ ...d, platforms: d.platforms.split(","), was_in: !!d.was_in }));
+  return json({ ok: true, testers: inBetas, waiting: (await waitingForOk(env)).map(shape), departures: left }, 200, null);
 }
 
 /** A beta's links for its platforms from a request: https only, and only platforms the beta has. */

@@ -84,14 +84,15 @@ Effugium Aura, which we make, is in testing on iPhone and Android, and putting s
 1. **Put on headphones**, and check the switch in the top bar says **3D**, not Speaker.
 2. **Tap Your sounds** under the circle, open a folder, and drag a sound onto a place around you: in front, behind or to either side. Above and below positions open up in Pro.
 3. **Add a few more**, and tap each one to set its volume. Then press **Play**.
-4. **On iPhone with AirPods**, turn on ☰ > **Head tracking** if you'd like your sounds to stay put as you turn your head. **Recenter audio**, at the top, makes the way you're facing the front.
-5. **To set a sound moving**, tap **Gravity** at the top, tap the sound, then **Orbit**.
+4. **On iPhone with AirPods**, turn on ☰ > **Head tracking** if you'd like your sounds to stay put in the room as you turn your head.
+5. **Settled in a new direction?** While head tracking is following your AirPods, **⟲ Recenter audio** shows at the top. Tap it to make the way you're facing now the front, so the sounds you put ahead of you are ahead of you again.
+6. **To set a sound moving**, tap **Gravity** at the top, tap the sound, then **Orbit**.
 
 It's a test version, so we'd like to hear how it went:
 
 - Do the sounds seem to come from where you put them, or from inside your head?
 - Which phone and headphones did you use?
-- With AirPods, did head tracking feel right in bed, or would you rather have it off?
+- With AirPods, did head tracking feel right in bed, or would you rather have it off? Did **Recenter audio** put the front where you wanted it?
 - On Android, does it feel like the sounds are around you, or does it need more?
 
 Testing already? In the app, open the ☰ menu and tap **Send feedback**. Not yet? You can [join the beta](/effugium/#beta).
@@ -117,7 +118,7 @@ Not in the same way. Placing a sound behind or above you needs headphones; on a 
 In the Effugium Aura beta, you can: above and below positions open up in Pro, on top of the places all around you. Height needs headphones. Try it and tell us whether you can hear where it is.
 
 ### Will my sounds move when I roll over in bed?
-With Fixed, they turn with your head. With Head Tracked on iPhone, Apple says the sound seems to come from your iPhone, so it depends where the phone is. In the Effugium Aura beta, try a night with head tracking on and one with it off, and tell us which you'd keep.
+With Fixed, they turn with your head. With Head Tracked on iPhone, Apple says the sound seems to come from your iPhone, so it depends where the phone is. In the Effugium Aura beta on iPhone, head tracking keeps your sounds in place in the room, and after you roll over you can tap **Recenter audio** to make the way you're facing the front again. Try a night with head tracking on and one with it off, and tell us which you'd keep.
 
 ## Bottom line
 

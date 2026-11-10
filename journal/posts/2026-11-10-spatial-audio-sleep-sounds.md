@@ -1,13 +1,13 @@
 ---
 title: Spatial audio sleep sounds with AirPods and Android (2026)
-description: How spatial audio and head tracking work with AirPods and Android, how they differ from 8D audio, and how to put rain, a fan or a stream around you.
+description: How spatial audio works with AirPods and on Android phones, how it differs from 8D audio, and how to put rain, a fan or a stream around you.
 summary: Rain behind you, the fan to your left: how spatial audio and head tracking work, and how to arrange your sounds around you.
 date: 2026-11-10
 kind: guide
 project: effugium
 quick_answer: Spatial audio makes headphones sound as if sounds come from places around you, not from inside your head. On iPhone, put in your AirPods, open Control Center, touch and hold the volume control, tap Spatial Audio and choose Fixed or Head Tracked. On a Pixel, it's in Settings > Sound & vibration > Spatial audio. These settings work with apps and content that support them, so to put each sound exactly where you want it, use an app that places sounds one by one. We're testing that in Effugium Aura, which we make.
 cta_title: Every sound in its place
-cta_text: In the Effugium Aura beta, put each sound in front, behind, to either side, above or below you, then tell us whether it sounds like it's really there.
+cta_text: In the Effugium Aura beta, put each sound in front, behind or to either side of you (above and below open up in Pro), then tell us whether it sounds like it's really there.
 ---
 
 Most sleep sounds play inside your head: one track, left and right. With spatial audio, each sound can seem to sit in its own place around you: the rain behind you, the fan to your left, a stream ahead. Here's how it works, how to turn it on with AirPods or on a Pixel phone, and how to arrange your sounds the way you want them.
@@ -43,9 +43,7 @@ Apple can also make a spatial audio profile for you, from a scan of your face an
 1. **Open Settings** and tap **Sound & vibration** > **Spatial audio**.
 2. **For wired headphones**, turn on **Wired headphones**. **For wireless ones**, tap **Connected devices settings**, tap your headphones, then turn on **Spatial Audio**.
 
-Head tracking needs Pixel Buds Pro or Pro 2 with a Pixel 6 or newer, and it's off until you turn it on. Open **Settings** > **Connected devices**, tap the settings for your Pixel Buds under Saved devices, then **Device details** > **Sounds**, and turn on **Spatial Audio** and **Head tracking**.
-
-Other Android phones may put these settings somewhere else, or not have them.
+Other Android phones may put this setting somewhere else, or not have it.
 
 ## What you can do with sounds around you
 
@@ -84,12 +82,10 @@ Sleeping in earbuds isn't for everyone. If they press on your ears when you lie 
 Effugium Aura, which we make, is in testing on iPhone and Android, and putting sounds around you is at the heart of what we're testing. Here's how to try it today:
 
 1. **Put on headphones**, and check the switch in the top bar says **3D**, not Speaker.
-2. **Tap Your sounds** under the circle, open a folder, and drag a sound onto a place around you: in front, behind, to either side, above or below.
+2. **Tap Your sounds** under the circle, open a folder, and drag a sound onto a place around you: in front, behind or to either side. Above and below positions open up in Pro.
 3. **Add a few more**, and tap each one to set its volume. Then press **Play**.
 4. **On iPhone with AirPods**, turn on ☰ > **Head tracking** if you'd like your sounds to stay put as you turn your head. **Recenter audio**, at the top, makes the way you're facing the front.
 5. **To set a sound moving**, tap **Gravity** at the top, tap the sound, then **Orbit**.
-
-On Android, Effugium Aura uses its own 3D sound, without head tracking, so the sounds turn with your head.
 
 It's a test version, so we'd like to hear how it went:
 
@@ -103,7 +99,7 @@ Testing already? In the app, open the ☰ menu and tap **Send feedback**. Not ye
 ## Questions people ask
 
 ### Do I need AirPods for spatial audio sleep sounds?
-You need headphones or earbuds, but not always AirPods. Apple's head tracking needs AirPods that support it, and a Pixel's needs Pixel Buds Pro or Pro 2. Apps that place sounds themselves can work on other headphones: in the Effugium Aura beta, your sounds are placed around you on any headphones, so tell us how yours sound.
+You need headphones or earbuds, but not always AirPods. Apple's head tracking needs AirPods that support it. Apps that place sounds themselves can work on other headphones: in the Effugium Aura beta, your sounds are placed around you on any headphones, so tell us how yours sound.
 
 ### How do I turn on spatial audio for AirPods on iPhone?
 With your AirPods in, open Control Center, touch and hold the volume control, tap Spatial Audio at the lower right, then choose Fixed or Head Tracked.
@@ -118,17 +114,16 @@ Usually a stereo recording of rain panned in circles around your head, made for 
 Not in the same way. Placing a sound behind or above you needs headphones; on a speaker, the sound comes from the speaker.
 
 ### Can I put a sound above or below me?
-In the Effugium Aura beta, you can: there are places above and below you as well as all around. Height needs headphones. Try it and tell us whether you can hear where it is.
+In the Effugium Aura beta, you can: above and below positions open up in Pro, on top of the places all around you. Height needs headphones. Try it and tell us whether you can hear where it is.
 
 ### Will my sounds move when I roll over in bed?
 With Fixed, they turn with your head. With Head Tracked on iPhone, Apple says the sound seems to come from your iPhone, so it depends where the phone is. In the Effugium Aura beta, try a night with head tracking on and one with it off, and tell us which you'd keep.
 
 ## Bottom line
 
-Spatial audio places sounds around you on headphones, and head tracking keeps them in place as you turn. Turn it on in Control Center on iPhone, or under Sound & vibration on a Pixel. To choose where every sound sits, use an app that places them one by one, keep the volume low, and try it in bed before a whole night.
+Spatial audio places sounds around you on headphones: turn it on in Control Center on iPhone, or under Sound & vibration on a Pixel. With AirPods, head tracking keeps them in place as you turn. To choose where every sound sits, use an app that places them one by one, keep the volume low, and try it in bed before a whole night.
 
 ## References
 - [Apple Support: Control Spatial Audio and head tracking on AirPods](https://support.apple.com/guide/airpods/control-spatial-audio-and-head-tracking-dev00eb7e0a3/web)
 - [Apple Support: Listen with Personalized Spatial Audio for AirPods and Beats](https://support.apple.com/en-us/102596)
 - [Pixel Phone Help: Listen with Spatial Audio on your Pixel device](https://support.google.com/pixelphone/answer/12967594?hl=en)
-- [Google Pixel Buds Help: Use Spatial Audio and head tracking](https://support.google.com/googlepixelbuds/answer/12921041?hl=en)

@@ -3,7 +3,7 @@ title: Can't sleep without your fan when traveling? Record it and loop it
 description: Record the fan you're used to at home, loop it without a click, and play it in a hotel room, at a friend's or on a trip. Steps for iPhone and Android.
 summary: Record your own fan at home, loop it without a click, and play it wherever you stay.
 date: 2026-11-08
-updated: 2026-11-09
+updated: 2026-11-12
 kind: guide
 project: effugium
 quick_answer: Record two or three minutes of your fan at home, with your phone set down an arm's length away and Do Not Disturb on. Trim the ends and blend the end into the start so the join doesn't click, then play it in an app that repeats it and keeps going with the screen off. Effugium Aura, the app we're testing now, does all of that in one place, and you can try it in the beta.
@@ -61,7 +61,7 @@ Then play it in an app that repeats one sound and keeps going with the screen of
 
 Effugium Aura is in testing, and recording your own fan is one of the things we most want testers to try. If you're testing it, here's how:
 
-1. **Record your fan.** Tap Record, set the phone down near the fan, and record two or three minutes. Or tap Import to use a recording you already have.
+1. **Record your fan.** Tap **+** at the end of the names under the circle, then **Record**. Set the phone down near the fan and record two or three minutes. Or tap **Import** to use a recording you already have.
 2. **Smooth the join.** Let the app blend the end into the start, then listen to it go round a few times.
 3. **Put it where your fan is.** Place the sound in front of you, behind, or to one side. With headphones, it seems to come from there.
 4. **Play it.** Let it run all night, or set the sleep timer so it fades out.

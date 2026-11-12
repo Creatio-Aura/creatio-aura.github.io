@@ -3,6 +3,7 @@ title: Meditation interval bell: a sound or a tap every few minutes
 description: How often to ring a meditation interval bell, which sound to pick, and how to get a silent tap on your phone or Apple Watch instead of a sound.
 summary: A soft bell, or a tap on your wrist, every few minutes while you sit: how often, which sound, and how to set it up.
 date: 2026-11-09
+updated: 2026-11-12
 kind: guide
 project: effugium
 quick_answer: Set a soft sound, like a singing bowl, to ring every few minutes while you sit: try every 3 to 5 minutes for a short sit, every 10 to 15 for a long one. Each time it rings, notice where your attention is and come back to your breath. For a silent cue, use a vibration on your phone or a tap on your Apple Watch, with the watch in Silent Mode so it doesn't chime. We're testing a bell like this in Effugium Aura, which we make.
@@ -73,8 +74,8 @@ On Android, the Clock app's timer sound and vibration are under More > Settings,
 
 Effugium Aura, which we make, is in testing on iPhone and Android, and its Kicker is one of the things we're testing: a sound, a vibration or both, on a timer you set, above whatever else is playing. Here's how to try it as a meditation bell today:
 
-1. **Pick or make a quiet soundscape, press Play, and tap Gravity** at the top. The Kicker plays in Gravity while a mix is playing.
-2. **Under Kicker, tap Add.**
+1. **Pick or make a quiet soundscape, and press Play.** The Kicker works in Flat or Gravity, and its timer waits while the mix is paused.
+2. **Under the picture, tap Kicker, then Add.**
 3. **Choose Sound, Vibrate or Both.** On an iPhone with an Apple Watch paired, you can vibrate the phone, the watch or both. On Android, it vibrates the phone.
 4. **Set How often.** Try every 3 to 5 minutes for a short sit.
 5. **Pick a sound, like the Singing bowl, tap Try it now, then Add the Kicker.**

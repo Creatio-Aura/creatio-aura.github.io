@@ -208,6 +208,7 @@ fieldset legend { margin-bottom: 10px; }
 .phone { flex: 0 0 auto; width: min(360px, 100%); margin: 0 auto; padding: 10px; border-radius: 54px; background: #0b0910; box-shadow: 0 30px 80px rgba(0, 0, 0, 0.5), inset 0 0 0 1px rgba(237, 231, 246, 0.14); }
 .phone video { display: block; width: 100%; height: auto; aspect-ratio: 720 / 1566; object-fit: cover; border-radius: 44px; background: #15121f; }
 .tour-side { flex: 1 1 380px; min-width: 0; display: flex; flex-direction: column; gap: 20px; }
+.tour.flip { flex-direction: row-reverse; } /* the second recording on a page: phone on the right (above, on a phone) */
 .tour-side h2 { font-size: 36px; }
 .tour-side .lede { font-size: 19px; color: var(--text-soft); }
 .video-steps { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 6px; }
@@ -439,25 +440,28 @@ h1 .pro, h2 .pro, h2 .tag { font-size: 13px; vertical-align: 6px; }
 <div class="topic-groups">
 <section class="topic-group"><h2>The basics</h2><ul class="guide-list"><li><a href="#flat"><strong>Flat</strong><span>Place each sound around you.</span></a></li><li><a href="#gravity"><strong>Gravity</strong><span>Turn your mix into a sphere.</span></a></li><li><a href="#orbits"><strong>Orbits and turning</strong><span>Set sounds circling you, and turn the view.</span></a></li></ul></section><section class="topic-group"><h2>Your sounds</h2><ul class="guide-list"><li><a href="#sounds"><strong>Sounds</strong><span>The built-in library, and bringing your own.</span></a></li><li><a href="#folders"><strong>Folders</strong><span>Sort your sounds your way.</span></a></li><li><a href="#recorder"><strong>Field recorder</strong><span>Record a sound, trim it, loop it.</span></a></li><li><a href="#loops"><strong>Loop Studio</strong><span>Make any sound loop without a bump.</span></a></li></ul></section><section class="topic-group"><h2>Extras</h2><ul class="guide-list"><li><a href="#stars"><strong>Shooting stars</strong><span>Sounds that pass by now and then.</span></a></li><li><a href="#kicker"><strong>Kicker</strong><span>A sound or a vibration on a timer.</span></a></li><li><a href="#beats"><strong>Binaural beats</strong><span>Two tones, one in each ear.</span></a></li></ul></section><section class="topic-group"><h2>At night</h2><ul class="guide-list"><li><a href="#sleep"><strong>Sleep timer</strong><span>Fade the mix out when you choose.</span></a></li><li><a href="#lock"><strong>Lock screen</strong><span>Control it without unlocking.</span></a></li><li><a href="#watch"><strong>Apple Watch</strong><span>Play, pause and volume on your wrist.</span></a></li></ul></section><section class="topic-group"><h2>More</h2><ul class="guide-list"><li><a href="#scapes"><strong>Soundscapes</strong><span>Keep your mixes, and your favourites.</span></a></li><li><a href="#menu"><strong>Menu and settings</strong><span>Everything in the ☰ menu.</span></a></li><li><a href="#pro"><strong>Free and Pro</strong><span>What each one includes.</span></a></li></ul></section></div><nav class="pager" aria-label="Previous and next topic"><span></span><a class="next" href="#flat"><span>Next</span>Flat</a></nav><aside class="note" aria-label="About this guide"><p><strong>For information only.</strong> This guide shows what you can do and set up in Effugium Aura. It isn't medical advice and it doesn't promise any result. Effugium Aura is not a medical device and makes no health claims. Apple, iPhone, AirPods, Apple Watch and StandBy are trademarks of Apple Inc., registered in the U.S. and other countries and regions. Android is a trademark of Google LLC.</p></aside></div></section><section class="view" id="view-flat" data-view="flat" aria-label="Flat"><div class="wrap guide"><header class="guide-head"><p class="eyebrow">The basics</p><h1>Flat</h1></header>
 <p class="lede">Flat is where you build a mix. The circle is the space around you, with you in the middle, and each sound sits in its own place on it.</p>
-<aside class="quick-answer"><h2>In short</h2><p>Tap Your sounds under the circle, open a folder, then drag a sound onto a place, or tap the sound and then the place. Press Play.</p></aside>
+<aside class="quick-answer"><h2>In short</h2><p>Tap + at the end of the names under the circle, open a folder, then drag a sound onto a place, or tap the sound and then the place. Press Play.</p></aside>
 <div class="guide-body">
   <h2>Place a sound</h2>
   <ol>
-    <li>Under the circle, tap <strong>Your sounds</strong>, then a folder to show its sounds.</li>
+    <li>Tap <strong>+</strong> at the end of the names under the circle, then a folder to show its sounds.</li>
     <li>Hold a sound and drag it onto a place. Or tap the sound, then tap a place.</li>
     <li>Press <strong>Play</strong>. Each place holds one sound.</li>
   </ol>
+  <p>Once it's placed, the sound's own controls take the place of the sounds you can add.</p>
   <h2>The places around you</h2>
   <p>Twelve places ring the circle: <strong>Front</strong>, Front right, Right ahead, <strong>Right</strong>, Right behind, Back right, <strong>Behind</strong>, Back left, Left behind, <strong>Left</strong>, Left ahead and Front left. Two more sit <strong>Above</strong> and <strong>Below</strong> you, and <strong>Low tones</strong> is for deep sounds, like a rumble or brown noise.</p>
-  <p>The names of the empty places show while you're placing a sound. Your sounds are listed by name in the strip under the circle, in order round you: tap one to choose it. On the circle, only the sound you chose shows its name; <strong>Aa Names</strong>, at the start of the strip, shows them all.</p>
+  <p>The names of the empty places show while you're placing a sound. Your sounds are listed by name in the strip under the circle, in order round you: tap one to choose it. On the circle, only the sound you chose shows its name; the eye and <strong>Names</strong>, at the start of the strip, show them all.</p>
   <p>Free uses Front, Behind, Left, Right and Low tones. <span class="pro">Pro</span> adds the eight in between, Above and Below.</p>
+  <h2>The shelf under the names</h2>
+  <p>Right under the names is one shelf for your sounds. It shows the sound you chose: its volume, Mute, Loop and Remove, and in Gravity its orbit too. Tap <strong>+</strong> and it shows the sounds you can add instead, with Record and Import. Place one and the shelf switches to it; tap <strong>×</strong> to go back.</p>
   <h2>The top stays put</h2>
-  <p>The top bar, the volume, Flat and Gravity, and the circle stay where they are. Everything under them folds to one line each that says what it's set to: the sound you chose, Your sounds, the Sleep timer, and with <span class="pro">Pro</span> Shooting stars and the Kicker. Tap a line to open it; the one that was open folds away.</p>
+  <p>The top bar, the volume, Flat and Gravity, the circle and the names stay where they are. Under the shelf, the Sleep timer, and with <span class="pro">Pro</span> Shooting stars and the Kicker, fold to one line each that says what it's set to. Tap a line to open it; the one that was open folds away.</p>
   <h2>Random</h2>
   <p>Tap <strong>Random</strong>, in Flat or Gravity, to shuffle your mix your way. Choose what changes (sounds, places, volumes; in Gravity the movement too; with <span class="pro">Pro</span> shooting stars and the Kicker), how many sounds and which folders new ones come from, whether the sound you chose stays as it is, and how much changes, from a sound or two to a whole new mix. Then tap <strong>Shuffle</strong>. Tap Random again to <strong>Undo</strong> or <strong>Shuffle again</strong>. Your choices are kept for next time.</p>
   <h2>Change a sound</h2>
   <ul>
-    <li><strong>Tap a placed sound</strong> for its volume and Mute. <strong>More</strong> holds Loop and Remove.</li>
+    <li><strong>Tap a placed sound</strong>, on the circle or in the names, for its volume, Mute, Loop and Remove. Removed one by mistake? Tap <strong>Undo</strong> in the bar at the foot.</li>
     <li><strong>Drag it</strong> to another place, or onto Remove.</li>
     <li><strong>Hold a sound in the list</strong> for its options: rename, colour, folders and more (see <a href="#sounds">Sounds</a>).</li>
   </ul>
@@ -476,7 +480,7 @@ h1 .pro, h2 .pro, h2 .tag { font-size: 13px; vertical-align: 6px; }
   </ol>
   <h2>Add a sound in Gravity</h2>
   <ol>
-    <li>Under the picture, tap <strong>+ Add a sound</strong>.</li>
+    <li>Tap <strong>+</strong> at the end of the names under the picture.</li>
     <li>Tap an empty place on the little map. Its ring and spot light up in the picture.</li>
     <li>Pick a sound, by folder. It floats up into its place.</li>
     <li>Drag it along its ring, or switch on <strong>Orbit</strong> and pick a speed. Then tap <strong>Add to mix</strong>. <strong>Back</strong> lets you pick another sound.</li>
@@ -538,13 +542,13 @@ h1 .pro, h2 .pro, h2 .tag { font-size: 13px; vertical-align: 6px; }
   <p>They're all in Free. The main idea, though, is your own sounds, below.</p>
   <h2>Bring your own</h2>
   <ol>
-    <li>Tap <strong>Import</strong> below the circle, or <strong>Import audio from Files</strong> in Your sounds.</li>
+    <li>Tap <strong>+</strong> at the end of the names, then <strong>Import</strong>. Or tap <strong>Import audio from Files</strong> in Your sounds.</li>
     <li>Pick one or more recordings from your phone's files.</li>
     <li>Effugium offers to make them loop seamlessly. Tap <strong>Make seamless</strong>, or <strong>Not now</strong> and do it later in <a href="#loops">Loop Studio</a>.</li>
   </ol>
   <p>Your originals are never changed. Free holds 6 of your own sounds, up to 3 minutes each. <span class="pro">Pro</span> has no limit, up to 10 minutes each.</p>
   <h2>Look after your sounds</h2>
-  <p>Open <strong>Your sounds</strong> from the ☰ menu, or tap <strong>⋯</strong> then <strong>Manage</strong> below the circle. It shows how much room your sounds take on your phone. Tap a sound, or hold one still in the mixer, for its options:</p>
+  <p>Open <strong>Your sounds</strong> from the ☰ menu, or tap <strong>+</strong> at the end of the names, then <strong>⋯</strong> and <strong>Manage</strong>. It shows how much room your sounds take on your phone. Tap a sound, or hold one still in the mixer, for its options:</p>
   <ul>
     <li><strong>Make it seamless</strong> <span class="pro">Pro</span>, or <strong>Fine-tune in Loop Studio</strong> <span class="pro">Pro</span></li>
     <li><strong>Folders</strong>: which folders it's in</li>
@@ -614,7 +618,7 @@ h1 .pro, h2 .pro, h2 .tag { font-size: 13px; vertical-align: 6px; }
   <h2>Open it</h2>
   <ul>
     <li>☰ menu &gt; <strong>Loop Studio</strong>, then pick a sound.</li>
-    <li>Tap a placed sound, then <strong>More</strong> and <strong>Loop</strong>.</li>
+    <li>Tap a placed sound, then <strong>Loop</strong>.</li>
     <li>Hold a sound in the list, then <strong>Fine-tune in Loop Studio</strong>.</li>
     <li>After you import, <strong>Make seamless</strong> makes the loop for you; fine-tune it here any time.</li>
   </ul>
@@ -695,10 +699,10 @@ h1 .pro, h2 .pro, h2 .tag { font-size: 13px; vertical-align: 6px; }
 <aside class="quick-answer"><h2>In short</h2><p>Open the Binaural folder and drop a beat on Left or Right: its pair fills the other side. Use headphones.</p></aside>
 <div class="guide-body">
   <h2>The five beats</h2>
-  <p>From the slowest to the fastest: <strong>Delta</strong> (3 beats a second), <strong>Theta</strong> (6), <strong>Alpha</strong> (10), <strong>Beta</strong> (16) and <strong>Gamma</strong> (40). Free has Alpha; <span class="pro">Pro</span> has all five, and journeys.</p>
+  <p>From the slowest to the fastest: <strong>Delta</strong> (3 beats a second), <strong>Theta</strong> (6), <strong>Alpha</strong> (10), <strong>Beta</strong> (16) and <strong>Gamma</strong> (40). All five, and journeys, are in Free.</p>
   <h2>Add a beat</h2>
   <ol>
-    <li>Open the <strong>Binaural</strong> folder below the circle.</li>
+    <li>Tap <strong>+</strong> at the end of the names, then the <strong>Binaural</strong> folder.</li>
     <li>Drop a beat on <strong>Left</strong> or <strong>Right</strong>, or tap it, then Left or Right. Its pair fills the other side.</li>
     <li>Tap it for its <strong>Volume</strong>, or <strong>Remove</strong> the pair.</li>
   </ol>
@@ -769,6 +773,7 @@ h1 .pro, h2 .pro, h2 .tag { font-size: 13px; vertical-align: 6px; }
   <ul>
     <li>Tap one to open it.</li>
     <li><strong>New soundscape</strong> starts another, with a name of your own.</li>
+    <li><strong>Clear all sounds</strong> takes every sound off the open one at once, the binaural beat too. A bar at the foot of the screen offers <strong>Undo</strong> for 10 seconds. Shooting stars and the Kicker stay.</li>
     <li><strong>Rename</strong>, <strong>Duplicate</strong> or <strong>Delete</strong> one. Deleting can't be undone, but your sounds stay in your library.</li>
   </ul>
   <h2>Favourites</h2>

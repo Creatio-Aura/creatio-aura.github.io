@@ -208,6 +208,7 @@ fieldset legend { margin-bottom: 10px; }
 .phone { flex: 0 0 auto; width: min(360px, 100%); margin: 0 auto; padding: 10px; border-radius: 54px; background: #0b0910; box-shadow: 0 30px 80px rgba(0, 0, 0, 0.5), inset 0 0 0 1px rgba(237, 231, 246, 0.14); }
 .phone video { display: block; width: 100%; height: auto; aspect-ratio: 720 / 1566; object-fit: cover; border-radius: 44px; background: #15121f; }
 .tour-side { flex: 1 1 380px; min-width: 0; display: flex; flex-direction: column; gap: 20px; }
+.tour.flip { flex-direction: row-reverse; } /* the second recording on a page: phone on the right (above, on a phone) */
 .tour-side h2 { font-size: 36px; }
 .tour-side .lede { font-size: 19px; color: var(--text-soft); }
 .video-steps { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 6px; }
@@ -507,15 +508,15 @@ fieldset legend { margin-bottom: 10px; }
   <h2>Place your sounds</h2>
   <ol>
     <li>Put on headphones. On speakers, sounds play in plain stereo.</li>
-    <li>Tap <strong>Your sounds</strong> under the circle, then drag sounds onto the places around it.</li>
-    <li>Drag a sound to move it, and tap it for its volume and more. The strip under the circle lists your sounds by name; <strong>Aa Names</strong> shows every name on the circle.</li>
+    <li>Tap <strong>+</strong> at the end of the names under the circle, open a folder, then drag sounds onto the places around it.</li>
+    <li>Drag a sound to move it, and tap it for its volume, Loop and Remove, right under the names. The strip under the circle lists your sounds by name; the eye and <strong>Names</strong> at its start show every name on the circle.</li>
     <li>Tap <strong>Random</strong> to shuffle your mix your way: choose what changes and how much, then <strong>Shuffle</strong>. Tap it again to undo.</li>
   </ol>
   <h2>Set some moving</h2>
   <ol>
     <li>Switch from <strong>Flat</strong> to <strong>Gravity</strong> at the top.</li>
     <li>Tap a sound and choose <strong>Orbit</strong> to send it slowly around you. <strong>Reset</strong> puts everything back.</li>
-    <li>Tap <strong>+ Add a sound</strong> to add one without leaving Gravity: pick a place, then a sound, and watch it float in.</li>
+    <li>Tap <strong>+</strong> at the end of the names to add one without leaving Gravity: pick a place, then a sound, and watch it float in.</li>
     <li>Under <strong>Shooting stars</strong>, tap <strong>Add</strong> for a sound that passes by now and then.</li>
   </ol>
   <h2>On iPhone with AirPods</h2>
@@ -547,7 +548,7 @@ fieldset legend { margin-bottom: 10px; }
   <h2>On your Apple Watch</h2>
   <p>The watch vibrates while your iPhone is locked, through quiet notifications named Kick 1, Kick 2, Kick 3. Allow notifications when asked. If your watch chimes as well, turn on its Silent Mode: press the side button, then tap the bell. The Kicker's own checklist has a test you can send.</p>
 </div>
-<div class="tell"><h3>Tell us</h3><ul><li>Did the cue arrive when you expected it?</li><li>Did you feel each vibration? On the watch: did your phone stay quiet?</li><li>Was anything about setting it up confusing?</li></ul><p>In the app: ☰ menu &gt; <strong>Send feedback</strong>. It's anonymous, so add your name if you'd like a reply, or just message Andrew.</p></div>
+<div class="tell"><h3>Tell us</h3><ul><li>Did the cue arrive when you expected it?</li><li>Did you feel each vibration? On the watch: did your phone stay quiet?</li><li>On Android: set it to 3 vibrations each time. Did you feel all three?</li><li>Was anything about setting it up confusing?</li></ul><p>In the app: ☰ menu &gt; <strong>Send feedback</strong>. It's anonymous, so add your name if you'd like a reply, or just message Andrew.</p></div>
 <aside class="note" aria-label="About this guide"><p><strong>For information only.</strong> This guide shows what you can try and set up in a test version of Effugium Aura. It isn't medical advice and it doesn't promise any result. Effugium Aura is not a medical device and makes no health claims. Apple, iPhone, AirPods, Apple Watch and Beats are trademarks of Apple Inc., registered in the U.S. and other countries and regions. Android is a trademark of Google LLC.</p></aside></div></section><section class="view" id="view-dreams" data-view="dreams"><div class="wrap guide">
 <header class="guide-head">
   <p class="eyebrow">Try it · Dreams</p>

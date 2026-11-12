@@ -3,6 +3,7 @@ title: Spatial audio sleep sounds with AirPods and Android (2026)
 description: How spatial audio works with AirPods and on Android phones, how it differs from 8D audio, and how to put rain, a fan or a stream around you.
 summary: Rain behind you, the fan to your left: how spatial audio and head tracking work, and how to arrange your sounds around you.
 date: 2026-11-10
+updated: 2026-11-12
 kind: guide
 project: effugium
 quick_answer: Spatial audio makes headphones sound as if sounds come from places around you, not from inside your head. On iPhone, put in your AirPods, open Control Center, touch and hold the volume control, tap Spatial Audio and choose Fixed or Head Tracked. On a Pixel, it's in Settings > Sound & vibration > Spatial audio. These settings work with apps and content that support them, so to put each sound exactly where you want it, use an app that places sounds one by one. We're testing that in Effugium Aura, which we make: it places your sounds around you by itself, on any headphones, with no setting to turn on.
@@ -82,7 +83,7 @@ Sleeping in earbuds isn't for everyone. If they press on your ears when you lie 
 Effugium Aura, which we make, is in testing on iPhone and Android, and putting sounds around you is at the heart of what we're testing. It places your sounds around you by itself, on any headphones, so you don't need to turn on Spatial Audio in Control Center or in your phone's settings. On iPhone with AirPods, head tracking in the app adds one more layer: your sounds stay put in the room as you turn your head. Here's how to try it today:
 
 1. **Put on headphones**, and check the switch in the top bar says **3D**, not Speaker.
-2. **Tap Your sounds** under the circle, open a folder, and drag a sound onto a place around you: in front, behind, to either side, above or below. Everything is unlocked in the beta; after launch, above, below and the places in between are part of Pro.
+2. **Tap +** at the end of the names under the circle, open a folder, and drag a sound onto a place around you: in front, behind, to either side, above or below. Everything is unlocked in the beta; after launch, above, below and the places in between are part of Pro.
 3. **Add a few more**, and tap each one to set its volume. Then press **Play**.
 4. **On iPhone with AirPods** (AirPods 3 or newer, any AirPods Pro, or AirPods Max), head tracking is on from the start: your sounds stay put in the room as you turn your head. If you'd rather they turn with you, switch it off in ☰ > **Head tracking**.
 5. **Settled in a new direction?** While head tracking is following your AirPods, **⟲ Recenter audio** shows at the top. Tap it to make the way you're facing now the front, so the sounds you put ahead of you are ahead of you again.

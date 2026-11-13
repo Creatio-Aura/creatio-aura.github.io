@@ -13,7 +13,7 @@
 import { BETAS } from "./betas";
 import { allowEmail, leaveToken, leaveTokenId } from "./guard";
 import type { Env } from "./index";
-import { groupHowTo, howTo, sendEmail, welcomeEmail } from "./mail";
+import { groupHowTo, groupSteps, howTo, sendEmail, welcomeEmail } from "./mail";
 
 /** Approval tokens are signed apart from the remove-me ones. */
 const LIST = "approve";
@@ -143,7 +143,7 @@ export async function composeWelcome(env: Env, row: Pick<Signup, "id" | "project
     .filter((p) => builds[p] || (p === "Android" && group))
     .map((platform) =>
       platform === "Android" && group
-        ? { platform, url: group.optIn, how: groupHowTo(beta.name, group.join) }
+        ? { platform, url: group.optIn, how: groupHowTo(beta.name, group.join), steps: groupSteps(beta.name, group) }
         : { platform, url: builds[platform]!, how: howTo(platform, builds[platform]!, beta.name) },
     );
   const leaveUrl = `${service(env)}/leave?t=${await leaveToken(env, row.id)}`;

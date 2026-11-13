@@ -233,7 +233,8 @@ test("signing up: a confirmation email; confirming asks Andrew; he lets them in 
   const welcome = (await outbox()).find((e) => e.to_addr === "kodi@example.com");
   assert.equal(welcome.subject, "You're in the Ignis Aura beta");
   // Android's way in is the closed test's group and opt-in link, there from the start.
-  assert.match(welcome.body, /Android: https:\/\/play\.google\.com\/apps\/testing\/com\.creatioaura\.ignisaura\n  Two steps on your Android phone/);
+  assert.match(welcome.body, /ANDROID: 3 STEPS, IN ORDER\. Use the same Gmail for all of them/);
+  assert.match(welcome.body, /STEP 2\. Become a tester: https:\/\/play\.google\.com\/apps\/testing\/com\.creatioaura\.ignisaura/);
   assert.doesNotMatch(welcome.body, /Guides:/);
   const leaveLink = welcome.body.match(/(http\S+\/leave\?t=\S+)/)[1];
   assert.match(await (await fetch(approveLink)).text(), /already in the Ignis Aura beta/);
@@ -351,8 +352,12 @@ test("links stored without emailing anyone reach later welcomes, and one tester'
   // Someone let in now gets both: Android as the group and opt-in steps (playGroup), Web as stored.
   await tester("again@example.com", ["Android", "Web"]);
   const welcome = (await outbox()).find((e) => e.to_addr === "again@example.com" && e.subject.startsWith("You're in"));
-  assert.match(welcome.body, /Android: https:\/\/play\.google\.com\/apps\/testing\/com\.creatioaura\.ignisaura\n  Two steps on your Android phone/);
-  assert.match(welcome.body, /join our testers group: https:\/\/groups\.google\.com\/g\/ignis-aura-testers/);
+  assert.match(welcome.body, /ANDROID: 3 STEPS, IN ORDER\. Use the same Gmail for all of them/);
+  assert.match(welcome.body, /STEP 2\. Become a tester: https:\/\/play\.google\.com\/apps\/testing\/com\.creatioaura\.ignisaura/);
+  assert.match(welcome.body, /STEP 1\. Join our testers group: https:\/\/groups\.google\.com\/g\/ignis-aura-testers/);
+  assert.match(welcome.body, /STEP 3\. Install Ignis Aura from Google Play: https:\/\/play\.google\.com\/store\/apps\/details\?id=com\.creatioaura\.ignisaura/);
+  // The group's page says "no permission" to members: the email says that's fine.
+  assert.match(welcome.body, /says you don't have permission to see its content: that's fine, it's private, and you're in/);
   assert.match(welcome.body, /Web: https:\/\/creatio-aura.com\/ignis-aura-web\//);
 
   // Sending it again: a dry run first, then one more welcome, to them only.
@@ -397,8 +402,9 @@ test("people Andrew invited himself: a dry run first, then let in and welcomed, 
   const dry = await (await admin("/admin/add", { project: "effugium", platforms: ["Android", "Web"], emails, onPlayList: true })).json();
   assert.deepEqual([dry.add, dry.platforms, dry.onPlayList, dry.sent], [["guest.one@example.com", "guest-two@example.com"], ["Android"], true, 0]);
   // Effugium Aura's Android testers join the closed test's Google Group, then opt in (playGroup), whatever the stored link.
-  assert.match(dry.preview, /Here's how to get it:\n\nAndroid: https:\/\/play\.google\.com\/apps\/testing\/com\.creatioaura\.effugiumaura\n  Two steps on your Android phone/);
-  assert.match(dry.preview, /join our testers group: https:\/\/groups\.google\.com\/g\/effugium-aura-testers/);
+  assert.match(dry.preview, /Here's how to get it:\n\nANDROID: 3 STEPS, IN ORDER/);
+  assert.match(dry.preview, /STEP 2\. Become a tester: https:\/\/play\.google\.com\/apps\/testing\/com\.creatioaura\.effugiumaura/);
+  assert.match(dry.preview, /STEP 1\. Join our testers group: https:\/\/groups\.google\.com\/g\/effugium-aura-testers/);
   assert.match(dry.preview, /Tester guide: https:\/\/creatio-aura\.com\/effugium\/testers\//);
   assert.equal((await (await admin("/admin/testers")).json()).testers.filter((t) => t.email.startsWith("guest")).length, 0); // nothing yet
 

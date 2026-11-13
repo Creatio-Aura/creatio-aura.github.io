@@ -39,8 +39,8 @@ export const BETAS: Record<string, Beta> = {
       { label: "Tester guide", url: "https://creatio-aura.com/effugium/testers/", about: "What to try first, and how to send us feedback." },
       { label: "User guide", url: "https://creatio-aura.com/effugium/guide/", about: "Every feature, explained." },
     ],
-    // Off until Google approves the closed test (sent for review 2026-11-12). To turn on:
-    // playGroup: { join: "https://groups.google.com/g/effugium-aura-testers", optIn: "https://play.google.com/apps/testing/com.creatioaura.effugiumaura" },
+    // On since 2026-11-13: Google published the closed test (2026-11-12, 12:50 MST).
+    playGroup: { join: "https://groups.google.com/g/effugium-aura-testers", optIn: "https://play.google.com/apps/testing/com.creatioaura.effugiumaura" },
   },
 };
 

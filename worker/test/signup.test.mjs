@@ -379,7 +379,8 @@ test("Android testers wait on a list to be added on Google Play until Andrew tic
   const todo = async () => (await (await admin("/admin/todo")).json()).play;
   const listed = (await todo()).map((p) => [p.app, p.email]);
   assert.ok(listed.some(([app, email]) => app === "Ignis Aura" && email === "droid@example.com"));
-  assert.ok(listed.some(([app, email]) => app === "Effugium Aura" && email === "pixel@example.com"));
+  // Effugium Aura's Android testers let themselves in through its Google Group (playGroup): nothing to add.
+  assert.ok(!listed.some(([, email]) => email === "pixel@example.com"));
   assert.ok(!listed.some(([, email]) => email === "browser@example.com")); // Web needs nothing
 
   // The morning report lists them, each with a link to tick it off.
@@ -414,7 +415,9 @@ test("people Andrew invited himself: a dry run first, then let in and welcomed, 
   const emails = ["Guest.One@Example.com", "guest-two@example.com", "not an email", "guest-two@example.com"];
   const dry = await (await admin("/admin/add", { project: "effugium", platforms: ["Android", "Web"], emails, onPlayList: true })).json();
   assert.deepEqual([dry.add, dry.platforms, dry.onPlayList, dry.sent], [["guest.one@example.com", "guest-two@example.com"], ["Android"], true, 0]);
-  assert.match(dry.preview, /Here's how to get it:\n\nAndroid: https:\/\/play\.google\.com\/apps\/internaltest\/4700\n  Open the link in Chrome/);
+  // Effugium Aura's Android testers join the closed test's Google Group, then opt in (playGroup), whatever the stored link.
+  assert.match(dry.preview, /Here's how to get it:\n\nAndroid: https:\/\/play\.google\.com\/apps\/testing\/com\.creatioaura\.effugiumaura\n  Two steps on your Android phone/);
+  assert.match(dry.preview, /join our testers group: https:\/\/groups\.google\.com\/g\/effugium-aura-testers/);
   assert.match(dry.preview, /Tester guide: https:\/\/creatio-aura\.com\/effugium\/testers\//);
   assert.equal((await (await admin("/admin/testers")).json()).testers.filter((t) => t.email.startsWith("guest")).length, 0); // nothing yet
 
@@ -500,7 +503,8 @@ test("the daily report: who's waiting for Andrew (with the links), and for each 
   assert.equal(sent.sent, true);
   const [latest] = await outbox();
   assert.equal(latest.to_addr, "studio@example.com");
-  assert.match(latest.subject, /^Creatio Aura betas: \d+ new, 1 waiting for your OK, \d+ to add on Google Play$/);
+  // "to add on Google Play" only when there are some: Effugium Aura's Android testers let themselves in (playGroup).
+  assert.match(latest.subject, /^Creatio Aura betas: \d+ new, 1 waiting for your OK(, \d+ to add on Google Play)?$/);
 
   // The next report counts only who's let in since that one: nobody, here.
   const after = await (await admin("/admin/report", {})).json();

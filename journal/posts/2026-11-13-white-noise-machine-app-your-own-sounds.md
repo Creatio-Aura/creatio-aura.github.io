@@ -45,7 +45,7 @@ On an iPhone, Background Sounds in Settings > Accessibility > Audio & Visual is 
 Effugium Aura, which we make, is in testing on iPhone and Android: a white noise machine app made for your own sounds, with white, pink and brown noise and more built in. Here's how to try it today:
 
 1. **Record your sound.** Tap **Record** below the circle, set the phone down near the fan or the rain, and tap the red button. Record two or three minutes, then **Stop** and keep it.
-2. **Or bring one in.** Tap **+** at the end of the names under the circle, then **Import**, and pick a recording from your phone. Tap **Make seamless** so it loops without a bump.
+2. **Or bring one in.** Tap **+** at the end of the names under the circle, then **Import**, and pick a recording from your phone. Tap **Make seamless** to help it loop more seamlessly.
 3. **Place it and press Play.** Drag your sound onto a place around you. Add **Brown**, **Pink** or **White** from the Noise folder underneath, if you like.
 4. **For the night**, tap **Sleep timer** below your sounds and pick a time, and the mix fades slowly to silence. Or let it play all night with the screen off.
 5. **Share it.** In the newest test version, you can send your sound, or a whole soundscape, to someone else through your phone's share sheet, and it opens in Effugium for them.

@@ -27,8 +27,8 @@ export const BETAS: Record<string, Beta> = {
     consent:
       "Email me about the Ignis Aura beta. I agree to the Beta Tester Terms (22 October 2026) and I've read the privacy policy.",
     terms: true,
-    // Off until Google approves the closed test (sent for review 2026-11-12). To turn on:
-    // playGroup: { join: "https://groups.google.com/g/ignis-aura-testers", optIn: "https://play.google.com/apps/testing/com.creatioaura.ignisaura" },
+    // On since 2026-11-13: Google published the closed test.
+    playGroup: { join: "https://groups.google.com/g/ignis-aura-testers", optIn: "https://play.google.com/apps/testing/com.creatioaura.ignisaura" },
   },
   effugium: {
     name: "Effugium Aura",

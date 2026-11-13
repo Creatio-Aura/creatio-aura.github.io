@@ -11,6 +11,12 @@ export interface Beta {
   terms: boolean;
   /** Guides on the website, linked from the "You're in" email (Andrew, 2026-11-09). Add one when it exists. */
   guides?: { label: string; url: string; about: string }[];
+  /**
+   * Android testers let themselves in on Google Play (Andrew, 2026-11-12): join the closed test's Google Group, then
+   * opt in. Without it, Andrew adds each tester's Google account to the test by hand. Set it only once Google has
+   * approved the closed test, so its opt-in link works.
+   */
+  playGroup?: { join: string; optIn: string };
 }
 
 export const BETAS: Record<string, Beta> = {
@@ -21,6 +27,8 @@ export const BETAS: Record<string, Beta> = {
     consent:
       "Email me about the Ignis Aura beta. I agree to the Beta Tester Terms (22 October 2026) and I've read the privacy policy.",
     terms: true,
+    // Off until Google approves the closed test (sent for review 2026-11-12). To turn on:
+    // playGroup: { join: "https://groups.google.com/g/ignis-aura-testers", optIn: "https://play.google.com/apps/testing/com.creatioaura.ignisaura" },
   },
   effugium: {
     name: "Effugium Aura",
@@ -31,6 +39,8 @@ export const BETAS: Record<string, Beta> = {
       { label: "Tester guide", url: "https://creatio-aura.com/effugium/testers/", about: "What to try first, and how to send us feedback." },
       { label: "User guide", url: "https://creatio-aura.com/effugium/guide/", about: "Every feature, explained." },
     ],
+    // Off until Google approves the closed test (sent for review 2026-11-12). To turn on:
+    // playGroup: { join: "https://groups.google.com/g/effugium-aura-testers", optIn: "https://play.google.com/apps/testing/com.creatioaura.effugiumaura" },
   },
 };
 

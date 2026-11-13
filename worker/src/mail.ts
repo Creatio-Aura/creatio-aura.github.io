@@ -374,8 +374,69 @@ export function confirmationEmail(app: string, name: string, confirmUrl: string,
 
 const escape = (text: string) => text.replace(/[&<>"']/g, (c) => `&#${c.charCodeAt(0)};`);
 
-/** Android, for a beta whose testers let themselves in on Google Play: join the group, then opt in at the link above it.
- *  The group's page shows "You don't have permission" to members (its messages are private): said, so nobody stops there (2026-11-13). */
+/** One numbered step of a way in: what to do, its link (a button in the HTML email), and a note under it. */
+export interface Step {
+  title: string;
+  url: string;
+  button: string;
+  note: string;
+}
+
+/**
+ * Android, for a beta whose testers let themselves in on Google Play: three steps, in order, each with its own
+ * link (Andrew, 2026-11-13: "make sure the steps are very bold, clear, and highlighted"). The group's page shows
+ * "You don't have permission" to members (its messages are private): said, so nobody stops there.
+ */
+export function groupSteps(app: string, group: { join: string; optIn: string }): Step[] {
+  const pkg = group.optIn.split("/").pop() ?? "";
+  return [
+    {
+      title: "Join our testers group",
+      url: group.join,
+      button: "Join the testers group",
+      note: "Tap Join group. Afterwards the page says you don't have permission to see its content: that's fine, it's private, and you're in.",
+    },
+    {
+      title: "Become a tester",
+      url: group.optIn,
+      button: "Become a tester",
+      note: "Open it in Chrome and tap Become a tester. If it says you're not a tester yet, wait 10 to 15 minutes and try again.",
+    },
+    {
+      title: `Install ${app} from Google Play`,
+      url: `https://play.google.com/store/apps/details?id=${pkg}`,
+      button: `Install ${app}`,
+      note: "Updates come through Google Play.",
+    },
+  ];
+}
+
+/** The steps in a plain-text email: a heading in capitals, then each step numbered with its link and note. */
+export function stepsText(steps: Step[]): string[] {
+  return [
+    `ANDROID: ${steps.length} STEPS, IN ORDER. Use the same Gmail for all of them (the one your Play Store uses).`,
+    "",
+    ...steps.flatMap((step, i) => [`STEP ${i + 1}. ${step.title}: ${step.url}`, `   ${step.note}`, ""]),
+  ];
+}
+
+/** The same in the HTML email: a highlighted box, each step bold and numbered, with its own button. */
+export function stepsHtml(steps: Step[]): string {
+  return `<div style="margin:0 0 22px;padding:18px 18px 6px;border:2px solid #ff8a3d;border-radius:14px;background:#2a1d1a">
+<p style="margin:0 0 4px;font-size:14px;font-weight:bold;letter-spacing:1px;text-transform:uppercase;color:#ffb35c">Android: ${steps.length} steps, in order</p>
+<p style="margin:0 0 16px;font-size:14px;line-height:1.5;color:#f4eadb">Use <b>the same Gmail for all of them</b>: the one your Play Store uses.</p>
+${steps
+  .map(
+    (step, i) => `<div style="margin:0 0 16px">
+<p style="margin:0 0 8px;font-size:18px;font-weight:bold;color:#f4eadb"><span style="display:inline-block;width:28px;height:28px;line-height:28px;text-align:center;border-radius:99px;background:#ff8a3d;color:#1d0f05;margin-right:8px">${i + 1}</span>${escape(step.title)}</p>
+<a href="${step.url}" style="display:inline-block;background:#ff8a3d;color:#1d0f05;font-weight:bold;text-decoration:none;padding:12px 22px;border-radius:99px">${escape(step.button)}</a>
+<p style="margin:8px 0 0;font-size:14px;line-height:1.5;color:#d8cbb6">${escape(step.note)}</p></div>`,
+  )
+  .join("")}
+</div>`;
+}
+
+/** The same steps as one paragraph, for anything that has only a line under a link. */
 export function groupHowTo(app: string, join: string): string {
   return `Two steps on your Android phone, signed in to the Google account you use for Google Play. First, join our testers group: ${join} (tap Join group; it sends no emails). After joining, the group's page says you don't have permission to see its content: that's fine, it's private, and you're in. Then open the link above in Chrome, tap Become a tester, and install ${app} from Google Play. If it says you're not a tester yet, wait 10 to 15 minutes and try again. Updates come through Google Play.`;
 }
@@ -401,7 +462,7 @@ export function welcomeEmail(
   app: string,
   name: string,
   leaveUrl: string,
-  links: { platform: string; url: string; how: string }[] = [],
+  links: { platform: string; url: string; how: string; steps?: Step[] }[] = [],
   /** The Beta Tester Terms, for a beta they cover; "" for one they don't. */
   termsUrl = "",
   /** The beta's guides on the website, if it has any. */
@@ -422,7 +483,7 @@ export function welcomeEmail(
       ? [
           getIt,
           "",
-          ...links.flatMap((link) => [`${link.platform}: ${link.url}`, `  ${link.how}`, ""]),
+          ...links.flatMap((link) => (link.steps ? stepsText(link.steps) : [`${link.platform}: ${link.url}`, `  ${link.how}`, ""])),
           ...(termsUrl ? [...TERMS_IN_SHORT, `The full terms: ${termsUrl}`] : []),
         ]
       : [`We'll email you when there's a build for you to ${play}.`]),
@@ -439,8 +500,10 @@ export function welcomeEmail(
     .join("\n")
     .replace(/\n{3,}/g, "\n\n");
   const buttons = links
-    .map(
-      (link) => `<div style="margin:0 0 18px">
+    .map((link) =>
+      link.steps
+        ? stepsHtml(link.steps)
+        : `<div style="margin:0 0 18px">
 <a href="${link.url}" style="display:inline-block;background:#ff8a3d;color:#1d0f05;font-weight:bold;text-decoration:none;padding:12px 22px;border-radius:99px">Get it for ${escape(link.platform)}</a>
 <p style="margin:8px 0 0;font-size:13px;line-height:1.5;color:#d8cbb6">${escape(link.how)}</p></div>`,
     )

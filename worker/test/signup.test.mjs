@@ -203,7 +203,8 @@ test("signing up: a confirmation email; confirming asks Andrew; he lets them in 
   const [note] = (await outbox()).filter((e) => e.to_addr === "studio@example.com");
   assert.equal(note.subject, "Ignis Aura beta: kodi@example.com wants in (Android, Web)");
   assert.match(note.body, /Plays on: Android, Web/);
-  assert.match(note.body, /add their Google account to the Play test's testers/);
+  // Android testers let themselves in (playGroup, both betas since 2026-11-13): nothing for Andrew to add on Google Play.
+  assert.doesNotMatch(note.body, /add their Google account to the Play test's testers/);
   const approveLink = await approveLinkFor("kodi@example.com");
   // A used link still says confirmed; a made-up one, expired.
   assert.equal((await fetch(confirmLink, { redirect: "manual" })).headers.get("Location"), `${SITE}/beta/confirmed/`);
@@ -227,13 +228,12 @@ test("signing up: a confirmation email; confirming asks Andrew; he lets them in 
   const letIn = await press(approveLink);
   const done = await letIn.text();
   assert.match(done, /is in the Ignis Aura beta/);
-  // Android: a reminder to add them to the Play test's email list, with their address to copy.
-  assert.match(done, /Now add them on Google Play:<\/b> in Play Console, Ignis Aura › Testing › Internal testing › Testers/);
-  assert.match(done, /user-select: all[^>]*>kodi@example\.com</);
-  assert.match(done, /<button type="submit">I've added them<\/button>/);
+  // Android: they let themselves in through the Google Group, so there's nothing to add on Google Play.
+  assert.doesNotMatch(done, /Now add them on Google Play/);
   const welcome = (await outbox()).find((e) => e.to_addr === "kodi@example.com");
   assert.equal(welcome.subject, "You're in the Ignis Aura beta");
-  assert.match(welcome.body, /We'll email you when there's a build for you to play\./);
+  // Android's way in is the closed test's group and opt-in link, there from the start.
+  assert.match(welcome.body, /Android: https:\/\/play\.google\.com\/apps\/testing\/com\.creatioaura\.ignisaura\n  Two steps on your Android phone/);
   assert.doesNotMatch(welcome.body, /Guides:/);
   const leaveLink = welcome.body.match(/(http\S+\/leave\?t=\S+)/)[1];
   assert.match(await (await fetch(approveLink)).text(), /already in the Ignis Aura beta/);
@@ -348,11 +348,11 @@ test("links stored without emailing anyone reach later welcomes, and one tester'
   // With no links it only shows what's stored; a bad link is ignored.
   assert.deepEqual((await (await admin("/admin/builds", { project: "ignis", links: { Android: "http://insecure" } })).json()).builds, { Android: play, Web: web });
 
-  // Someone let in now gets both, with the Chrome note for Google Play.
+  // Someone let in now gets both: Android as the group and opt-in steps (playGroup), Web as stored.
   await tester("again@example.com", ["Android", "Web"]);
   const welcome = (await outbox()).find((e) => e.to_addr === "again@example.com" && e.subject.startsWith("You're in"));
-  assert.match(welcome.body, /Android: https:\/\/play\.google\.com\/apps\/internaltest\/5678\n  Open the link in Chrome/);
-  assert.match(welcome.body, /If Google Play says you can't join yet, try again a little later: we add each tester by hand\./);
+  assert.match(welcome.body, /Android: https:\/\/play\.google\.com\/apps\/testing\/com\.creatioaura\.ignisaura\n  Two steps on your Android phone/);
+  assert.match(welcome.body, /join our testers group: https:\/\/groups\.google\.com\/g\/ignis-aura-testers/);
   assert.match(welcome.body, /Web: https:\/\/creatio-aura.com\/ignis-aura-web\//);
 
   // Sending it again: a dry run first, then one more welcome, to them only.
@@ -372,35 +372,16 @@ test("links stored without emailing anyone reach later welcomes, and one tester'
   await fetch(leave, { redirect: "manual" });
 });
 
-test("Android testers wait on a list to be added on Google Play until Andrew ticks them off", async () => {
+test("Android testers let themselves in: nobody waits to be added on Google Play", async () => {
+  // Both betas have playGroup (2026-11-13): Android testers join the closed test's Google Group and opt in.
+  // The add-by-hand list and its tick-off page stay in the code for a beta without one.
   await tester("droid@example.com", ["Android"]);
   await tester("browser@example.com", ["Web"]);
   await tester("pixel@example.com", ["iPhone", "Android"], "effugium");
-  const todo = async () => (await (await admin("/admin/todo")).json()).play;
-  const listed = (await todo()).map((p) => [p.app, p.email]);
-  assert.ok(listed.some(([app, email]) => app === "Ignis Aura" && email === "droid@example.com"));
-  // Effugium Aura's Android testers let themselves in through its Google Group (playGroup): nothing to add.
-  assert.ok(!listed.some(([, email]) => email === "pixel@example.com"));
-  assert.ok(!listed.some(([, email]) => email === "browser@example.com")); // Web needs nothing
-
-  // The morning report lists them, each with a link to tick it off.
+  const listed = (await (await admin("/admin/todo")).json()).play.map((p) => p.email);
+  for (const email of ["droid@example.com", "browser@example.com", "pixel@example.com"]) assert.ok(!listed.includes(email));
   const report = await (await admin("/admin/report", {})).json();
-  assert.match(report.subject, /to add on Google Play/);
-  assert.match(report.preview, /To add on Google Play: \d+\n(.*\n)*  \[ \] Ignis Aura: droid@example\.com \(in since \d{4}-\d\d-\d\d\)\. Add to Play Console › Ignis Aura › Testing › Internal testing › Testers, then tick it off: http\S+\/play-added\?t=/);
-
-  // The link opens a page (a mail app checking links ticks nothing off); its button does.
-  const link = (await todo()).find((p) => p.email === "droid@example.com").url;
-  const shown = await (await fetch(link)).text();
-  assert.match(shown, /Added on Google Play\?/);
-  assert.match(shown, /user-select: all[^>]*>droid@example\.com</);
-  assert.ok((await todo()).some((p) => p.email === "droid@example.com"));
-  assert.match(await (await fetch(link, { method: "POST" })).text(), /ticked off as added to the Ignis Aura Google Play test/);
-  assert.ok(!(await todo()).some((p) => p.email === "droid@example.com"));
-  assert.match(await (await fetch(link)).text(), /Ticked off/);
-
-  // Or from the computer, when Andrew says it's done.
-  await admin("/admin/todo", { project: "effugium", email: "Pixel@Example.com" });
-  assert.ok(!(await todo()).some((p) => p.email === "pixel@example.com"));
+  assert.doesNotMatch(report.subject, /to add on Google Play/);
   assert.equal((await admin("/admin/todo", { project: "ignis", email: "nobody@example.com" })).status, 404);
 
   // Tidy up: they leave, so later tests' counts are unchanged.

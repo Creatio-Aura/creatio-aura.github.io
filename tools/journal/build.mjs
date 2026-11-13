@@ -2,7 +2,7 @@
 // Copies site/ to <dir>, then writes /journal/ (the list, one page per post, feed.xml), adds the posts to
 // sitemap.xml, and fills each project page's "From the journal" spot. site/ itself is never changed, so a
 // day's post is one Markdown file in its pull request; the publish workflow runs this before deploying.
-import { cpSync, mkdirSync, readFileSync, rmSync, writeFileSync, existsSync } from 'node:fs';
+import { cpSync, mkdirSync, readFileSync, readdirSync, rmSync, writeFileSync, existsSync } from 'node:fs';
 import { join } from 'node:path';
 import { allPosts, config, esc, longDate, monthOf, rfc822, ROOT, shortDate } from './posts.mjs';
 
@@ -166,7 +166,8 @@ ${p.html}
         dateModified: p.updated,
         author: authorLd,
         publisher: publisherLd,
-        image: abs(p.image || config.shareImage.url),
+        // The same picture as the post's link preview: its project's own, if it has one.
+        image: abs(p.image || (config.projects[p.project]?.shareImage || config.shareImage).url),
         mainEntityOfPage: SITE + p.url,
         articleSection: kindName(p),
         wordCount: p.words,
@@ -256,27 +257,54 @@ ${posts
 `;
 writeFileSync(join(OUT, 'journal', 'feed.xml'), feed);
 
-// ---------- sitemap ----------
-const smPath = join(OUT, 'sitemap.xml');
-if (existsSync(smPath)) {
-  const newest = posts[0]?.updated || new Date().toISOString().slice(0, 10);
-  const urls = [`  <url><loc>${SITE}/journal/</loc><lastmod>${newest}</lastmod></url>`, ...posts.map((p) => `  <url><loc>${SITE}${p.url}</loc><lastmod>${p.updated}</lastmod></url>`)];
-  const sm = readFileSync(smPath, 'utf8').replace('</urlset>', `  <!-- The Journal, added by tools/journal/build.mjs -->\n${urls.join('\n')}\n</urlset>`);
-  writeFileSync(smPath, sm);
-}
-
-// ---------- each project page's "From the journal" spot (<!-- journal:<project> --> in its page) ----------
-for (const [key, proj] of Object.entries(config.projects)) {
-  const file = join(OUT, proj.page.replace(/^\//, ''), 'index.html');
+// ---------- the "From the journal" spots ----------
+// Each project page's (<!-- journal:<project> --> in its page) shows that project's newest three posts. The home
+// page's (<!-- journal:home -->, 2026-11-12) shows the newest three of any project: it's the page search engines
+// trust most, so a new post is found from there sooner.
+const strip = (list) =>
+  list.length
+    ? `<section class="wrap journal-strip" aria-labelledby="from-journal"><div class="journal-strip-head"><h2 id="from-journal">From the journal</h2><a href="/journal/">All posts</a></div><div class="journal-grid">${list.map((p) => card(p)).join('')}</div></section>`
+    : '';
+const spotDates = {}; // page → the newest date among the posts its spot shows (for the sitemap below)
+const spots = [['home', '/', posts.slice(0, 3)], ...Object.entries(config.projects).map(([key, proj]) => [key, proj.page, posts.filter((p) => p.project === key).slice(0, 3)])];
+for (const [key, pagePath, list] of spots) {
+  const file = join(OUT, pagePath.replace(/^\//, ''), 'index.html');
   if (!existsSync(file)) continue;
   const html = readFileSync(file, 'utf8');
   const marker = `<!-- journal:${key} -->`;
   if (!html.includes(marker)) continue;
-  const mine = posts.filter((p) => p.project === key).slice(0, 3);
-  const block = mine.length
-    ? `<section class="wrap journal-strip" aria-labelledby="from-journal"><div class="journal-strip-head"><h2 id="from-journal">From the journal</h2><a href="/journal/">All posts</a></div><div class="journal-grid">${mine.map((p) => card(p)).join('')}</div></section>`
-    : '';
-  writeFileSync(file, html.replace(marker, block));
+  writeFileSync(file, html.replace(marker, strip(list)));
+  if (list.length) spotDates[pagePath] = list.map((p) => p.updated).sort().at(-1);
+}
+
+// ---------- sitemap ----------
+// The Journal's pages go at the end. A page with a spot changes whenever its posts do, so its lastmod moves up to
+// the newest of them, and search engines know to look at it again; its own date in site/sitemap.xml is for
+// changes to the page itself.
+const smPath = join(OUT, 'sitemap.xml');
+if (existsSync(smPath)) {
+  const newest = posts[0]?.updated || new Date().toISOString().slice(0, 10);
+  const urls = [`  <url><loc>${SITE}/journal/</loc><lastmod>${newest}</lastmod></url>`, ...posts.map((p) => `  <url><loc>${SITE}${p.url}</loc><lastmod>${p.updated}</lastmod></url>`)];
+  const sm = readFileSync(smPath, 'utf8')
+    .replace(/<url><loc>([^<]+)<\/loc><lastmod>([^<]+)<\/lastmod><\/url>/g, (all, loc, mod) => {
+      const d = spotDates[loc.replace(SITE, '')];
+      return d && d > mod ? `<url><loc>${loc}</loc><lastmod>${d}</lastmod></url>` : all;
+    })
+    .replace('</urlset>', `  <!-- The Journal, added by tools/journal/build.mjs -->\n${urls.join('\n')}\n</urlset>`);
+  writeFileSync(smPath, sm);
+}
+
+// ---------- large picture previews ----------
+// Every page search engines may show lets them show its picture large, as Google Discover and image results
+// need (2026-11-12). A page that already says what robots may do (the noindex ones) keeps its own.
+for (const rel of readdirSync(OUT, { recursive: true })) {
+  if (!rel.endsWith('.html')) continue;
+  const file = join(OUT, rel);
+  const html = readFileSync(file, 'utf8');
+  if (/<meta\s+name="robots"/i.test(html)) continue;
+  const withPreview = html.replace(/<meta name="viewport"[^>]*>/, (m) => `${m}\n  <meta name="robots" content="max-image-preview:large">`);
+  if (withPreview === html) throw new Error(`${rel} has no viewport line to put the robots line after`);
+  writeFileSync(file, withPreview);
 }
 
 console.log(`Journal: ${posts.length} post(s) built into ${OUT}${withDrafts ? ' (drafts included)' : ''}`);

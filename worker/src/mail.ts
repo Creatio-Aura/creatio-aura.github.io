@@ -374,6 +374,11 @@ export function confirmationEmail(app: string, name: string, confirmUrl: string,
 
 const escape = (text: string) => text.replace(/[&<>"']/g, (c) => `&#${c.charCodeAt(0)};`);
 
+/** Android, for a beta whose testers let themselves in on Google Play: join the group, then opt in at the link above it. */
+export function groupHowTo(app: string, join: string): string {
+  return `Two steps on your Android phone, signed in to the Google account you use for Google Play. First, join our testers group: ${join} (tap Join group; it sends no emails). Then open the link above in Chrome, tap Become a tester, and install ${app} from Google Play. Updates come through Google Play.`;
+}
+
 /** How to get a build on each platform, under its link. Android's depends on the link: Google Play's test, or the app file itself. */
 export function howTo(platform: string, url: string, app = "Ignis Aura"): string {
   if (platform === "Android") {
@@ -477,9 +482,9 @@ ${guides
 }
 
 /** To the studio: someone has signed up and confirmed their email, and waits to be let in. */
-export function waitingEmail(app: string, email: string, platforms: string[], approveUrl: string, waiting: number) {
+export function waitingEmail(app: string, email: string, platforms: string[], approveUrl: string, waiting: number, androidSelfServe = false) {
   const when = new Date().toUTCString();
-  const android = platforms.includes("Android")
+  const android = platforms.includes("Android") && !androidSelfServe
     ? "On Android, add their Google account to the Play test's testers in Play Console first (this address, if it's their Google one)."
     : "";
   const text = [

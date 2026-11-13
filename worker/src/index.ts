@@ -380,7 +380,7 @@ async function confirm(env: Env, url: URL) {
     const app = BETAS[row.project]?.name ?? row.project;
     await sendEmail(env, {
       to: env.OWNER_EMAIL,
-      ...waitingEmail(app, row.email, row.platforms.split(","), await approveUrl(env, row.id), waiting?.n ?? 0),
+      ...waitingEmail(app, row.email, row.platforms.split(","), await approveUrl(env, row.id), waiting?.n ?? 0, !!BETAS[row.project]?.playGroup),
     });
   } catch (error) {
     console.error("Asking the studio to let a tester in failed:", error);

@@ -13,7 +13,7 @@
 import { BETAS } from "./betas";
 import { allowEmail, leaveToken, leaveTokenId } from "./guard";
 import type { Env } from "./index";
-import { howTo, sendEmail, welcomeEmail } from "./mail";
+import { groupHowTo, howTo, sendEmail, welcomeEmail } from "./mail";
 
 /** Approval tokens are signed apart from the remove-me ones. */
 const LIST = "approve";
@@ -34,8 +34,9 @@ export async function playToAdd(env: Env) {
       "SELECT id, project, email, approved_at FROM signups WHERE approved_at IS NOT NULL AND play_added_at IS NULL AND (',' || platforms || ',') LIKE '%,Android,%' ORDER BY approved_at",
     ).all<{ id: number; project: string; email: string; approved_at: string }>()
   ).results;
+  // Betas whose Android testers let themselves in (playGroup) have nothing to add by hand.
   return Promise.all(
-    rows.map(async (r) => ({
+    rows.filter((r) => !BETAS[r.project]?.playGroup).map(async (r) => ({
       project: r.project,
       app: BETAS[r.project]?.name ?? r.project,
       email: r.email,
@@ -131,15 +132,20 @@ export async function sendWelcome(
 
 /** The "You're in" email for a tester, with the latest links for where they play, unsent. */
 export async function composeWelcome(env: Env, row: Pick<Signup, "id" | "project" | "name" | "email" | "platforms">, note = "") {
-  const beta: { name: string; terms: boolean; guides?: { label: string; url: string; about: string }[] } = BETAS[row.project] ?? {
+  const beta: { name: string; terms: boolean; guides?: { label: string; url: string; about: string }[]; playGroup?: { join: string; optIn: string } } = BETAS[row.project] ?? {
     name: row.project,
     terms: false,
   };
   const builds = await currentBuilds(env, row.project);
+  const group = beta.playGroup;
   const links = row.platforms
     .split(",")
-    .filter((p) => builds[p])
-    .map((platform) => ({ platform, url: builds[platform]!, how: howTo(platform, builds[platform]!, beta.name) }));
+    .filter((p) => builds[p] || (p === "Android" && group))
+    .map((platform) =>
+      platform === "Android" && group
+        ? { platform, url: group.optIn, how: groupHowTo(beta.name, group.join) }
+        : { platform, url: builds[platform]!, how: howTo(platform, builds[platform]!, beta.name) },
+    );
   const leaveUrl = `${service(env)}/leave?t=${await leaveToken(env, row.id)}`;
   const terms = beta.terms ? `${env.SITE_URL.replace(/\/$/, "")}/beta/terms/` : "";
   return { content: welcomeEmail(beta.name, row.name, leaveUrl, links, terms, beta.guides ?? [], note), links, leaveUrl };
@@ -158,7 +164,7 @@ export async function approval(env: Env, url: URL, method: string, path: string)
   if (!row) return page("Not here any more", "<p>That sign-up has gone: they left, or were turned away.</p>", 404);
   const who = `<b>${escape(row.email)}</b>`;
   const platforms = row.platforms.split(",");
-  const beta = BETAS[row.project] ?? { name: row.project, terms: false };
+  const beta: { name: string; terms: boolean; playGroup?: { join: string; optIn: string } } = BETAS[row.project] ?? { name: row.project, terms: false };
 
   // Ticking off adding an Android tester to the Google Play test list.
   if (path === "/play-added") {
@@ -179,7 +185,7 @@ export async function approval(env: Env, url: URL, method: string, path: string)
     return page(
       "Let them in?",
       `<p>${who} wants to join the ${escape(beta.name)} beta, on ${escape(platforms.join(", "))}.</p>
-${platforms.includes("Android") ? "<p>On Android, Google Play only lets in the Google accounts on the test's tester list: add theirs in Play Console first (this address, if it's their Google one).</p>" : ""}
+${platforms.includes("Android") && !beta.playGroup ? "<p>On Android, Google Play only lets in the Google accounts on the test's tester list: add theirs in Play Console first (this address, if it's their Google one).</p>" : ""}
 <form method="post" action="${action("/approve")}"><button type="submit">Let them in</button></form>
 <form method="post" action="${action("/decline")}"><button class="quiet" type="submit">Turn them away</button></form>`,
     );
@@ -201,7 +207,7 @@ ${platforms.includes("Android") ? "<p>On Android, Google Play only lets in the G
       ? `We've emailed them the links for ${escape(links.map((l) => l.platform).join(", "))}.`
       : "We've emailed them that they're in; the next build email will reach them."
     : "We couldn't email them just now, but they're in: the next build email will reach them.";
-  const android = platforms.includes("Android")
+  const android = platforms.includes("Android") && !beta.playGroup
     ? `<p><b>Now add them on Google Play:</b> ${PLAY_WHERE(beta.name)}. Their Google Play link won't let them in until you do.</p>
 <p style="user-select: all; padding: 10px 14px; border-radius: 10px; background: #221c33; color: #f4eadb">${escape(row.email)}</p>
 <form method="post" action="/play-added?t=${encodeURIComponent(token)}"><button type="submit">I've added them</button></form>

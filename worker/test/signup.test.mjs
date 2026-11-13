@@ -353,6 +353,8 @@ test("links stored without emailing anyone reach later welcomes, and one tester'
   const welcome = (await outbox()).find((e) => e.to_addr === "again@example.com" && e.subject.startsWith("You're in"));
   assert.match(welcome.body, /Android: https:\/\/play\.google\.com\/apps\/testing\/com\.creatioaura\.ignisaura\n  Two steps on your Android phone/);
   assert.match(welcome.body, /join our testers group: https:\/\/groups\.google\.com\/g\/ignis-aura-testers/);
+  // The group's page says "no permission" to members: the email says that's fine.
+  assert.match(welcome.body, /says you don't have permission to see its content: that's fine, it's private, and you're in/);
   assert.match(welcome.body, /Web: https:\/\/creatio-aura.com\/ignis-aura-web\//);
 
   // Sending it again: a dry run first, then one more welcome, to them only.

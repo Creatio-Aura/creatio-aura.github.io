@@ -374,9 +374,10 @@ export function confirmationEmail(app: string, name: string, confirmUrl: string,
 
 const escape = (text: string) => text.replace(/[&<>"']/g, (c) => `&#${c.charCodeAt(0)};`);
 
-/** Android, for a beta whose testers let themselves in on Google Play: join the group, then opt in at the link above it. */
+/** Android, for a beta whose testers let themselves in on Google Play: join the group, then opt in at the link above it.
+ *  The group's page shows "You don't have permission" to members (its messages are private): said, so nobody stops there (2026-11-13). */
 export function groupHowTo(app: string, join: string): string {
-  return `Two steps on your Android phone, signed in to the Google account you use for Google Play. First, join our testers group: ${join} (tap Join group; it sends no emails). Then open the link above in Chrome, tap Become a tester, and install ${app} from Google Play. Updates come through Google Play.`;
+  return `Two steps on your Android phone, signed in to the Google account you use for Google Play. First, join our testers group: ${join} (tap Join group; it sends no emails). After joining, the group's page says you don't have permission to see its content: that's fine, it's private, and you're in. Then open the link above in Chrome, tap Become a tester, and install ${app} from Google Play. If it says you're not a tester yet, wait 10 to 15 minutes and try again. Updates come through Google Play.`;
 }
 
 /** How to get a build on each platform, under its link. Android's depends on the link: Google Play's test, or the app file itself. */

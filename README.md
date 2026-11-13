@@ -17,11 +17,15 @@ Aura** (no invite code since 7 November 2026: anyone can sign up, and Andrew let
 
 **Search engines and AI assistants.** `site/robots.txt` welcomes both (with `Content-Signal: search=yes,
 ai-input=yes, ai-train=yes`, Andrew 2026-11-07) and points them at `site/sitemap.xml`, which lists the pages to
-index: **add new pages there** (the Journal adds its own posts when it builds). Pages that shouldn't appear in results (the beta's confirmed/left/
-expired pages, 404, `ignis-aura-web/`) say `noindex` themselves. Indexed pages name their canonical
+index: **add new pages there** (the Journal adds its own posts when it builds, and moves a page's date up when the
+Journal posts it shows change). Pages that shouldn't appear in results (the beta's confirmed/left/
+expired pages, 404, `ignis-aura-web/`, the Effugium tester guide) say `noindex` themselves; every other page gets
+`max-image-preview:large` when it's built, so search can show its picture large. Indexed pages name their canonical
 creatio-aura.com address, and the home page carries the company's details for search engines
 (name, legal name "Creatio Aura Ltd.", logo, contact email and the business phone; no postal
-address, on purpose). `/support/` is the Support URL for App Store and Google Play listings.
+address, on purpose). The home page also shows the newest three Journal posts, so new ones are found sooner.
+The Effugium user guide (`/effugium/guide/`) is in search since 2026-11-12; it's built from the EffugiumAura repo
+(`marketing/user-guide/build.py --site`). `/support/` is the Support URL for App Store and Google Play listings.
 
 ## Waiting lists ("tell me when it's out")
 

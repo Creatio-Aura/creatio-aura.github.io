@@ -43,7 +43,7 @@ The answer.
 - [Apple Support: …](https://support.apple.com/…)
 ```
 
-The page adds, by itself: the byline and reading time, the quick-answer box, a closing "About the app" box with its buttons, the project's note (information-only for Effugium, trademarks for Ignis), "More from the Journal", the feed and sitemap entries, structured data for search (Article, breadcrumbs, and the questions as FAQ), and the latest three posts on the project's own page.
+The page adds, by itself: the byline and reading time, the quick-answer box, a closing "About the app" box with its buttons, the project's note (information-only for Effugium, trademarks for Ignis), "More from the Journal", the feed and sitemap entries, structured data for search (Article, breadcrumbs, and the questions as FAQ), the latest three posts on the project's own page, and the latest three of any project on the home page.
 
 ## A guide's shape (what works for Vaultaire, in our words)
 

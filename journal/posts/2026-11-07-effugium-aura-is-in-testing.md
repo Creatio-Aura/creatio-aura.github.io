@@ -15,7 +15,7 @@ Effugium Aura is an audio player for your own sounds. Friends and family are tes
 
 ## Take the tour
 
-The app opens with a short tour, six steps from bringing in your own sounds to looping them without a bump. We recorded it straight from the app: [watch it on the Effugium Aura page](/effugium/#tour-title).
+The app opens with a short tour, six steps from bringing in your own sounds to helping them loop more seamlessly. We recorded it straight from the app: [watch it on the Effugium Aura page](/effugium/#tour-title).
 
 ## What's in this test
 

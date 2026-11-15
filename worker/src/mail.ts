@@ -582,6 +582,7 @@ ${android ? `<p style="font-size:14px;color:#4a433b">${escape(android)}</p>` : "
 export const APP_NAMES: Record<string, string> = { ignis: "Ignis Aura", effugium: "Effugium Aura" };
 
 const DETAIL_LABELS: Record<string, string> = {
+  name: "Name they gave",
   version: "App version",
   build: "Build",
   commit: "Commit",
@@ -635,7 +636,8 @@ ${rows.map(([label, value]) => `<tr><td><b>${escape(label)}</b></td><td>${escape
 </body></html>`;
   // Its first line, short, so the inbox shows what it's about.
   const gist = message.split("\n")[0]!.trim();
-  const subject = `${app} FEEDBACK: ${gist.length > 60 ? `${gist.slice(0, 57).trimEnd()}…` : gist}`;
+  const who = details.name ? ` from ${details.name}` : "";
+  const subject = `${app} FEEDBACK${who}: ${gist.length > 60 ? `${gist.slice(0, 57).trimEnd()}…` : gist}`;
   return { subject, text, html };
 }
 

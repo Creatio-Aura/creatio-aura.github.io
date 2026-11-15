@@ -731,6 +731,11 @@ test("a note with an address can be answered: replying goes to them, and it says
   assert.equal(fromStranger.reply_to, "ash@example.com");
   assert.match(fromStranger.body, /ash@example\.com \(not on the beta list\)/);
 
+  // A name they left: who it's from, in the subject and the email.
+  assert.equal((await sendNote({ message: "The chest stuck.", name: " Sam\n " })).status, 200);
+  const named = await landed((m) => m.subject === "Ignis Aura FEEDBACK from Sam: The chest stuck.");
+  assert.match(named.body, /From: No address left.*\nName they gave: Sam\n/);
+
   // A long first line is cut short in the subject.
   assert.equal((await sendNote({ message: "x".repeat(80) })).status, 200);
   const long = await landed((m) => m.subject.startsWith("Ignis Aura FEEDBACK: xxx"));

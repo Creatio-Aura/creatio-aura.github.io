@@ -1,8 +1,9 @@
 // Feedback from the Ignis Aura app during the beta: a tester types a note (the app's menu → Send
 // feedback) and it comes to the studio's inbox, with the app's version and device so a problem
-// can be found. If they left their address, replying to the email answers them.
+// can be found. If they left their address, replying to the email answers them; if they left a
+// name (the app fills in their player's name, theirs to change or clear), the email says who.
 //
-//   POST /feedback  { id, message, email?, version?, build?, platform?, device?, screen?, game? }
+//   POST /feedback  { id, message, email?, name?, version?, build?, platform?, device?, screen?, game? }
 //                                                → { ok } once it's kept; the email follows
 //
 // An app on a phone sends no Origin; the web build sends its own, which must be an allowed one.
@@ -18,7 +19,7 @@ import { feedbackEmail, sendEmails, type Email } from "./mail";
 /** The most of each detail an app sends with a note. */
 const DETAIL_MAX = 200;
 /** What an app may send with a note, in the order the email shows them. */
-export const DETAILS = ["version", "build", "commit", "platform", "device", "screen", "game"] as const;
+export const DETAILS = ["name", "version", "build", "commit", "platform", "device", "screen", "game"] as const;
 /**
  * Each app that sends notes: the most it lets someone write, and whether a note may hold links.
  * A note says which app it's from; one that doesn't is from Ignis Aura, which sent them first.

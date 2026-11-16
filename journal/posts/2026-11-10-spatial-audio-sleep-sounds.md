@@ -3,7 +3,7 @@ title: Spatial audio sleep sounds with AirPods and Android (2026)
 description: How spatial audio works with AirPods and on Android phones, how it differs from 8D audio, and how to put rain, a fan or a stream around you.
 summary: Rain behind you, the fan to your left: how spatial audio and head tracking work, and how to arrange your sounds around you.
 date: 2026-11-10
-updated: 2026-11-12
+updated: 2026-11-16
 kind: guide
 project: effugium
 quick_answer: Spatial audio makes headphones sound as if sounds come from places around you, not from inside your head. On iPhone, put in your AirPods, open Control Center, touch and hold the volume control, tap Spatial Audio and choose Fixed or Head Tracked. On a Pixel, it's in Settings > Sound & vibration > Spatial audio. These settings work with apps and content that support them, so to put each sound exactly where you want it, use an app that places sounds one by one. We're testing that in Effugium Aura, which we make: it places your sounds around you by itself, on any headphones, with no setting to turn on.
@@ -45,6 +45,14 @@ Apple can also make a spatial audio profile for you, from a scan of your face an
 2. **For wired headphones**, turn on **Wired headphones**. **For wireless ones**, tap **Connected devices settings**, tap your headphones, then turn on **Spatial Audio**.
 
 Other Android phones may put this setting somewhere else, or not have it.
+
+### Which Android phones have spatial audio?
+
+It depends on the phone, not only the Android version. Google lists Spatial Audio for the Pixel 6 and newer, the Pixel Fold and the Pixel Tablet, with movies and shows from streaming apps that support it. For head tracking on a Pixel, Google lists Pixel Buds Pro, with their latest firmware. On other Android phones, look for Spatial audio in the sound settings, or check the maker's help pages.
+
+### Beats headphones on Android
+
+Beats connect to Android phones, and Apple makes a Beats app for Android to set them up. Apple describes spatial audio with head tracking for Beats on Apple devices. On Android, Apple says Apple Music subscribers can listen to select songs in Spatial Audio with Dolby Atmos.
 
 ## What you can do with sounds around you
 
@@ -115,6 +123,12 @@ Both place sounds around you. Fixed has no head tracking, so the sounds turn wit
 ### What are 8D rain sounds?
 Usually a stereo recording of rain panned in circles around your head, made for headphones. With spatial audio, a sound can also sit behind or above you, and with head tracking, stay put as you turn.
 
+### Can Android users get spatial audio on Beats headphones?
+Partly. On Android, Apple says Apple Music subscribers can listen to select songs in Spatial Audio with Dolby Atmos; Apple describes head tracking for Beats on Apple devices. An app that places sounds itself works on any headphones: in the Effugium Aura beta on Android, tell us how your Beats sound.
+
+### Does Android 13 have spatial audio?
+Some Android phones do, but it depends on the phone and its maker. On Pixel, Google lists Spatial Audio for the Pixel 6 and newer, the Pixel Fold and the Pixel Tablet, under Settings > Sound & vibration > Spatial audio.
+
 ### Do spatial sounds work on a speaker?
 Not in the same way. Placing a sound behind or above you needs headphones; on a speaker, the sound comes from the speaker.
 
@@ -132,3 +146,5 @@ Spatial audio places sounds around you on headphones: turn it on in Control Cent
 - [Apple Support: Control Spatial Audio and head tracking on AirPods](https://support.apple.com/guide/airpods/control-spatial-audio-and-head-tracking-dev00eb7e0a3/web)
 - [Apple Support: Listen with Personalized Spatial Audio for AirPods and Beats](https://support.apple.com/en-us/102596)
 - [Pixel Phone Help: Listen with Spatial Audio on your Pixel device](https://support.google.com/pixelphone/answer/12967594?hl=en)
+- [Beats User Guide: Control Spatial Audio and head tracking on Apple devices](https://support.apple.com/guide/beats/control-spatial-audio-head-tracking-apple-dev7db73ea55/web)
+- [Beats User Guide: Beats app for Android at a glance](https://support.apple.com/guide/beats/beatsapp-at-a-glance-dev17f3d0fc5/web)

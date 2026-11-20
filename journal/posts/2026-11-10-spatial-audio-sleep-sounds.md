@@ -6,7 +6,7 @@ date: 2026-11-10
 updated: 2026-11-16
 kind: guide
 project: effugium
-quick_answer: Spatial audio makes headphones sound as if sounds come from places around you, not from inside your head. On iPhone, put in your AirPods, open Control Center, touch and hold the volume control, tap Spatial Audio and choose Fixed or Head Tracked. On a Pixel, it's in Settings > Sound & vibration > Spatial audio. These settings work with apps and content that support them, so to put each sound exactly where you want it, use an app that places sounds one by one. We're testing that in Effugium Aura, which we make: it places your sounds around you by itself, on any headphones, with no setting to turn on.
+quick_answer: Spatial audio makes headphones sound as if sounds come from places around you, not from inside your head. On iPhone, put in your AirPods, open Control Center, touch and hold the volume control, tap Spatial Audio and choose Fixed or Head Tracked. On a Pixel, it's in Settings > Sound & vibration > Spatial audio. These settings work with apps and content that support them, so to put each sound exactly where you want it, use an app that places sounds one by one. We're testing that in Effugium Aura: it places your sounds around you by itself, on any headphones, with no setting to turn on.
 cta_title: Every sound in its place
 cta_text: In the Effugium Aura beta, where everything is unlocked, put each sound in front, behind, to either side, above or below you, then tell us whether it sounds like it's really there.
 ---
@@ -88,7 +88,7 @@ Sleeping in earbuds isn't for everyone. If they press on your ears when you lie 
 
 ## Try it in the Effugium Aura beta
 
-Effugium Aura, which we make, is in testing on iPhone and Android, and putting sounds around you is at the heart of what we're testing. It places your sounds around you by itself, on any headphones, so you don't need to turn on Spatial Audio in Control Center or in your phone's settings. On iPhone with AirPods, head tracking in the app adds one more layer: your sounds stay put in the room as you turn your head. Here's how to try it today:
+Effugium Aura, is in testing on iPhone and Android, and putting sounds around you is at the heart of what we're testing. It places your sounds around you by itself, on any headphones, so you don't need to turn on Spatial Audio in Control Center or in your phone's settings. On iPhone with AirPods, head tracking in the app adds one more layer: your sounds stay put in the room as you turn your head. Here's how to try it today:
 
 1. **Put on headphones**, and check the switch in the top bar says **3D**, not Speaker.
 2. **Tap +** at the end of the names under the circle, open a folder, and drag a sound onto a place around you: in front, behind, to either side, above or below. Everything is unlocked in the beta; after launch, above, below and the places in between are part of Pro.

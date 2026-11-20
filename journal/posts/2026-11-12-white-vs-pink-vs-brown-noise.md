@@ -42,7 +42,7 @@ For a baby's room, keep the machine well away from the crib and the volume low.
 
 ## Try it in the Effugium Aura beta
 
-Effugium Aura, which we make, is in testing on iPhone and Android: a white noise machine app that plays your own sounds too, each in its own place around you. Brown, Pink and White come with it, in the Noise folder, next to rain, wind, an air conditioner and more. Here's how to try them side by side today:
+Effugium Aura, is in testing on iPhone and Android: a white noise machine app that plays your own sounds too, each in its own place around you. Brown, Pink and White come with it, in the Noise folder, next to rain, wind, an air conditioner and more. Here's how to try them side by side today:
 
 1. **Tap +** at the end of the names under the circle, then open the **Noise** folder.
 2. **Drag Brown, Pink and White** onto three places around you. Each place holds one sound. **Low tones** is the place for deep sounds, so Brown fits there.

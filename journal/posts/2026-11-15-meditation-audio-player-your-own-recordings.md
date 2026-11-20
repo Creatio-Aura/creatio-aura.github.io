@@ -5,7 +5,7 @@ summary: Guided tracks, music, or your own sounds on a loop: how to play your me
 date: 2026-11-15
 kind: guide
 project: effugium
-quick_answer: To play your own meditation audio, put the recording on your phone and play it in an app that keeps going with the screen locked. A guided recording plays once, start to finish, so a music or podcast player is enough; on iPhone, the Clock timer can stop it with Stop Playing. For a sound you want on repeat, like a stream or your own room, use a meditation audio player that loops it smoothly, with a timer that fades out and a bell if you like. We're testing that in Effugium Aura, which we make.
+quick_answer: To play your own meditation audio, put the recording on your phone and play it in an app that keeps going with the screen locked. A guided recording plays once, start to finish, so a music or podcast player is enough; on iPhone, the Clock timer can stop it with Stop Playing. For a sound you want on repeat, like a stream or your own room, use a meditation audio player that loops it smoothly, with a timer that fades out and a bell if you like. We're testing that in Effugium Aura.
 cta_title: Your sounds for your sit
 cta_text: In the Effugium Aura beta, where everything is unlocked, loop your own recordings, add a bell on a timer, and let a timer fade it all out. Then tell us how it went.
 ---
@@ -42,7 +42,7 @@ Meditation audio comes in two kinds, and they want different players.
 
 ## Try it in the Effugium Aura beta
 
-Effugium Aura, which we make, is in testing on iPhone and Android: an audio player for your own sounds, which loops them, mixes them with built-in ones like Rain, Babbling brook or Forest, and adds a bell on a timer. Every sound in it plays on repeat, and in the beta each of your own sounds can be up to 10 minutes long, so it suits steady sounds and music for your sit. For a long guided recording you want to hear once, start to finish, a music or podcast app is the better fit. Here's how to try it today:
+Effugium Aura, is in testing on iPhone and Android: an audio player for your own sounds, which loops them, mixes them with built-in ones like Rain, Babbling brook or Forest, and adds a bell on a timer. Every sound in it plays on repeat, and in the beta each of your own sounds can be up to 10 minutes long, so it suits steady sounds and music for your sit. For a long guided recording you want to hear once, start to finish, a music or podcast app is the better fit. Here's how to try it today:
 
 1. **Bring in your sound.** Tap **+** at the end of the names under the circle, then **Import**, and pick a recording from your phone. Tap **Make seamless** to help it loop more seamlessly. Or tap **Record** to record one.
 2. **Place it and press Play.** Drag it onto a place around you. Add a quieter sound from Water or Nature underneath, if you like.

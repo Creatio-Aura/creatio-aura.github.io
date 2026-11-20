@@ -12,11 +12,11 @@ cta_title: Watch your mix
 cta_text: In the Effugium Aura beta, Visualize shows your own sounds as eleven visualizers and a campfire scene, and fades to black while they keep playing. Try a few and tell us which you watch.
 ---
 
-A music visualizer turns sound into moving pictures: bars that rise with the beat, a wave that traces the sound, stars that glow as it plays. Most come with a music player and follow one song. With a soundscape of your own sounds, like rain, a fan or a stream, a visualizer can follow each sound: where it is, how loud it is, and what colour you gave it. Here's how visualizers differ from animated scenes, how to watch one at night, and how to try ours.
+A music visualizer turns sound into moving pictures: bars that rise with the beat, a wave that traces the sound, stars that glow as it plays. Most come with a music player and follow one song. With a soundscape of your own sounds, like rain, a fan or a stream, a visualizer can follow each sound: where it is, how loud it is, and what colour you gave it. Some follow every sound closely; others take your colours and move more gently, and are simply nice to look at while you listen. Here's how visualizers differ from animated scenes, how to watch one at night, and how to try ours.
 
 ## What a music visualizer is
 
-A visualizer listens to what's playing and draws it, many times a second. The simplest show the sound's level, like a meter. Others turn the sound into shapes, colours and motion: rings on water, curtains of light, a flight through stars. When the sound changes, the picture changes with it.
+A visualizer listens to what's playing and draws it, many times a second. The simplest show the sound's level, like a meter. Others turn the sound into shapes, colours and motion: rings on water, curtains of light, a flight through stars. How closely they follow varies a lot: a meter shows every change, while a slow aurora mostly takes the colours and drifts. Both have their place: one to watch your sounds, the other to have something easy to look at.
 
 ## Visualizer or animated scene?
 
@@ -30,7 +30,7 @@ There are two kinds of things to watch while sounds play, and both have their pl
 | | A visualizer | An animated scene |
 | --- | --- | --- |
 | What it shows | The sound itself, as shapes, light and colour | A place, like a fire or a night sky |
-| Follows your sounds? | Yes, it changes as they change | It plays on its own; your sounds play over it |
+| Follows your sounds? | Yes: some closely, some only in colour and gentle motion | It plays on its own; your sounds play over it |
 | Good for | Seeing your mix move | Something to look at while you listen |
 
 ## Watching at night: set up your screen
@@ -51,7 +51,7 @@ A bright screen in a dark room is a lot. A few settings help:
 
 ## Try it in the Effugium Aura beta
 
-Effugium Aura, which we make, is in testing on iPhone and Android, and Visualize is one of the things we're testing: your own mix, full screen, as visualizers that follow your sounds, or animated scenes to add your sounds to. Visualize will be part of Pro after launch; everything is unlocked in the beta. Here's how to try it:
+Effugium Aura, which we make, is in testing on iPhone and Android, and Visualize is one of the things we're testing: your own mix, full screen, as visualizers that follow your sounds, some closely and some gently, or an animated scene to add your sounds to. Visualize will be part of Pro after launch; everything is unlocked in the beta. Here's how to try it:
 
 1. **Make or pick a soundscape, and press Play**, so there's something to watch.
 2. **Tap ✦, beside Flat and Gravity.** Read the short note about light sensitivity and tap I understand. Gentler motion is there too.
@@ -64,8 +64,9 @@ Effugium Aura, which we make, is in testing on iPhone and Android, and Visualize
 
 What's in the list today:
 
-- **Eleven visualizers** that follow your sounds, where each one is, how loud and its colour: Fractal flight, Your system (you're the sun, and your sounds are planets around you), Through space (a flight through the stars), Levels, Night sky, Ripples, Ridgelines, Aurora, Scope, Murmuration and Kaleidoscope.
-- **A scene:** Campfire, a fire at night by a river, under the stars, to add the sounds you want to.
+- **Six that show your sounds plainly**, so you can watch each one: Levels (each sound's level as bars), Scope (the sound as a glowing trace), Ridgelines (the sound as ridges rolling toward you), Night sky (each sound a star where it sits around you, bigger when it's louder), Murmuration (a flock of specks round each sound) and Your system (you're the sun, and your sounds are planets around you).
+- **Five that are gentler:** they take your sounds' colours and move with your mix more loosely, so they're more to enjoy than to read: Fractal flight (a slow flight through 3D shapes), Aurora (curtains of light), Ripples (rings on dark water), Kaleidoscope (mirrored patterns) and Through space (a flight through the stars, where orbiting sounds pass as planets).
+- **A scene:** Campfire, a fire at night by a river, under the stars. It doesn't follow your mix: it's a place to look at while your sounds play.
 - **Options:** colours from your mix or new ones, Gentle or Gentler motion, and Fade to black after 15 minutes, 30 minutes or an hour. When the picture fades, it stops drawing and your sounds keep playing; tap to bring it back.
 - **Detail:** Fractal flight and the scenes let you choose how sharp the picture is. Some visualizers ask a lot of a phone and may stutter on older models; a lower Detail or Battery saver is the fix to try first.
 - **Look around (iPhone):** with AirPods that follow your head, turn your head in Fractal flight, Night sky, Your system, Through space or Campfire to look around.
@@ -93,7 +94,7 @@ If you're testing, tell us in the app: ☰ menu > **Send feedback**. If you're n
 ## Questions people ask
 
 ### Can I use a music visualizer with my own sounds?
-Yes, if the app plays your sounds as well as drawing them. Many visualizers are made for music players and follow whatever song is on. In the Effugium Aura beta, Visualize follows the sounds in your own mix: rain, a fan, a stream, or anything you've recorded or imported.
+Yes, if the app plays your sounds as well as drawing them. Many visualizers are made for music players and follow whatever song is on. In the Effugium Aura beta, Visualize draws the sounds in your own mix, rain, a fan, a stream, or anything you've recorded or imported: some visualizers show each sound plainly, others just take its colours and move gently.
 
 ### What's the difference between a visualizer and an animated scene?
 A visualizer draws the sound itself and changes as it changes. An animated scene is a place to watch, like a fire at night, that plays on its own while your sounds play over it.

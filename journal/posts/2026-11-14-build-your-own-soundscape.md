@@ -5,7 +5,7 @@ summary: Layers, levels and places. How to build a soundscape of your own in a c
 date: 2026-11-14
 kind: guide
 project: effugium
-quick_answer: To build your own soundscape, start with one steady sound as a base, add one or two quieter layers on top, and set each one's volume so nothing jumps out. A custom soundscape app that plays your own recordings lets you use the sounds you know, and one that places each sound around you keeps the layers apart. We're testing that in Effugium Aura, which we make.
+quick_answer: To build your own soundscape, start with one steady sound as a base, add one or two quieter layers on top, and set each one's volume so nothing jumps out. A custom soundscape app that plays your own recordings lets you use the sounds you know, and one that places each sound around you keeps the layers apart. We're testing that in Effugium Aura.
 cta_title: Your soundscape, your sounds
 cta_text: In the Effugium Aura beta, where everything is unlocked, layer your own recordings with built-in sounds, place each one around you, and tell us what you built.
 ---
@@ -42,7 +42,7 @@ Two or three layers is plenty. More than that and they start to blur into each o
 
 ## Try it in the Effugium Aura beta
 
-Effugium Aura, which we make, is in testing on iPhone and Android: a customized audio player for your own sounds, with a set of built-in sounds to mix them with. Here's how to build a soundscape in it today:
+Effugium Aura, is in testing on iPhone and Android: a customized audio player for your own sounds, with a set of built-in sounds to mix them with. Here's how to build a soundscape in it today:
 
 1. **Start a new one.** Open the ☰ menu, then **Soundscapes**, and tap **New soundscape**. Give it a name.
 2. **Place your base.** Tap **+** at the end of the names under the circle, open a folder, and drag a sound onto a place around you, like **Brown** from the Noise folder onto **Low tones**. Press **Play**.

@@ -5,7 +5,7 @@ summary: All night, a timer, or a slow fade: how to make your sleep sounds stop 
 date: 2026-11-16
 kind: guide
 project: effugium
-quick_answer: On iPhone, the Clock app's timer can stop whatever is playing: tap When Timer Ends, then Stop Playing. Background Sounds has its own timer in iOS 26 and later. On Android, use a sleep timer in the app that's playing. Those stop the sound all at once. For a slow fade to silence instead, use a sleep sounds app whose timer fades out. We're testing that in Effugium Aura, which we make.
+quick_answer: On iPhone, the Clock app's timer can stop whatever is playing: tap When Timer Ends, then Stop Playing. Background Sounds has its own timer in iOS 26 and later. On Android, use a sleep timer in the app that's playing. Those stop the sound all at once. For a slow fade to silence instead, use a sleep sounds app whose timer fades out. We're testing that in Effugium Aura.
 cta_title: Your night, your ending
 cta_text: In the Effugium Aura beta, where everything is unlocked, set a sleep timer and your mix fades slowly to silence, or let it play all night. Then tell us how it went.
 ---
@@ -55,7 +55,7 @@ A fade lowers the sound over several minutes until it's silent, so there's no su
 
 ## Try it in the Effugium Aura beta
 
-Effugium Aura, which we make, is in testing on iPhone and Android, with a sleep timer that fades your mix slowly to silence. Here's how to try it today:
+Effugium Aura, is in testing on iPhone and Android, with a sleep timer that fades your mix slowly to silence. Here's how to try it today:
 
 1. **Pick or make a soundscape** and press **Play**.
 2. **Tap Sleep timer** below your sounds and pick 15 or 30 minutes, an hour or two hours. It shows when it will be silent by.

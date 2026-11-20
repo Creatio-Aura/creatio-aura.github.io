@@ -5,7 +5,7 @@ summary: A machine, an app, or your own recordings? How to set up a white noise 
 date: 2026-11-13
 kind: guide
 project: effugium
-quick_answer: A white noise machine app turns your phone into a sound machine. Pick a steady sound, set the volume, and choose whether it plays all night or stops on a timer. To use a sound you know, like your own fan or the rain outside, record or import it into an app that loops it without a click and keeps playing with the screen off. We're testing that in Effugium Aura, which we make.
+quick_answer: A white noise machine app turns your phone into a sound machine. Pick a steady sound, set the volume, and choose whether it plays all night or stops on a timer. To use a sound you know, like your own fan or the rain outside, record or import it into an app that loops it without a click and keeps playing with the screen off. We're testing that in Effugium Aura.
 cta_title: The sound you know, on your phone
 cta_text: In the Effugium Aura beta, where everything is unlocked, record your own fan or rain, mix it with the built-in noise, and tell us how it sounds.
 ---
@@ -42,7 +42,7 @@ On an iPhone, Background Sounds in Settings > Accessibility > Audio & Visual is 
 
 ## Try it in the Effugium Aura beta
 
-Effugium Aura, which we make, is in testing on iPhone and Android: a white noise machine app made for your own sounds, with white, pink and brown noise and more built in. Here's how to try it today:
+Effugium Aura, is in testing on iPhone and Android: a white noise machine app made for your own sounds, with white, pink and brown noise and more built in. Here's how to try it today:
 
 1. **Record your sound.** Tap **Record** below the circle, set the phone down near the fan or the rain, and tap the red button. Record two or three minutes, then **Stop** and keep it.
 2. **Or bring one in.** Tap **+** at the end of the names under the circle, then **Import**, and pick a recording from your phone. Tap **Make seamless** to help it loop more seamlessly.

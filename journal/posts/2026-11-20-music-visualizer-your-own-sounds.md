@@ -7,7 +7,7 @@ kind: guide
 project: effugium
 image: /effugium/media/visualize-campfire.jpg
 image_alt: Effugium Aura's Campfire scene, recorded on an iPhone: a fire at night by a river, under the stars
-quick_answer: A music visualizer turns sound into moving pictures that follow it as it plays, such as bars, waves or stars. An animated scene is a place to watch, like a fire at night, while your sounds play over it. Pick a dark, slow one for the evening, turn the brightness down, and use a fade to black so the screen doesn't stay on all night. We're testing both kinds, with your own sounds, in Effugium Aura, which we make.
+quick_answer: A music visualizer turns sound into moving pictures that follow it as it plays, such as bars, waves or stars. An animated scene is a place to watch, like a fire at night, while your sounds play over it. Pick a dark, slow one for the evening, turn the brightness down, and use a fade to black so the screen doesn't stay on all night. We're testing both kinds, with your own sounds, in Effugium Aura.
 cta_title: Watch your mix
 cta_text: In the Effugium Aura beta, Visualize shows your own sounds as eleven visualizers and a campfire scene, and fades to black while they keep playing. Try a few and tell us which you watch.
 ---
@@ -51,7 +51,7 @@ A bright screen in a dark room is a lot. A few settings help:
 
 ## Try it in the Effugium Aura beta
 
-Effugium Aura, which we make, is in testing on iPhone and Android, and Visualize is one of the things we're testing: your own mix, full screen, as visualizers that follow your sounds, some closely and some gently, or an animated scene to add your sounds to. Visualize will be part of Pro after launch; everything is unlocked in the beta. Here's how to try it:
+Effugium Aura, is in testing on iPhone and Android, and Visualize is one of the things we're testing: your own mix, full screen, as visualizers that follow your sounds, some closely and some gently, or an animated scene to add your sounds to. Visualize will be part of Pro after launch; everything is unlocked in the beta. Here's how to try it:
 
 1. **Make or pick a soundscape, and press Play**, so there's something to watch.
 2. **Tap ✦, beside Flat and Gravity.** Read the short note about light sensitivity and tap I understand. Gentler motion is there too.

@@ -18,6 +18,8 @@ const BANNED = [
   [/\b(improves? (your )?focus|boosts? (focus|productivity)|meditate deeply|deeper meditation)\b/i, 'a focus or meditation outcome'],
   [/\b(helps? you (lucid )?dream|induces? lucid|guarantee[sd]?)\b/i, 'a promised result'],
   [/\b(studies|study shows|research (shows|proves|suggests)|scientifically|proven)\b/i, 'studies or proof: we don’t cite research'],
+  // Andrew, 2026-11-20: "Effugium Aura, which we make" was in every post: extra and unneeded. Just the name.
+  [/\b(which|that) we (make|built|build|are making|'re making)\b/i, 'Andrew’s rule: just "Effugium Aura", without "which we make"'],
 ];
 // Allowed on purpose: the information-only note's own wording.
 const ALLOW = [/not a medical device/i, /isn['’]t medical advice/i, /makes no health claims/i];

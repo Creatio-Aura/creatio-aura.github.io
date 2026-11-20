@@ -5,7 +5,7 @@ summary: A soft sound, a tap on your wrist, or both, on a timer you set: for luc
 date: 2026-11-17
 kind: guide
 project: effugium
-quick_answer: People who practise with a lucid dreaming cue pick one soft sound, play it during a few minutes of awareness practice before bed, then let it play quietly on a timer later in the night. The cue can be a sound, a vibration on your phone or Apple Watch, or both. Nothing here makes a lucid dream happen; it's a cue you practise with. We're testing a cue like this, the Kicker, in Effugium Aura, which we make.
+quick_answer: People who practise with a lucid dreaming cue pick one soft sound, play it during a few minutes of awareness practice before bed, then let it play quietly on a timer later in the night. The cue can be a sound, a vibration on your phone or Apple Watch, or both. Nothing here makes a lucid dream happen; it's a cue you practise with. We're testing a cue like this, the Kicker, in Effugium Aura.
 cta_title: A cue that's yours to set
 cta_text: In the Effugium Aura beta, the Kicker plays a soft sound, taps your Apple Watch, or both, on the timing you choose. Try it at night or on your next sit, and tell us how it went.
 ---
@@ -64,7 +64,7 @@ It's your choice, and you can change it any night.
 
 ## Try it in the Effugium Aura beta
 
-Effugium Aura, which we make, is in testing on iPhone and Android, and the Kicker is one of the things we're testing: a sound, a vibration or both, on a timer you set, above whatever else is playing. The Kicker will be part of Pro after launch; everything is unlocked in the beta. Here's how to try it as a lucid dreaming cue:
+Effugium Aura, is in testing on iPhone and Android, and the Kicker is one of the things we're testing: a sound, a vibration or both, on a timer you set, above whatever else is playing. The Kicker will be part of Pro after launch; everything is unlocked in the beta. Here's how to try it as a lucid dreaming cue:
 
 1. **Pick or make a quiet soundscape, and press Play.** The Kicker plays while the mix is playing, in Flat or Gravity.
 2. **Under the picture, tap Kicker, then Add.**

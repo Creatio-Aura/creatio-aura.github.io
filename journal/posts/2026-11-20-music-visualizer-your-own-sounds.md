@@ -2,14 +2,14 @@
 title: "Music visualizer for your own sounds: watch your soundscape (2026)"
 description: What a music visualizer is, visualizers vs animated scenes, how to watch one at night with a dim screen, and how to try Effugium Aura's Visualize.
 summary: Moving pictures that follow your sounds, or a scene to watch while they play: how to choose, and how to watch at night.
-date: 2026-11-18
+date: 2026-11-20
 kind: guide
 project: effugium
 image: /effugium/media/visualize-campfire.jpg
-image_alt: Effugium Aura's Campfire scene on an iPhone, a fire at night under the stars
+image_alt: Effugium Aura's Campfire scene, recorded on an iPhone: a fire at night by a river, under the stars
 quick_answer: A music visualizer turns sound into moving pictures that follow it as it plays, such as bars, waves or stars. An animated scene is a place to watch, like a fire at night, while your sounds play over it. Pick a dark, slow one for the evening, turn the brightness down, and use a fade to black so the screen doesn't stay on all night. We're testing both kinds, with your own sounds, in Effugium Aura, which we make.
 cta_title: Watch your mix
-cta_text: In the Effugium Aura beta, Visualize shows your own sounds as nine visualizers and three scenes, and fades to black while they keep playing. Try a few and tell us which you watch.
+cta_text: In the Effugium Aura beta, Visualize shows your own sounds as eleven visualizers and a campfire scene, and fades to black while they keep playing. Try a few and tell us which you watch.
 ---
 
 A music visualizer turns sound into moving pictures: bars that rise with the beat, a wave that traces the sound, stars that glow as it plays. Most come with a music player and follow one song. With a soundscape of your own sounds, like rain, a fan or a stream, a visualizer can follow each sound: where it is, how loud it is, and what colour you gave it. Here's how visualizers differ from animated scenes, how to watch one at night, and how to try ours.
@@ -23,8 +23,8 @@ A visualizer listens to what's playing and draws it, many times a second. The si
 There are two kinds of things to watch while sounds play, and both have their place.
 
 <div class="post-shots">
-<figure><video src="/effugium/media/visualize-aurora.mp4" poster="/effugium/media/visualize-aurora.jpg" autoplay muted loop playsinline aria-label="The Aurora visualizer: green curtains of light"></video><img class="still" src="/effugium/media/visualize-aurora.jpg" alt="The Aurora visualizer: green curtains of light" loading="lazy"><figcaption>Aurora, a visualizer</figcaption></figure>
-<figure><video src="/effugium/media/visualize-campfire.mp4" poster="/effugium/media/visualize-campfire.jpg" autoplay muted loop playsinline aria-label="The Campfire scene: a fire at night by a river"></video><img class="still" src="/effugium/media/visualize-campfire.jpg" alt="The Campfire scene: a fire at night by a river" loading="lazy"><figcaption>Campfire, a scene</figcaption></figure>
+<figure><video src="/effugium/media/visualize-levels.mp4" poster="/effugium/media/visualize-levels.jpg" autoplay muted loop playsinline aria-label="The Levels visualizer: rainbow bars rising and falling with the sounds"></video><img class="still" src="/effugium/media/visualize-levels.jpg" alt="The Levels visualizer: rainbow bars rising and falling with the sounds" loading="lazy"><figcaption>Levels, a visualizer</figcaption></figure>
+<figure><video src="/effugium/media/visualize-campfire.mp4" poster="/effugium/media/visualize-campfire.jpg" autoplay muted loop playsinline aria-label="The Campfire scene: a fire at night by a river, under the stars"></video><img class="still" src="/effugium/media/visualize-campfire.jpg" alt="The Campfire scene: a fire at night by a river, under the stars" loading="lazy"><figcaption>Campfire, a scene</figcaption></figure>
 </div>
 
 | | A visualizer | An animated scene |
@@ -64,16 +64,26 @@ Effugium Aura, which we make, is in testing on iPhone and Android, and Visualize
 
 What's in the list today:
 
-- **Nine visualizers** that follow your sounds, where each one is, how loud and its colour: Fractal flight, Levels, Night sky, Ripples, Ridgelines, Aurora, Scope, Murmuration and Kaleidoscope.
-- **Three scenes:** Your system (you're the sun, and your sounds are planets around you), Through space (a flight through the stars) and Campfire (a fire at night by a river, under the stars).
+- **Eleven visualizers** that follow your sounds, where each one is, how loud and its colour: Fractal flight, Your system (you're the sun, and your sounds are planets around you), Through space (a flight through the stars), Levels, Night sky, Ripples, Ridgelines, Aurora, Scope, Murmuration and Kaleidoscope.
+- **A scene:** Campfire, a fire at night by a river, under the stars, to add the sounds you want to.
 - **Options:** colours from your mix or new ones, Gentle or Gentler motion, and Fade to black after 15 minutes, 30 minutes or an hour. When the picture fades, it stops drawing and your sounds keep playing; tap to bring it back.
-- **Look around (iPhone):** with AirPods that follow your head, turn your head in Fractal flight, Night sky or a scene to look around.
+- **Detail:** Fractal flight and the scenes let you choose how sharp the picture is. Some visualizers ask a lot of a phone and may stutter on older models; a lower Detail or Battery saver is the fix to try first.
+- **Look around (iPhone):** with AirPods that follow your head, turn your head in Fractal flight, Night sky, Your system, Through space or Campfire to look around.
+
+A few of them, recorded from the app on an iPhone with a mix of 14 sounds playing:
+
+<div class="post-shots">
+<figure><video src="/effugium/media/visualize-system.mp4" poster="/effugium/media/visualize-system.jpg" autoplay muted loop playsinline aria-label="Your system: a sun in the middle with the sounds as planets around it"></video><img class="still" src="/effugium/media/visualize-system.jpg" alt="Your system: a sun in the middle with the sounds as planets around it" loading="lazy"><figcaption>Your system</figcaption></figure>
+<figure><video src="/effugium/media/visualize-kaleidoscope.mp4" poster="/effugium/media/visualize-kaleidoscope.jpg" autoplay muted loop playsinline aria-label="Kaleidoscope: mirrored patterns in green, orange and blue"></video><img class="still" src="/effugium/media/visualize-kaleidoscope.jpg" alt="Kaleidoscope: mirrored patterns in green, orange and blue" loading="lazy"><figcaption>Kaleidoscope</figcaption></figure>
+<figure><video src="/effugium/media/visualize-night-sky.mp4" poster="/effugium/media/visualize-night-sky.jpg" autoplay muted loop playsinline aria-label="Night sky: the sounds as coloured stars in a dark sky"></video><img class="still" src="/effugium/media/visualize-night-sky.jpg" alt="Night sky: the sounds as coloured stars in a dark sky" loading="lazy"><figcaption>Night sky</figcaption></figure>
+<figure><video src="/effugium/media/visualize-murmuration.mp4" poster="/effugium/media/visualize-murmuration.jpg" autoplay muted loop playsinline aria-label="Murmuration: specks of light flocking round the sounds"></video><img class="still" src="/effugium/media/visualize-murmuration.jpg" alt="Murmuration: specks of light flocking round the sounds" loading="lazy"><figcaption>Murmuration</figcaption></figure>
+</div>
 
 Visualize keeps your screen on while it draws. Once it fades to black, your phone can lock as usual.
 
 It's a test version, so we'd like to hear how it went:
 
-- Did it play smoothly on your phone? If it stuttered, tell us which phone you have.
+- Did it play smoothly on your phone? If one stuttered, tell us which one: Send feedback already includes your phone's model.
 - Which ones did you keep coming back to, and which did you skip?
 - Did Fade to black work the way you expected?
 - What would you like to watch next?

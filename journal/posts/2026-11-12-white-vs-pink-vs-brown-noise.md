@@ -3,6 +3,7 @@ title: "White vs pink vs brown noise: what's the difference?"
 description: White, pink and brown noise side by side, what each one sounds like, which sounds each covers, and how to pick and mix yours on your phone.
 summary: Hiss, rain or rumble. What the noise colors mean, and a simple way to pick yours.
 date: 2026-11-12
+updated: 2026-11-27
 kind: guide
 project: effugium
 quick_answer: White noise sounds like a hiss, pink noise like steady rain, and brown noise like a low rumble. All three hold every pitch at once; pink and brown have less of the high pitches, so they sound softer. None of them is the right one. Play each at about the same volume and keep the one you like, or mix them.
@@ -11,6 +12,19 @@ cta_text: In the Effugium Aura beta, where everything is unlocked, play all thre
 ---
 
 White vs pink vs brown noise: all three are a steady hiss made of every pitch at once. What changes is how much of the sound sits in the high pitches and how much in the low ones. Here's how each one sounds, what each covers, and a simple way to pick yours, on any white noise machine or app.
+
+## Brown noise vs white noise
+
+These two are the furthest apart, and the pair people compare most. White noise is a bright hiss; brown noise, also called Brownian or red noise, is a deep rumble.
+
+| | White noise | Brown noise |
+| --- | --- | --- |
+| Sounds like | A hiss, like TV static or a fan on high | A low rumble, like distant surf or a far-off waterfall |
+| Where its sound sits | Spread evenly over every pitch, so mostly in the highs | Mostly in the bass: 6 dB quieter for each octave up |
+| Covers best | Higher sounds: voices, birds, a TV next door | Lower sounds: traffic, a neighbor's bass, a furnace |
+| To most ears | Bright and sharp | Soft and deep |
+
+Pink noise sits between the two: softer than white, brighter than brown.
 
 ## What the colors mean
 
@@ -42,7 +56,7 @@ For a baby's room, keep the machine well away from the crib and the volume low.
 
 ## Try it in the Effugium Aura beta
 
-Effugium Aura, is in testing on iPhone and Android: a white noise machine app that plays your own sounds too, each in its own place around you. Brown, Pink and White come with it, in the Noise folder, next to rain, wind, an air conditioner and more. Here's how to try them side by side today:
+Effugium Aura is in testing on iPhone and Android: a white noise machine app that plays your own sounds too, each in its own place around you. Brown, Pink and White come with it, in the Noise folder, next to rain, wind, an air conditioner and more. Here's how to try them side by side today:
 
 1. **Tap +** at the end of the names under the circle, then open the **Noise** folder.
 2. **Drag Brown, Pink and White** onto three places around you. Each place holds one sound. **Low tones** is the place for deep sounds, so Brown fits there.
@@ -62,6 +76,9 @@ It's a test version, so we'd like to hear how it went:
 Testing already? In the app, open the ☰ menu and tap **Send feedback**. Not yet? You can [join the beta](/effugium/#beta).
 
 ## Questions people ask
+
+### What's the difference between brown noise and white noise?
+White noise has the same strength at every pitch, so it sounds like a bright hiss. Brown noise gets 6 dB quieter for each octave up, so most of its sound is in the bass and it sounds like a low rumble. White covers higher sounds like voices; brown covers low ones like traffic.
 
 ### Is brown noise better than white noise?
 Neither is better; they sound different. Brown has less hiss and more rumble, and covers low sounds like traffic well. White covers higher sounds like voices. Play both at about the same volume and keep the one you like.

@@ -18,7 +18,7 @@
 <meta property="og:image" content="https://creatio-aura.com/images/share-effugium-aura.png">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
-<meta property="og:image:alt" content="Effugium Aura: an audio player for your own sounds, placed all around you. Beta sign-ups open.">
+<meta property="og:image:alt" content="Effugium Aura: the sound machine for your own sounds, placed all around you. Beta sign-ups open.">
 <meta name="twitter:card" content="summary_large_image">
 <link rel="preload" href="/fonts/nunito-latin.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="/fonts/fraunces-latin.woff2" as="font" type="font/woff2" crossorigin>
@@ -272,6 +272,17 @@ fieldset legend { margin-bottom: 10px; }
 .post-figure { margin: 8px 0 0; }
 .post-figure img { display: block; width: min(240px, 60%); border-radius: 26px; border: 8px solid #0b0910; box-shadow: 0 24px 60px rgba(0, 0, 0, 0.45); }
 .post-body { display: flex; flex-direction: column; gap: 14px; }
+/* A row of app screens inside a post: short looping clips (or stills), in the same phone frame as .post-figure,
+   recorded on the phone with the status bar cropped off (540 x 1096). With reduced motion, each clip's still shows instead. */
+.post-shots { display: flex; flex-wrap: wrap; gap: 20px; margin: 6px 0; }
+.post-shots figure { margin: 0; flex: 0 1 200px; min-width: 140px; }
+.post-shots video, .post-shots img { display: block; width: 100%; height: auto; aspect-ratio: 540 / 1096; object-fit: cover; border-radius: 26px; border: 8px solid #0b0910; background: #15121f; box-shadow: 0 24px 60px rgba(0, 0, 0, 0.45); }
+.post-shots figcaption { margin-top: 10px; font-size: 14px; color: var(--text-muted); text-align: center; }
+.post-shots .still { display: none; }
+@media (prefers-reduced-motion: reduce) {
+  .post-shots video { display: none; }
+  .post-shots .still { display: block; }
+}
 .post-body h2 { font-size: 30px; margin-top: 26px; text-wrap: balance; }
 .post-body h3 { font-size: 21px; margin-top: 14px; }
 .post-body p, .post-body li { color: var(--text-soft); }
@@ -451,12 +462,12 @@ h1 .pro, h2 .pro, h2 .tag { font-size: 13px; vertical-align: 6px; }
   <p>Once it's placed, the sound's own controls take the place of the sounds you can add.</p>
   <h2>The places around you</h2>
   <p>Twelve places ring the circle: <strong>Front</strong>, Front right, Right ahead, <strong>Right</strong>, Right behind, Back right, <strong>Behind</strong>, Back left, Left behind, <strong>Left</strong>, Left ahead and Front left. Two more sit <strong>Above</strong> and <strong>Below</strong> you, and <strong>Low tones</strong> is for deep sounds, like a rumble or brown noise.</p>
-  <p>The names of the places show while you're placing a sound, and always with <strong>Labels</strong>, the tag beside Names at the start of the strip. Your sounds are listed by name in the strip under the circle, in order round you: tap one to choose it. On the circle, only the sound you chose shows its name; the eye and <strong>Names</strong> show them all.</p>
+  <p>The names of the places show while you're placing a sound, and always with <strong>Labels</strong>, the tag beside Names under the circle. Beside them, <strong>Current sounds</strong> lists every sound in your mix, in order round you: tap one to choose it and its controls open below. The bar under the circle changes its size: slide it up to make the circle smaller or close it, down to make it bigger, or tap it to close it and open it again. On the circle, only the sound you chose shows its name; the eye and <strong>Names</strong> show them all.</p>
   <p>Free uses Front, Behind, Left, Right and Low tones. <span class="pro">Pro</span> adds the eight in between, Above and Below.</p>
   <h2>The shelf under the names</h2>
   <p>Right under the names is one shelf for your sounds. It shows the sound you chose: its volume, Mute, Loop and Remove, and in Gravity its orbit too. Tap <strong>+</strong> and it shows the sounds you can add instead, with Record and Import. Place one and the shelf switches to it; tap <strong>×</strong> to go back.</p>
-  <h2>The top stays put</h2>
-  <p>The top bar, the volume, Flat and Gravity, the circle and the names stay where they are. Under the shelf, the Sleep timer, and with <span class="pro">Pro</span> Shooting stars and the Kicker, fold to one line each that says what it's set to. Tap a line to open it; the one that was open folds away.</p>
+  <h2>The top of the mixer</h2>
+  <p>The top bar, the volume, Flat and Gravity, the circle and the row under it (Names, Labels, Current sounds and +) stay at the top while the rest scrolls under them. The bar under the circle sizes it: slide it up to make the circle smaller or close it, down to make it bigger, or tap it to close it and open it again. Below, the shelf, the Sleep timer, and with <span class="pro">Pro</span> Shooting stars and the Kicker, fold to one line each that says what it's set to. Tap a line to open it; the one that was open folds away.</p>
   <h2>Random</h2>
   <p>Tap <strong>Random</strong>, in Flat or Gravity, to shuffle your mix your way. Choose what changes (sounds, places, volumes; in Gravity the movement too; with <span class="pro">Pro</span> shooting stars and the Kicker), how many sounds and which folders new ones come from, whether the sound you chose stays as it is, and how much changes, from a sound or two to a whole new mix. Then tap <strong>Shuffle</strong>. Tap Random again to <strong>Undo</strong> or <strong>Shuffle again</strong>. Your choices are kept for next time.</p>
   <h2>Change a sound</h2>
@@ -539,7 +550,7 @@ h1 .pro, h2 .pro, h2 .tag { font-size: 13px; vertical-align: 6px; }
     <li><strong>Change</strong> picks another, and <strong>Remove</strong> takes it out (with Undo).</li>
   </ul>
   <h2>Sounds recorded all around</h2>
-  <p>Nine come with the app, each recorded with microphones facing every way: rain in a forest at night, birds at sunrise, nightingales, a cloud forest, a forest in the Andes, a beach before dawn, a stream with birds overhead, a forest in Iceland and a small waterfall. You can bring your own (four-channel AmbiX files, up to five minutes) or <span class="tag">iPhone</span> record one (see <a href="#recorder">Field recorder</a>).</p>
+  <p>Eleven come with the app, each recorded with microphones facing every way: rain in a forest at night, birds at sunrise, nightingales, a cloud forest, a forest in the Andes, a beach before dawn, a stream with birds overhead, a forest in Iceland, a small waterfall, and two we recorded ourselves with Effugium's field recorder: snow in the mountains and a potbelly stove. You can bring your own (four-channel AmbiX files, up to five minutes) or <span class="tag">iPhone</span> record one (see <a href="#recorder">Field recorder</a>).</p>
   <h2>Headphones</h2>
   <p>It plays all around you on headphones. <span class="tag">iPhone</span> With AirPods that support head tracking, it stays where it is as you turn your head. On the speaker, it spreads left and right.</p>
   <p>In Free, a Global sound plays from one spot, the way it's turned; <span class="pro">Pro</span> plays it all around you.</p>
@@ -571,11 +582,12 @@ h1 .pro, h2 .pro, h2 .tag { font-size: 13px; vertical-align: 6px; }
   </ol>
   <p>Your originals are never changed. Free holds 6 of your own sounds, up to 3 minutes each. <span class="pro">Pro</span> has no limit, up to 10 minutes each.</p>
   <h2>Look after your sounds</h2>
-  <p>Open <strong>Your sounds</strong> from the ☰ menu, or tap <strong>+</strong> at the end of the names, then <strong>⋯</strong> and <strong>Manage</strong>. It shows how much room your sounds take on your phone. Tap a sound, or hold one still in the mixer, for its options:</p>
+  <p>Open <strong>Your sounds</strong> from the ☰ menu, or tap <strong>+</strong> at the end of the names, then <strong>⋯</strong> and <strong>Manage</strong>. It shows how much room your sounds take on your phone, and when and where each was recorded if you noted it. Tap <strong>Play</strong> beside a sound to hear it there, with your mix turned down under it; tap it again to stop. <strong>Make all seamless</strong> <span class="pro">Pro</span> asks first, and once they're done, <strong>Undo</strong> puts them back as they were for 10 seconds. Tap a sound's name, or hold one still in the mixer, for its options:</p>
   <ul>
-    <li><strong>Make it seamless</strong> <span class="pro">Pro</span>, or <strong>Fine-tune in Loop Studio</strong> <span class="pro">Pro</span></li>
+    <li><strong>Make it seamless</strong> <span class="pro">Pro</span> (Undo follows), or <strong>Fine-tune in Loop Studio</strong> <span class="pro">Pro</span></li>
     <li><strong>Folders</strong>: which folders it's in</li>
-    <li><strong>Rename</strong> and <strong>Colour</strong></li>
+    <li><strong>Name, when and where</strong>: a name up to 80 characters, and if you like, when it was recorded and where: <strong>Use where I am</strong>, or <strong>Pick on the map</strong> (search for a town, or drag the map under the pin). They stay on your phone.</li>
+    <li><strong>Colour</strong></li>
     <li><strong>Share</strong>: send it to someone (see <a href="#share">Sharing</a>)</li>
     <li><strong>Remove from library</strong>: it's taken out of your library and every soundscape, with any loop you made for it. The file you imported from stays where it was.</li>
   </ul>
@@ -585,8 +597,8 @@ h1 .pro, h2 .pro, h2 .tag { font-size: 13px; vertical-align: 6px; }
 <aside class="quick-answer"><h2>In short</h2><p>Tap Folders to sort your sounds. A sound can be in as many folders as you like.</p></aside>
 <div class="guide-body">
   <h2>The ready-made folders</h2>
-  <p>Water, Weather, Nature, Fire, Home, Civilization, Technology, Noise and Kickers, plus Binaural for the binaural beats. The built-in sounds start filed in them (see <a href="#sounds">Sounds</a>). They stay as they are in Free.</p>
-  <h2>Make your own folders <span class="pro">Pro</span></h2>
+  <p>Water, Weather, Nature, Fire, Home, Civilization, Technology, Noise and Kickers, plus Binaural for the binaural beats. The built-in sounds start filed in them (see <a href="#sounds">Sounds</a>). You can change them like your own.</p>
+  <h2>Make your own folders</h2>
   <ol>
     <li>Below the circle, tap <strong>⋯</strong>, then <strong>Folders</strong>. Each folder stays closed until you tap it; inside are its sounds, and Rename, Colour and Delete.</li>
     <li>Tap <strong>+ New</strong> and name it.</li>
@@ -617,13 +629,15 @@ h1 .pro, h2 .pro, h2 .tag { font-size: 13px; vertical-align: 6px; }
     <li>Tap <strong>Mark</strong> at any moment you might want to cut at later.</li>
     <li><strong>Pause</strong> stops recording until you carry on.</li>
     <li>It keeps recording with the screen locked: up to a minute at a time in Free, up to ten minutes with <span class="pro">Pro</span>.</li>
+    <li><strong>Timer</strong> <span class="pro">Pro</span>, beside the red button, stops recording by itself after 1, 2, 5 or 10 minutes, so you can leave the phone somewhere. When it stops, a chime and a vibration tell you; the chime isn't in the recording.</li>
     <li>Record at least a couple of seconds to keep it, and 4 seconds or more to make it loop.</li>
   </ul>
   <h2>After you stop</h2>
   <ul>
-    <li>The whole recording stays on the tape. Tap ▶ to hear it.</li>
+    <li>The whole recording stays on the tape. Tap <strong>Play</strong> to hear it.</li>
     <li>Drag the two peach handles to leave out the start or the end. It zooms in so you can fine-tune.</li>
     <li><strong>Fades</strong> softens the start and the end. Give it a <strong>Name</strong>.</li>
+    <li><strong>When</strong> is noted as you tap the red button; change or clear it. <strong>Where</strong> is yours to add: <strong>Use where I am</strong> or <strong>Pick on the map</strong>. Turn on <strong>Add where I am to every recording</strong> to have it noted as each recording starts. Location is only used when you ask, and it stays on your phone.</li>
     <li><strong>Make it seamless</strong> <span class="pro">Pro</span>: the tape wraps into a ring, starting at the top like a clock, and the loop helper finds where the end can flow back into the start. Tap the middle of the ring to hear it going round. <em>Longest</em> repeats least often, <em>Smoothest</em> has the join that's hardest to hear. <strong>Hear the join</strong> plays the moment it starts again, <strong>Blend</strong> sets how gently it fades across, and <strong>Undo</strong> unwraps it.</li>
     <li><strong>Split at the marks</strong> saves each part between your marks as a sound of its own.</li>
   </ul>
@@ -679,7 +693,7 @@ h1 .pro, h2 .pro, h2 .tag { font-size: 13px; vertical-align: 6px; }
     <li>Tap <strong>Share</strong> on its shelf. It's in <strong>Your sounds</strong> too, and right after you keep a recording, <strong>Share it</strong> does the same.</li>
     <li>Pick how to send it.</li>
   </ol>
-  <p>It goes as an ordinary audio file anyone can play. A recording keeps its name, colour and loop inside the file, so a seamless loop stays seamless when it's opened in Effugium. The sounds that come with the app aren't shared this way: everyone with Effugium has them already.</p>
+  <p>It goes as an ordinary audio file anyone can play. A recording keeps its name, colour and loop inside the file, so a seamless loop stays seamless when it's opened in Effugium. If it has when or where it was recorded, Effugium asks first whether to send them too; they never go unless you say so, and soundscapes never carry them. The sounds that come with the app aren't shared this way: everyone with Effugium has them already.</p>
   <h2>Send a soundscape</h2>
   <ol>
     <li>Open ☰ &gt; <strong>Soundscapes</strong>.</li>
@@ -782,14 +796,13 @@ h1 .pro, h2 .pro, h2 .tag { font-size: 13px; vertical-align: 6px; }
     <li><strong>Colours</strong>: <em>From the mix</em> (your sounds' own colours), <em>Random</em>, <em>Drifting</em> into new ones, or <em>Every colour</em> in turn.</li>
     <li><strong>Motion</strong>: Gentle or Gentler.</li>
     <li><strong>Fade to black</strong>: Never, 15 min, 30 min or 1 hour. The picture fades and stops drawing, to save battery. Your sounds keep playing; tap to bring it back.</li>
-    <li><strong>Detail</strong>: the sharpest picture that stays smooth, the sharpest, or a battery saver.</li>
+    <li><strong>Detail</strong>: the sharpest picture that stays smooth, the sharpest, or a battery saver. Some visualizers ask a lot of your phone and may stutter on older models: lower Detail if one does, and if it still isn't smooth, tell us with <strong>Send feedback</strong> (it includes your phone's model).</li>
     <li><strong>About light sensitivity</strong> shows the note again.</li>
   </ul>
   <p>Some visualizers have a choice or two of their own, such as Shape or Look.</p>
-  <h2>Sideways, glasses and looking around</h2>
+  <h2>Sideways and looking around</h2>
   <ul>
     <li><strong>Turn your phone sideways</strong> and Visualize fills the screen. The rest of the app stays upright.</li>
-    <li><strong>Glasses or a screen</strong>: plug in USB-C glasses or a screen and Visualize shows there, with your phone as the remote.</li>
     <li><strong>Look around</strong> <span class="tag">iPhone</span>: with AirPods that follow your head, turn your head in Fractal flight, Night sky or a scene to look around.</li>
   </ul>
   <h2>In the tours</h2>
@@ -888,7 +901,7 @@ h1 .pro, h2 .pro, h2 .tag { font-size: 13px; vertical-align: 6px; }
   <ul>
     <li><a href="#recorder"><strong>Field recorder</strong></a>: record a sound to loop and place.</li>
     <li><a href="#loops"><strong>Loop Studio</strong></a>: help make a sound more seamlessly loop.</li>
-    <li><a href="#sounds"><strong>Your sounds</strong></a>: import, rename, make seamless.</li>
+    <li><a href="#sounds"><strong>Your sounds</strong></a>: import, play, name, make seamless.</li>
     <li><a href="#scapes"><strong>Soundscapes</strong></a>: open, rename or start a new one.</li>
   </ul>
   <h2>Rings around you</h2>
@@ -927,20 +940,20 @@ h1 .pro, h2 .pro, h2 .tag { font-size: 13px; vertical-align: 6px; }
   <div class="table-wrap"><table>
     <thead><tr><th scope="col"></th><th scope="col">Free</th><th scope="col">Pro</th></tr></thead>
     <tbody>
-      <tr><td>Your own sounds</td><td>6, up to 3 min</td><td>No limit, 10 min</td></tr>
-      <tr><td>Soundscapes</td><td>4</td><td>No limit</td></tr>
+      <tr><td>Visualize</td><td>—</td><td>Yes</td></tr>
       <tr><td>Places round you</td><td>5</td><td>15</td></tr>
       <tr><td>Gravity</td><td>Ear level, 2 orbiting</td><td>Any tilt, all orbiting</td></tr>
       <tr><td>Shooting stars, the Kicker</td><td>—</td><td>Yes</td></tr>
-      <tr><td>Visualize</td><td>—</td><td>Yes</td></tr>
       <tr><td>A Global sound</td><td>From one spot</td><td>All around you</td></tr>
+      <tr><td>Your own sounds</td><td>6, up to 3 min</td><td>No limit, 10 min</td></tr>
       <tr><td>Seamless loops, Loop Studio</td><td>—</td><td>Yes</td></tr>
-      <tr><td>Field recorder</td><td>1 min a clip</td><td>10 min, seamless, all around (iPhone)</td></tr>
+      <tr><td>Field recorder</td><td>1 min a clip</td><td>10 min, Timer, seamless, all around (iPhone)</td></tr>
+      <tr><td>Soundscapes</td><td>4</td><td>No limit</td></tr>
       <tr><td>Binaural beats</td><td>All five, journeys</td><td>All five, journeys</td></tr>
-      <tr><td>Your own folders</td><td>—</td><td>Yes</td></tr>
       <tr><td>Sharing sounds and soundscapes</td><td>Yes</td><td>Yes</td></tr>
     </tbody>
   </table></div>
+  <p>How smoothly Visualize runs depends on your phone. Some visualizers run best on recent models.</p>
   <p>Throughout this guide, <span class="pro">Pro</span> marks the parts that need Pro.</p>
   <p><strong>Test versions</strong> (TestFlight on iPhone, and Google Play testing on Android) have everything unlocked, so there's nothing to buy.</p>
 </div><nav class="pager" aria-label="Previous and next topic"><a class="prev" href="#menu"><span>Back</span>Menu and settings</a><span></span></nav><aside class="note" aria-label="About this guide"><p><strong>For information only.</strong> This guide shows what you can do and set up in Effugium Aura. It isn't medical advice and it doesn't promise any result. Effugium Aura is not a medical device and makes no health claims. Apple, iPhone, AirPods, Apple Watch and StandBy are trademarks of Apple Inc., registered in the U.S. and other countries and regions. Android is a trademark of Google LLC.</p></aside></div></section></main>
